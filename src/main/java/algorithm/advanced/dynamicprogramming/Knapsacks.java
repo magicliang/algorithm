@@ -150,4 +150,35 @@ public class Knapsacks {
         return result;
     }
 
+    public int knapsacksDp(int[] weights, int[] values, int item, int capacity) {
+
+        // 准备 dp 表，初始化边缘值
+        int[][] dp = new int[item + 1][capacity + 1];
+        for (int i = 1; i <= item; i++) {
+            dp[i][0] = 0;
+        }
+        for (int j = 1; j <= capacity; j++) {
+            dp[0][j] = 0;
+        }
+
+        return knapsacksDp(weights, values, item, capacity, dp);
+    }
+
+    private int knapsacksDp(int[] weights, int[] values, int item, int capacity, int[][] dp) {
+        if (item == 0 || capacity == 0) {
+            // 返回 0 意味着 0 价值
+            return 0;
+        }
+        // 我们可以认为0方程
+        for (int i = 1; i <= item; i++) {
+            for (int j = 1; j <= capacity; j++) {
+                // weights 和 values 是 0-based 的
+                // 易错的点：j 不是索引，只有i是 weights 和 values 的索引
+                dp[i][j] = Math.max(dp[i - 1][j], dp[i - 1][j - weights[i-1]] + values[i-1]);
+            }
+        }
+
+        return dp[item][capacity];
+    }
+
 }
