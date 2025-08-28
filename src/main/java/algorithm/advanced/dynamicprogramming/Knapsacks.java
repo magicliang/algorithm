@@ -150,6 +150,52 @@ public class Knapsacks {
         return result;
     }
 
+    /**
+     * 使用动态规划解决0-1背包问题（自底向上迭代实现）
+     * 
+     * @param weights 物品重量数组，索引从0开始
+     * @param values 物品价值数组，索引从0开始
+     * @param item 物品数量（1-based，表示前item个物品）
+     * @param capacity 背包总容量
+     * @return 在给定容量下能获得的最大价值
+     * 
+     * 算法核心思想：自底向上的表格填充法
+     * 
+     * 状态定义：
+     * dp[i][j] 表示考虑前i个物品，在背包容量为j时能获得的最大价值
+     * 其中：i ∈ [0, item]，j ∈ [0, capacity]
+     * 
+     * 状态转移方程：
+     * 1. 如果第i个物品重量 > 当前容量j：dp[i][j] = dp[i-1][j]
+     *    （当前物品太重，无法放入，继承前i-1个物品的最优解）
+     * 2. 否则：dp[i][j] = max(dp[i-1][j], dp[i-1][j-weights[i-1]] + values[i-1])
+     *    （不放入当前物品 vs 放入当前物品，取较大值）
+     * 
+     * 边界条件：
+     * - dp[0][j] = 0, ∀j ∈ [0, capacity]（0个物品时价值为0）
+     * - dp[i][0] = 0, ∀i ∈ [0, item]（容量为0时价值为0）
+     * 
+     * 填表顺序：
+     * 外层循环：物品i从1到item（逐物品考虑）
+     * 内层循环：容量j从1到capacity（逐容量考虑）
+     * 
+     * 时间复杂度：O(n × capacity)，其中n是物品数量，capacity是背包容量
+     * 空间复杂度：O(n × capacity)，使用二维数组存储所有状态
+     * 
+     * 与记忆化搜索的对比：
+     * - 记忆化搜索：自顶向下，按需计算，可能跳过某些状态
+     * - 动态规划：自底向上，系统性地计算所有状态
+     * - 两者时间复杂度相同，但DP的空间利用更规律
+     * 
+     * 优化空间：
+     * 可优化为一维数组，空间复杂度降至O(capacity)
+     * 但需要逆序遍历容量以避免覆盖问题
+     * 
+     * 实现细节注意：
+     * 1. weights和values数组是0-based，而i是1-based
+     * 2. 需要处理weights[i-1] > j的边界情况
+     * 3. j-weights[i-1]必须非负（由if条件保证）
+     */
     public int knapsacksDp(int[] weights, int[] values, int item, int capacity) {
 
         if (item == 0 || capacity == 0) {
