@@ -325,4 +325,28 @@ public class Knapsacks {
         return dp[item][capacity];
     }
 
+    public int knapsacksDpOptimized(int[] weights, int[] values, int item, int capacity) {
+        if (item == 0 || capacity == 0) {
+            return 0;
+        }
+        // 方程：dp[i][c] = max(dp[i-1][c], dp[i-1][c - w[i]] + v[i] )
+
+        // 遍历 item，所以每一行都是 capacity。对于 item = 0 的矩阵而言，整行的初始值都是0。
+        int[] dp = new int[capacity + 1]; // 我们假设这一行是第0行，意味着 i 为 0 也是一个可选的初始行。且capacity本身的状态就意味着下标。
+
+        // 开始扫行
+        for (int i = 1; i <= item; i++) {
+            // 这一步其实没有必要，但是写出来，让我们提醒每一行 j 等于 0 的时候合法值 是 0
+            dp[0] = 0;
+            // 对每行，开始逐列从右到左移动，这样可以避免跳跃式移动的时候，对前方的j的状态污染
+            for (int j = capacity; j >= 1; j--) {
+                if (weights[i - 1] <= j) {
+                    // dp[j] 在未更新前等于 dp[i-1][j]，dp[j - weights[i - 1]] 等于 dp[i-1][j-weights[i-1]]
+                    dp[j] = Math.max(dp[j], dp[j - weights[i - 1]] + values[i - 1]);
+                }
+            }
+        }
+        return dp[capacity];
+    }
+
 }
