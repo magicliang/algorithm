@@ -6,6 +6,7 @@ package algorithm.advanced.dynamicprogramming;
  *
  * description: 背包问题
  *
+ *
  * @author magicliang
  *
  *         date: 2025-08-28 18:49
@@ -102,6 +103,34 @@ public class Knapsacks {
     public int knapsacksMemoization(int[] weights, int[] values, int item, int capacity) {
         // 易错的点：负价值更安全
         // 初始化memo数组，-1表示该状态尚未计算
+        
+        // 关键设计决策：为什么使用-1而不是0作为"未计算"的标记？
+        // 
+        // 1. 0是一个合法的计算结果
+        //    在背包问题中，0是完全有效的返回值：
+        //    - 当item == 0（没有物品）时，返回0
+        //    - 当capacity == 0（背包容量为0）时，返回0
+        //    - 当所有物品重量都大于当前容量时，返回0
+        //
+        // 2. 如果用0表示"未计算"，会导致：
+        //    - 误判缓存命中：当某个子问题的真实最优解就是0时
+        //    - 算法会错误地认为这个状态已经计算过，直接返回0
+        //    - 跳过了实际的计算过程，导致结果错误
+        //
+        // 3. 示例场景：
+        //    weights = [10], values = [5], capacity = 5
+        //    此时knapsacksMemoization(weights, values, 1, 5)的正确结果应该是0
+        //    （因为物品太重放不进去）
+        //    但如果用0表示未计算，memo[1][5]会被错误地认为是已缓存的结果
+        //
+        // 4. 为什么-1是安全的：
+        //    - -1在背包问题中永远不可能是一个合法的返回值（价值不可能为负）
+        //    - 因此可以明确区分"未计算"和"计算结果为0"这两种状态
+        //
+        // 5. 替代方案（但不如-1简洁）：
+        //    - 使用Boolean[][] computed数组单独记录哪些状态已计算
+        //    - 使用包装类型Integer[][]并用null表示未计算
+        //    - 使用特殊标记值如Integer.MIN_VALUE
         int[][] memo = new int[item + 1][capacity + 1];
         for (int i = 0; i <= item; i++) {
             for (int j = 0; j <= capacity; j++) {
