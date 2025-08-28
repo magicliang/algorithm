@@ -1,4 +1,4 @@
-package algorithm.LowestCommonAncestorOfABinaryTree;
+package algorithm.selectedtopics.leetcode.LowestCommonAncestorOfABinaryTree;
 
 public class TreeNode {
 	private TreeNode left;

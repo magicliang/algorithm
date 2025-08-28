@@ -1,4 +1,4 @@
-package algorithm.LetterCasePermutation;
+package algorithm.selectedtopics.leetcode.LetterCasePermutation;
 
 import java.util.ArrayList;
 import java.util.Collections;
