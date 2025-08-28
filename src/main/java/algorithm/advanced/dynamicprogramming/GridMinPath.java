@@ -98,9 +98,9 @@ package algorithm.advanced.dynamicprogramming;
  *
  * @author magicliang
  * @version 1.0
- * @since 2025-08-26
  * @see <a href="https://leetcode-cn.com/problems/minimum-path-sum/">LeetCode 64. 最小路径和</a>
  * @see <a href="https://en.wikipedia.org/wiki/Dynamic_programming">Dynamic Programming - Wikipedia</a>
+ * @since 2025-08-26
  */
 public class GridMinPath {
 
@@ -140,21 +140,18 @@ public class GridMinPath {
      * @param grid 二维网格数组，包含非负整数，不能为null或空数组
      * @return 从左上角(0,0)到右下角(m-1,n-1)的最小路径和
      * @throws IllegalArgumentException 如果grid为null、空数组或包含负数
-     *
-     * @example
-     * <pre>
-     * GridMinPath solver = new GridMinPath();
-     * int[][] grid = {
-     *     {1, 3, 1},
-     *     {1, 5, 1},
-     *     {4, 2, 1}
-     * };
-     * int result = solver.minPathSum(grid); // 返回 7
-     * // 最优路径：1→3→1→1→1，总和为7
-     * </pre>
-     *
+     * @example <pre>
+     *         GridMinPath solver = new GridMinPath();
+     *         int[][] grid = {
+     *             {1, 3, 1},
+     *             {1, 5, 1},
+     *             {4, 2, 1}
+     *         };
+     *         int result = solver.minPathSum(grid); // 返回 7
+     *         // 最优路径：1→3→1→1→1，总和为7
+     *         </pre>
      * @apiNote 对于大规模网格，建议使用 {@link #minPathSumMemoization(int[][], int, int)}
-     *          或 {@link #minPathSumDp(int[][], int, int)} 方法
+     *         或 {@link #minPathSumDp(int[][], int, int)} 方法
      * @see #minPathSumDFS(int[][], int, int)
      * @see #minPathSumMemoization(int[][], int, int)
      * @see #minPathSumDp(int[][], int, int)
@@ -268,26 +265,23 @@ public class GridMinPath {
      * @return 从左上角(0,0)到目标位置(i,j)的最小路径和
      * @throws IllegalArgumentException 如果参数无效
      * @throws ArrayIndexOutOfBoundsException 如果索引越界
+     * @example <pre>
+     *         GridMinPath solver = new GridMinPath();
+     *         int[][] grid = {
+     *             {1, 2, 3},
+     *             {4, 5, 6}
+     *         };
      *
-     * @example
-     * <pre>
-     * GridMinPath solver = new GridMinPath();
-     * int[][] grid = {
-     *     {1, 2, 3},
-     *     {4, 5, 6}
-     * };
+     *         // 计算到右下角的最小路径和
+     *         int result1 = solver.minPathSumMemoization(grid, 1, 2); // 返回 12
+     *         // 最优路径：1→2→3→6 或 1→4→5→6，都是12
      *
-     * // 计算到右下角的最小路径和
-     * int result1 = solver.minPathSumMemoization(grid, 1, 2); // 返回 12
-     * // 最优路径：1→2→3→6 或 1→4→5→6，都是12
-     *
-     * // 计算到中间位置的最小路径和
-     * int result2 = solver.minPathSumMemoization(grid, 0, 1); // 返回 3
-     * // 最优路径：1→2，总和为3
-     * </pre>
-     *
+     *         // 计算到中间位置的最小路径和
+     *         int result2 = solver.minPathSumMemoization(grid, 0, 1); // 返回 3
+     *         // 最优路径：1→2，总和为3
+     *         </pre>
      * @implNote 该方法创建新的缓存数组，适合单次计算。如需多次查询，
-     *           考虑预先计算整个DP表
+     *         考虑预先计算整个DP表
      * @see #minPathSumMemoization(int[][], int, int, Integer[][])
      * @see #minPathSumDp(int[][], int, int)
      * @since 1.0
@@ -438,15 +432,15 @@ public class GridMinPath {
      * @param j 目标列索引
      * @return 从(0,0)到(i,j)的最小路径和
      * @example <pre>
-     *         GridMinPath solver = new GridMinPath();
-     *         int[][] grid = {
-     *             {1, 3, 1},
-     *             {1, 5, 1},
-     *             {4, 2, 1}
-     *         };
-     *         int result = solver.minPathSumDPCompOptimized(grid, 2, 2); // 返回 7
-     *         // 使用O(3)空间而非O(9)空间完成计算
-     *         </pre>
+     *                 GridMinPath solver = new GridMinPath();
+     *                 int[][] grid = {
+     *                     {1, 3, 1},
+     *                     {1, 5, 1},
+     *                     {4, 2, 1}
+     *                 };
+     *                 int result = solver.minPathSumDPCompOptimized(grid, 2, 2); // 返回 7
+     *                 // 使用O(3)空间而非O(9)空间完成计算
+     *                 </pre>
      * @see #minPathSumDp(int[][], int, int)
      * @since 1.0
      */
@@ -476,11 +470,15 @@ public class GridMinPath {
         for (int l = 1; l <= i; l++) {
             // 更新当前行第0列：只能向下移动，路径和累加
             currentRowDp[0] = currentRowDp[0] + grid[l][0];
-            
+
             // 处理当前行其余列：可以从上方或左方到达
             for (int m = 1; m <= j; m++) {
                 // 关键技巧：更新前currentRowDp[m]是上一行的值，currentRowDp[m-1]是当前行已更新的值
                 // 这样就同时获得了上方和左方的最小路径和
+
+                // 注意：此算法适用于网格路径问题，因为状态转移只需要上方和左方的信息。
+                // 对于需要"跨越式访问前值"的背包问题（如0-1背包），
+                // 这种从左到右的更新顺序会导致状态污染，需要采用逆序遍历
                 currentRowDp[m] = Math.min(currentRowDp[m], currentRowDp[m - 1]) + grid[l][m];
             }
         }
