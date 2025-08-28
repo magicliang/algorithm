@@ -340,12 +340,21 @@ public class Knapsacks {
             dp[0] = 0;
             // 对每行，开始逐列从右到左移动，这样可以避免跳跃式移动的时候，对前方的j的状态污染
             for (int j = capacity; j >= 1; j--) {
+                // 【补充】逆序遍历的关键：确保使用的是上一轮未被更新的"旧值"
+                // 如果正序遍历，dp[j - weights[i-1]]可能已经被本轮更新，导致状态污染
                 if (weights[i - 1] <= j) {
                     // dp[j] 在未更新前等于 dp[i-1][j]，dp[j - weights[i - 1]] 等于 dp[i-1][j-weights[i-1]]
+                    // 【补充】空间优化：二维转一维的核心思想
+                    // 原二维状态：dp[i][j] = max(dp[i-1][j], dp[i-1][j-w[i-1]] + v[i-1])
+                    // 一维优化：dp[j] = max(dp[j], dp[j-w[i-1]] + v[i-1])
+                    // 关键：逆序遍历保证dp[j-w[i-1]]使用的是上一轮的值
                     dp[j] = Math.max(dp[j], dp[j - weights[i - 1]] + values[i - 1]);
                 }
+                // 【补充】当weights[i-1] > j时，dp[j]保持不变（即dp[i][j] = dp[i-1][j]）
             }
         }
+        // 【补充】最终结果：dp[capacity] = dp[item][capacity]
+        // 经过item轮迭代后，dp数组存储的就是考虑所有物品时的最优解
         return dp[capacity];
     }
 
