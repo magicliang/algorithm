@@ -111,16 +111,41 @@ public class CoinsProblem {
         return Math.min(subProblemChoice, currentProblemChoice);
     }
 
+    /**
+     * 使用记忆化搜索解决零钱兑换问题（公共接口）
+     * 
+     * 【记忆化搜索的优势】：
+     * 1. 时间复杂度：从DFS的O(2^(n+targetAmount))优化为O(n*targetAmount)
+     * 2. 空间复杂度：O(n*targetAmount)用于存储memo数组
+     * 3. 编程复杂度：相比动态规划更直观，保持了递归的思维模式
+     * 
+     * 【初始化策略】：
+     * memo数组初始化为-1有特殊含义：
+     * - -1：表示该状态尚未计算（区别于计算结果为-1的无解状态）
+     * - 0或正数：表示已计算的有效结果
+     * - 这种设计避免了"未计算"与"无解"状态的混淆
+     * 
+     * @param coins 硬币面额数组
+     * @param i 硬币种类数量（1-based，表示前i种硬币）
+     * @param targetAmount 目标金额
+     * @return 最少硬币数量，无解时返回-1
+     */
     public int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount) {
 
-        // 创建记忆化数组
+        // 【步骤1】：创建记忆化数组
+        // 维度说明：memo[i][amount]表示用前i种硬币凑出amount金额的最优解
         int[][] memo = new int[i + 1][targetAmount + 1];
 
-        // 初始化记忆化数组的目的是为了让"未计算"和"合法值0"分开
+        // 【步骤2】：初始化记忆化数组
+        // 关键设计：使用-1标记"未计算"状态，区别于计算结果-1（无解）
+        // 这样可以正确区分：
+        // - memo[i][j] == -1：该子问题尚未计算
+        // - 计算后返回-1：该子问题无解
         for (int[] row : memo) {
             Arrays.fill(row, -1);
         }
         
+        // 【步骤3】：调用递归函数开始计算
         return unboundedKnapsackProblemMemoization(coins, i, targetAmount, memo);
     }
 
@@ -149,47 +174,60 @@ public class CoinsProblem {
      * @return 最少硬币数量，无解时返回-1
      */
     private int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount, int[][] memo) {
+        // 【递归终止条件1】：目标金额为0，不需要任何硬币
         if (targetAmount == 0) {
             return 0;
         }
 
-        // 如果硬币已经为0了，targetAmount 不为 0，说明无解
+        // 【递归终止条件2】：没有硬币可用但目标金额不为0，无解
+        // 这是零钱兑换问题的特殊性：等值约束可能导致无解
         if (i == 0) {
             return -1;
         }
 
-        // targetAmount 不会小于0，下面会剪枝
-
-        // 命中缓存
+        // 【缓存查询】：检查当前状态是否已经计算过
+        // memo[i][targetAmount] != -1 表示该子问题已有缓存结果
         if (memo[i][targetAmount] != -1) {
             return memo[i][targetAmount];
         }
 
+        // 【选择1】：不使用当前硬币coins[i-1]
+        // 递归计算使用前i-1种硬币凑出targetAmount的最优解
         int subProblemChoice = unboundedKnapsackProblemMemoization(coins, i - 1, targetAmount, memo);
+        
+        // 【缓存更新1】：先将不选择当前硬币的结果存入缓存
+        // 这样即使后续选择当前硬币失败，也有一个备选方案
         memo[i][targetAmount] = subProblemChoice;
 
-        // 剪枝来了：不能做出选择
+        // 【剪枝优化】：当前硬币面额大于目标金额，无法使用
+        // 此时只能选择不使用当前硬币的方案
         if (coins[i - 1] > targetAmount) {
             return memo[i][targetAmount];
         }
 
+        // 【选择2】：使用当前硬币coins[i-1]
+        // 递归计算使用当前硬币后的子问题：目标金额减少，硬币种类不变（完全背包特性）
         int currentProblemChoice = unboundedKnapsackProblemMemoization(coins, i, targetAmount - coins[i - 1], memo);
-        // 不能用 min 比对 -1，所以还是返回 subProblemChoice，不要把 + 1加上去
+        
+        // 【无解处理1】：如果使用当前硬币的方案无解
+        // 保持原有的subProblemChoice结果，不进行进一步处理
         if (currentProblemChoice == -1) {
             return memo[i][targetAmount];
         }
+        
+        // 【硬币计数】：使用当前硬币需要额外消耗1个硬币
         currentProblemChoice += 1;
         
-        // 【缓存更新策略】：
-        // 1. 如果subProblemChoice是无解(-1)，直接使用currentProblemChoice
-        // 2. 如果currentProblemChoice是无解(-1)，保持subProblemChoice
-        // 3. 两者都有解时，选择较小的值
+        // 【缓存更新2】：比较两种选择，更新为最优解
+        // 需要处理subProblemChoice为-1（无解）的情况
         if (memo[i][targetAmount] == -1) {
+            // 如果不选择当前硬币无解，直接使用选择当前硬币的方案
             memo[i][targetAmount] = currentProblemChoice;
-            return memo[i][targetAmount];
+        } else {
+            // 两种方案都有解，选择硬币数量更少的方案
+            memo[i][targetAmount] = Math.min(memo[i][targetAmount], currentProblemChoice);
         }
 
-        memo[i][targetAmount] = Math.min(subProblemChoice, currentProblemChoice);
         return memo[i][targetAmount];
     }
 
