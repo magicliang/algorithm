@@ -231,4 +231,88 @@ public class CoinsProblem {
         return memo[i][targetAmount];
     }
 
+    /**
+     * 使用动态规划解决零钱兑换问题
+     * 
+     * 【动态规划的优势】：
+     * 1. 时间复杂度：O(item * targetAmount)，与记忆化搜索相同但常数更小
+     * 2. 空间复杂度：O(item * targetAmount)，可进一步优化为O(targetAmount)
+     * 3. 编程复杂度：自底向上填表，避免递归调用栈开销
+     * 4. 可读性：状态转移过程更直观，便于理解和调试
+     * 
+     * 【状态定义】：
+     * dp[i][j] 表示使用前i种硬币凑出金额j所需的最少硬币数
+     * 
+     * 【状态转移方程】：
+     * dp[i][j] = min(dp[i-1][j], dp[i][j-coins[i-1]] + 1)
+     * - 不选当前硬币：dp[i-1][j]
+     * - 选择当前硬币：dp[i][j-coins[i-1]] + 1（注意这里是dp[i]而不是dp[i-1]，体现完全背包特性）
+     * 
+     * 【边界条件】：
+     * - dp[i][0] = 0：凑出金额0需要0个硬币
+     * - dp[0][j] = MAX：没有硬币无法凑出正金额（用MAX标记无效状态）
+     * 
+     * 【无效状态处理】：
+     * 使用MAX = targetAmount + 1作为无效状态标记，因为：
+     * - 任何有效解的硬币数都不会超过targetAmount（最坏情况全用面额1的硬币）
+     * - MAX比所有有效解都大，在min比较中会被自然淘汰
+     * - 最终通过 dp[item][targetAmount] < MAX 判断是否有解
+     * 
+     * @param coins 硬币面额数组
+     * @param item 硬币种类数量（1-based，表示前item种硬币）
+     * @param targetAmount 目标金额
+     * @return 最少硬币数量，无解时返回-1
+     */
+    public int coinChangeDp(int[] coins, int item, int targetAmount) {
+        if (targetAmount == 0) {
+            return 0;
+        }
+
+        if (item <= 0 || targetAmount < 0) {
+            return -1;
+        }
+
+        // 【无效状态标记】：MAX = targetAmount + 1
+        // 任何有效解的硬币数都不会超过targetAmount（最坏情况全用面额1的硬币）
+        int MAX = targetAmount + 1;
+
+        // 【步骤1】：创建DP表
+        // dp[i][j] 表示用前i种硬币凑出金额j的最少硬币数
+        int[][] dp = new int[item + 1][targetAmount + 1];
+
+        // 【步骤2】：初始化边界条件
+        // dp[i][0] = 0：凑出金额0需要0个硬币（默认值已经是0）
+        
+        // dp[0][j] = MAX：没有硬币无法凑出正金额，用MAX标记无效状态
+        // MAX恰好比所有有效解都大1，在min函数中会被自然淘汰
+        for (int amount = 1; amount <= targetAmount; amount++) {
+            dp[0][amount] = MAX;
+        }
+
+        // 【步骤3】：填充DP表
+        for (int i = 1; i <= item; i++) {
+            for (int j = 1; j <= targetAmount; j++) {
+                // 【关键判断】：当前硬币面额是否大于当前金额j
+                // 易错点：这里是j而不是targetAmount
+                if (coins[i - 1] > j) {
+                    // 【情况1】：当前硬币面额太大，无法使用
+                    // 只能继承不使用当前硬币的结果
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    // 【情况2】：当前硬币可以使用，选择最优方案
+                    // 注意：dp[i][j - coins[i-1]]而不是dp[i-1][j - coins[i-1]]
+                    // 这体现了完全背包的特性：同一种硬币可以重复使用
+                    dp[i][j] = Math.min(
+                        dp[i - 1][j],                    // 不选当前硬币
+                        dp[i][j - coins[i - 1]] + 1     // 选择当前硬币
+                    );
+                }
+            }
+        }
+
+        // 【步骤4】：返回结果
+        // 如果dp[item][targetAmount] < MAX，说明找到了有效解
+        // 否则返回-1表示无解
+        return dp[item][targetAmount] < MAX ? dp[item][targetAmount] : -1;
+    }
 }
