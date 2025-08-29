@@ -56,7 +56,7 @@ public class CoinsProblem {
      * - 使用-1表示无解状态
      */
     // 返回值是达成 targetAmount 的硬币数量，i 是硬币的搜索规模，即使是 dfs 也需要先写 dp 方程才好搜索
-    public int unboundedKnapsackProblemDfs(int[] coins, int i, int targetAmount) {
+    public int coinChangeDfs(int[] coins, int i, int targetAmount) {
         // 【递归终止条件1】：目标金额为0，不需要任何硬币
         if (targetAmount == 0) {
             return 0;
@@ -70,7 +70,7 @@ public class CoinsProblem {
         }
 
         // 【选择1】：不使用当前硬币coins[i-1]，问题规模缩减为前i-1种硬币
-        int subProblemChoice = unboundedKnapsackProblemDfs(coins, i - 1, targetAmount);
+        int subProblemChoice = coinChangeDfs(coins, i - 1, targetAmount);
         
         // 【剪枝优化】：当前硬币面额大于目标金额，无法使用
         // 易错的点：容易被忘记的资源约束，当前不能再做选择了，因为单个选择就突破资源限制
@@ -92,7 +92,7 @@ public class CoinsProblem {
         // - 如果两个都有解，选择硬币数量更少的方案
         // 
         // 这就是为什么要分别检查每种情况的原因
-        int currentProblemChoice = unboundedKnapsackProblemDfs(coins, i, targetAmount - coins[i - 1]);
+        int currentProblemChoice = coinChangeDfs(coins, i, targetAmount - coins[i - 1]);
         
         // 【情况1】：使用当前硬币的方案无解，只能选择不使用的方案
         if (currentProblemChoice == -1) {
@@ -130,7 +130,7 @@ public class CoinsProblem {
      * @param targetAmount 目标金额
      * @return 最少硬币数量，无解时返回-1
      */
-    public int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount) {
+    public int coinChangeMemoization(int[] coins, int i, int targetAmount) {
 
         // 【步骤1】：创建记忆化数组
         // 维度说明：memo[i][amount]表示用前i种硬币凑出amount金额的最优解
@@ -146,7 +146,7 @@ public class CoinsProblem {
         }
         
         // 【步骤3】：调用递归函数开始计算
-        return unboundedKnapsackProblemMemoization(coins, i, targetAmount, memo);
+        return coinChangeMemoization(coins, i, targetAmount, memo);
     }
 
     /**
@@ -173,7 +173,7 @@ public class CoinsProblem {
      * @param memo 记忆化缓存数组
      * @return 最少硬币数量，无解时返回-1
      */
-    private int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount, int[][] memo) {
+    private int coinChangeMemoization(int[] coins, int i, int targetAmount, int[][] memo) {
         // 【递归终止条件1】：目标金额为0，不需要任何硬币
         if (targetAmount == 0) {
             return 0;
@@ -193,7 +193,7 @@ public class CoinsProblem {
 
         // 【选择1】：不使用当前硬币coins[i-1]
         // 递归计算使用前i-1种硬币凑出targetAmount的最优解
-        int subProblemChoice = unboundedKnapsackProblemMemoization(coins, i - 1, targetAmount, memo);
+        int subProblemChoice = coinChangeMemoization(coins, i - 1, targetAmount, memo);
         
         // 【缓存更新1】：先将不选择当前硬币的结果存入缓存
         // 这样即使后续选择当前硬币失败，也有一个备选方案
@@ -207,7 +207,7 @@ public class CoinsProblem {
 
         // 【选择2】：使用当前硬币coins[i-1]
         // 递归计算使用当前硬币后的子问题：目标金额减少，硬币种类不变（完全背包特性）
-        int currentProblemChoice = unboundedKnapsackProblemMemoization(coins, i, targetAmount - coins[i - 1], memo);
+        int currentProblemChoice = coinChangeMemoization(coins, i, targetAmount - coins[i - 1], memo);
         
         // 【无解处理1】：如果使用当前硬币的方案无解
         // 保持原有的subProblemChoice结果，不进行进一步处理

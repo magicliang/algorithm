@@ -46,8 +46,8 @@ public class CoinsProblemTest {
         int[] coins = {1, 2, 5};
         int targetAmount = 11;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 3, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 3, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 3, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 3, targetAmount);
         
         assertEquals(3, dfsResult);
         assertEquals(3, memoResult);
@@ -62,8 +62,8 @@ public class CoinsProblemTest {
         int[] coins = {1, 2, 5};
         int targetAmount = 0;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 3, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 3, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 3, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 3, targetAmount);
         
         assertEquals(0, dfsResult);
         assertEquals(0, memoResult);
@@ -78,8 +78,8 @@ public class CoinsProblemTest {
         int[] coins = {2, 4};
         int targetAmount = 3;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 2, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 2, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 2, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 2, targetAmount);
         
         assertEquals(-1, dfsResult);
         assertEquals(-1, memoResult);
@@ -95,8 +95,8 @@ public class CoinsProblemTest {
         int targetAmount = 6;
         
         // 最优解应该是3+3=2个硬币，而不是贪心的4+1+1=3个硬币
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 3, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 3, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 3, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 3, targetAmount);
         
         assertEquals(2, dfsResult);
         assertEquals(2, memoResult);
@@ -111,8 +111,8 @@ public class CoinsProblemTest {
         int[] coins = {2};
         int targetAmount = 6;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 1, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 1, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 1, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 1, targetAmount);
         
         assertEquals(3, dfsResult);
         assertEquals(3, memoResult);
@@ -127,8 +127,8 @@ public class CoinsProblemTest {
         int[] coins = {2};
         int targetAmount = 3;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 1, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 1, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 1, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 1, targetAmount);
         
         assertEquals(-1, dfsResult);
         assertEquals(-1, memoResult);
@@ -143,8 +143,8 @@ public class CoinsProblemTest {
         int[] coins = {1, 5, 10, 25};
         int targetAmount = 30;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 4, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 4, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 4, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 4, targetAmount);
         
         assertEquals(2, dfsResult); // 25 + 5
         assertEquals(2, memoResult);
@@ -159,8 +159,8 @@ public class CoinsProblemTest {
         int[] coins = {5, 10};
         int targetAmount = 3;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 2, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 2, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 2, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 2, targetAmount);
         
         assertEquals(-1, dfsResult);
         assertEquals(-1, memoResult);
@@ -175,8 +175,8 @@ public class CoinsProblemTest {
         int[] coins = {1, 2, 5, 10};
         int targetAmount = 18;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 4, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 4, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 4, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 4, targetAmount);
         
         assertEquals(4, dfsResult); // 10 + 5 + 2 + 1
         assertEquals(4, memoResult);
@@ -191,8 +191,8 @@ public class CoinsProblemTest {
         int[] coins = {1, 2, 5};
         int targetAmount = 1;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 3, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 3, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 3, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 3, targetAmount);
         
         assertEquals(1, dfsResult);
         assertEquals(1, memoResult);
@@ -207,8 +207,8 @@ public class CoinsProblemTest {
         int[] coins = {2, 3, 5};
         int targetAmount = 9;
         
-        int dfsResult = solver.unboundedKnapsackProblemDfs(coins, 3, targetAmount);
-        int memoResult = solver.unboundedKnapsackProblemMemoization(coins, 3, targetAmount);
+        int dfsResult = solver.coinChangeDfs(coins, 3, targetAmount);
+        int memoResult = solver.coinChangeMemoization(coins, 3, targetAmount);
         
         assertEquals(3, dfsResult); // 3 + 3 + 3
         assertEquals(3, memoResult);
