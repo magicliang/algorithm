@@ -94,16 +94,17 @@ public class ZeroOrOneKnapsacks {
             return 0;
         }
 
+        int no = knapsacksDfs(weights, values, item - 1, capacity);
+
         // 这个算法有个吊诡的点，就是 item 是 1-based的，而两个数组都是0based，所以 item - 1 代表着当前物品在数组里的坐标
         if (weights[item - 1] > capacity) {
             // 如果无法把当前物品放入背包，则不放入，沿用上一个物品的解
-            return knapsacksDfs(weights, values, item - 1, capacity);
+            return no;
         }
 
         // 在上一个解的基础上放入当前物品
         int yes = knapsacksDfs(weights, values, item - 1, capacity - weights[item - 1]) + values[item - 1];
         // 不放入当前物品
-        int no = knapsacksDfs(weights, values, item - 1, capacity);
         return Math.max(yes, no);
     }
 
