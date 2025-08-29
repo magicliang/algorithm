@@ -1,6 +1,5 @@
 package algorithm.selectedtopics.stringalgorithms;
 
-
 /**
  * project name: domain-driven-transaction-sys
  *
@@ -12,6 +11,42 @@ package algorithm.selectedtopics.stringalgorithms;
  */
 public class Kmp {
 
+    /**
+     * KMP算法构建next数组的完整口诀与详解：
+     * 
+     * 【核心口诀】
+     * "初始为零，双指针，不匹配回退，匹配前进"
+     * 
+     * 【口诀详解】
+     * 1. 初始为零：next[0] = 0
+     *    - 单个字符没有真前缀和真后缀，最长相等前后缀长度为0
+     * 
+     * 2. 双指针：
+     *    - i：待分析子串的游标，遍历模式串pattern[1...m-1]
+     *    - j：next数组的构建指针，同时具有双重含义：
+     *         a) 值：表示pattern[0...i-1]的最长相等前后缀长度
+     *         b) 下标：指向下一个需要比较的前缀字符位置
+     * 
+     * 3. 不匹配回退：
+     *    - 当pattern[i] ≠ pattern[j]时，j需要回退
+     *    - 回退规则：j = next[j-1]
+     *    - 原理：利用已计算的next值，找到次优的匹配前缀
+     *    - 类比：像跳棋一样，不是回到起点，而是跳到"最长可复用前缀"位置
+     * 
+     * 4. 匹配前进：
+     *    - 当pattern[i] == pattern[j]时，j++
+     *    - 原理：当前字符匹配，可以扩展最长相等前后缀
+     *    - 结果：next[i] = j，记录当前位置的最长相等前后缀长度
+     * 
+     * 【记忆技巧】
+     * 把j想象成"已匹配前缀长度计数器"：
+     * - 匹配成功：计数器+1（j++）
+     * - 匹配失败：计数器回退到之前记录的最佳位置（j = next[j-1]）
+     * - 每次循环结束：把计数器的值存到next[i]中
+     * 
+     * @param pattern 模式串
+     * @return next数组，其中next[i]表示子串pattern[0...i]的最长相等前后缀长度
+     */
     public int[] buildNextArray(String pattern) {
         int m = pattern.length();
         if (m == 0) {
@@ -29,7 +64,7 @@ public class Kmp {
         int j = 0;
 
         // i 遍历模式串，计算每个位置的 next 值。
-        for (int i = 1; i < m; i++) {
+        for (int i = 1; i < m; i++) { // 因为 next[0] 已经初始化为 0，所以当然是从1开始
             // 核心：当字符不匹配时，j 需要向前回退。
             // 比如 "ababc"，当 i=4 (c)，此时 j=2 (代表 "ab")。
             // 我们比较 pattern[i] (c) 和 pattern[j] (a)，发现不匹配。
@@ -108,5 +143,26 @@ public class Kmp {
 
         return -1;
     }
+
+    public int[] buildNextArray2(String pattern) {
+        final int n = pattern.length();
+        int[] next = new int[n];
+       int j = 0; // j 有两重含义，当前已经匹配的字符串长度，以及下一个要匹配的字符串的位置
+        next[0] = 0;// 初始匹配数组一开始肯定是 0值
+
+        // 不从 0 开始进行对前缀数组的匹配
+        for (int i = 1; i < n; i++) {
+            while (j > 0 && pattern.charAt(i) != pattern.charAt(j)) {
+                j = next[j-1];
+            }
+            if (pattern.charAt(i) == pattern.charAt(j)) {
+                j++;
+            }
+            next[i] = j;
+        }
+
+       return next;
+    }
+
 
 }
