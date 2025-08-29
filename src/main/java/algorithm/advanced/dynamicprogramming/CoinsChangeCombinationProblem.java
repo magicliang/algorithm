@@ -43,6 +43,39 @@ import java.util.Arrays;
  * - 我们只需要统计叶子节点的数量，不需要考虑到达叶子节点的"代价"
  * - 因此状态转移时不需要加1来表示"选择"的代价
  * 
+ * 【状态转移方程的深度认知】：
+ * 
+ * **核心问题**：为什么选择硬币后的子问题是 dp[i][a-coins[i-1]] 而不是 dp[i-1][a-coins[i-1]]？
+ * 
+ * **问题分解的本质**：
+ * - 原问题：用前i种硬币凑出金额a
+ * - 选择第i种硬币后的新问题：用前i种硬币凑出金额(a - coins[i-1])
+ * - 这个新问题的每个解，都隐含地包含了我们最初选择的那个coins[i-1]
+ * 
+ * **为什么是dp[i]而不是dp[i-1]？**
+ * - dp[i][a-coins[i-1]]：选择当前硬币后，仍然可以继续使用这种硬币（无限硬币问题）
+ * - dp[i-1][a-coins[i-1]]：选择当前硬币后，不能再使用这种硬币（01背包问题）
+ * 
+ * **数学递推的逻辑**：
+ * ```
+ * dp[i][a] = dp[i-1][a] + dp[i][a-coins[i-1]]
+ *            ↑不选择      ↑选择当前硬币后的子问题
+ *            当前硬币      
+ * ```
+ * 
+ * **关键洞察**：
+ * 当我们选择了一个硬币，问题规模确实缩小了（从"凑出a"变成"凑出a-coins[i-1]"），
+ * 这个缩小后的问题的解法数量，就是我们要加上的贡献。
+ * 由于硬币可以重复使用，所以子问题仍然是在第i层决策空间内。
+ * 
+ * **适用范围**：
+ * 这种 dp[i][a-cost] 的模式只适用于：
+ * - 无限背包问题（物品可重复选择）
+ * - 硬币兑换问题（硬币可重复使用）
+ * - 爬楼梯问题（每种步长可重复使用）
+ * 
+ * 如果是01背包（每个物品只能选一次），就必须用：dp[i][w] = max(dp[i-1][w], dp[i-1][w-weight[i-1]] + value[i-1])
+ * 
  * @author magicliang
  *
  *         date: 2025-08-29 19:02
@@ -104,6 +137,20 @@ public class CoinsChangeCombinationProblem {
         return coinChangeDfs(coins, coins.length, amount);
     }
 
+    /**
+     * 使用记忆化搜索计算硬币兑换的组合数（自顶向下动态规划）
+     * 
+     * 【记忆化搜索核心思想】：
+     * 在递归搜索的基础上，使用缓存避免重复计算相同的子问题。
+     * 
+     * 【时间复杂度】：O(item × targetAmount)
+     * 【空间复杂度】：O(item × targetAmount) - 缓存空间 + O(item) - 递归栈空间
+     * 
+     * @param coins 硬币面值数组
+     * @param item 考虑前item种硬币（1-based索引）
+     * @param targetAmount 目标金额
+     * @return 能够组成目标金额的组合数
+     */
     public int coinChangeMemoization(int[] coins, int item, int targetAmount) {
         int[][] memo = new int[item + 1][targetAmount + 1];
 
@@ -115,8 +162,23 @@ public class CoinsChangeCombinationProblem {
         return coinChangeMemoization(coins, item, targetAmount, memo);
     }
 
+    /**
+     * 记忆化搜索的递归实现
+     * 
+     * 【关键认知】：记忆化搜索 = 递归 + 缓存
+     * - 保持与DFS完全相同的递归逻辑
+     * - 在递归调用前检查缓存，在返回前存储结果
+     * - 注意：这里选择硬币后仍然递归调用 coinChangeMemoization(coins, item, ...)
+     *   体现了硬币可以重复使用的特性
+     * 
+     * @param coins 硬币面值数组
+     * @param item 考虑前item种硬币（1-based索引）
+     * @param targetAmount 目标金额
+     * @param memo 记忆化缓存数组，-1表示未计算
+     * @return 能够组成目标金额的组合数
+     */
     private int coinChangeMemoization(int[] coins, int item, int targetAmount, int[][] memo) {
-        // 0 和 1 都是合法值，没有非法值，所以无需处理非法值问题
+        // 递归终止条件：与DFS版本完全相同
         if (targetAmount == 0) {
             return 1;
         }
@@ -124,26 +186,58 @@ public class CoinsChangeCombinationProblem {
             return 0;
         }
 
+        // 检查缓存：如果已经计算过，直接返回缓存结果
         if (memo[item][targetAmount] != -1) {
             return memo[item][targetAmount];
         }
 
-        // dp[item][targetAmount] = dp[item - 1][targetAmount] + dp[item][targetAmount - coins[item - 1]]
+        // 状态转移方程：dp[item][targetAmount] = dp[item - 1][targetAmount] + dp[item][targetAmount - coins[item - 1]]
 
+        // 情况1：不选择当前硬币
         int no = coinChangeMemoization(coins, item - 1, targetAmount, memo);
-        // 剪掉一个不可选的枝
-        if (coins[item -1] > targetAmount) {
+        
+        // 剪枝优化：如果当前硬币面值大于目标金额，无法选择
+        if (coins[item - 1] > targetAmount) {
             memo[item][targetAmount] = no;
             return memo[item][targetAmount];
         }
 
-        int yes =coinChangeMemoization(coins, item, targetAmount - coins[item - 1], memo);
+        // 情况2：选择当前硬币（注意：仍然是item，体现硬币可重复使用）
+        int yes = coinChangeMemoization(coins, item, targetAmount - coins[item - 1], memo);
+        
+        // 缓存结果并返回
         memo[item][targetAmount] = no + yes;
-
         return memo[item][targetAmount];
     }
 
+    /**
+     * 使用动态规划计算硬币兑换的组合数（自底向上动态规划）
+     * 
+     * 【DP核心思想】：
+     * 通过填表的方式，从小问题逐步构建到大问题的解。
+     * 
+     * 【状态定义】：
+     * dp[i][j] 表示用前i种硬币组成金额j的方案数
+     * 
+     * 【状态转移方程】：
+     * dp[i][j] = dp[i-1][j] + dp[i][j-coins[i-1]]
+     * - dp[i-1][j]：不选择第i种硬币的方案数
+     * - dp[i][j-coins[i-1]]：选择第i种硬币的方案数（注意是dp[i]，体现硬币可重复使用）
+     * 
+     * 【边界条件】：
+     * - dp[i][0] = 1：金额为0时，有1种方案（不选任何硬币）
+     * - dp[0][j] = 0 (j>0)：没有硬币时，无法组成正数金额
+     * 
+     * 【时间复杂度】：O(item × targetAmount)
+     * 【空间复杂度】：O(item × targetAmount)
+     * 
+     * @param coins 硬币面值数组
+     * @param item 硬币种类数量
+     * @param targetAmount 目标金额
+     * @return 能够组成目标金额的组合数
+     */
     public int coinChangeDp(int[] coins, int item, int targetAmount) {
+        // 边界条件检查
         if (targetAmount == 0) {
             return 1;
         }
@@ -151,27 +245,101 @@ public class CoinsChangeCombinationProblem {
             return 0;
         }
 
+        // 创建DP表
         int[][] dp = new int[item + 1][targetAmount + 1];
 
+        // 初始化边界条件
+        // dp[i][0] = 1：金额为0时，有1种方案（不选任何硬币）
         for (int i = 0; i <= item; i++) {
             dp[i][0] = 1;
         }
 
+        // dp[0][j] = 0：没有硬币时，无法组成正数金额
         for (int j = 1; j <= targetAmount; j++) {
             dp[0][j] = 0;
         }
-        // dp[i][a] = dp[i-1][a] + dp[i][a - coins[i - 1]]
+        
+        // 填充DP表
+        // 状态转移方程：dp[i][a] = dp[i-1][a] + dp[i][a - coins[i - 1]]
         // 易错的点：i 从 1 开始，而不是从 0 开始。有意义的值是从边缘值开始的。
         for (int i = 1; i <= item; i++) {
             for (int j = 1; j <= targetAmount; j++) {
-                if (coins[i - 1] > j) {
-                    dp[i][j] = dp[i - 1][j];
-                } else {
-                    dp[i][j] = dp[i - 1][j] + dp[i][j - coins[i - 1]];;
+                // 不选择当前硬币的方案数
+                dp[i][j] = dp[i - 1][j];
+                
+                // 如果当前硬币面值不超过目标金额，考虑选择当前硬币
+                if (coins[i - 1] <= j) {
+                    // 选择当前硬币的方案数：dp[i][j - coins[i - 1]]
+                    // 注意：这里是dp[i]而不是dp[i-1]，体现了硬币可重复使用
+                    dp[i][j] += dp[i][j - coins[i - 1]];
                 }
             }
         }
         return dp[item][targetAmount];
     }
 
+    /**
+     * 使用空间优化的动态规划计算硬币兑换的组合数（一维数组实现）
+     * 
+     * 【空间优化核心思想】：
+     * 利用DP状态转移只依赖上一行的特性，将二维数组压缩为一维数组。
+     * 
+     * 【关键认知：扫描顺序的本质】：
+     * 
+     * **为什么硬币问题使用正序扫描？**
+     * - 硬币可以重复使用，我们需要的是当前行的新值 dp[i][j-coins[i-1]]
+     * - 正序扫描时，dp[j-coins[i-1]] 会被提前更新，成为"当前行新值"
+     * - 这正好满足了硬币重复使用的需求
+     * 
+     * **对比01背包的逆序扫描**：
+     * - 01背包每个物品只能选一次，需要的是上一行的旧值 dp[i-1][j-weight[i-1]]
+     * - 逆序扫描保护 dp[j-weight[i-1]] 不被提前更新，维持其作为"上一行旧值"
+     * 
+     * **统一的表面现象与不同的内在需求**：
+     * ```java
+     * // 两种问题空间优化后的状态转移形式完全相同
+     * dp[j] = dp[j] + dp[j-coins[i-1]]  // 硬币问题
+     * dp[j] = max(dp[j], dp[j-weight[i-1]] + value[i-1])  // 01背包
+     * ```
+     * 但扫描顺序不同：
+     * - 硬币问题：正序扫描，让 dp[j-coins[i-1]] 成为新值（支持重复选择）
+     * - 01背包：逆序扫描，让 dp[j-weight[i-1]] 保持旧值（避免重复选择）
+     * 
+     * 【时间复杂度】：O(item × targetAmount)
+     * 【空间复杂度】：O(targetAmount) - 相比二维版本大幅优化
+     * 
+     * @param coins 硬币面值数组
+     * @param item 硬币种类数量
+     * @param targetAmount 目标金额
+     * @return 能够组成目标金额的组合数
+     */
+    public int coinChangeDpOptimized(int[] coins, int item, int targetAmount) {
+        // 边界条件检查
+        if (targetAmount == 0) {
+            return 1;
+        }
+        if (item == 0) {
+            return 0;
+        }
+        
+        // 初始化一维DP数组
+        int[] dp = new int[targetAmount + 1];
+        // 金额为0时，有1种方案（不选任何硬币）
+        dp[0] = 1;
+        
+        // 外层循环：遍历硬币种类
+        for (int i = 1; i <= item; i++) {
+            // 内层循环：遍历金额（正序扫描）
+            // 【关键】正序扫描让 dp[j-coins[i-1]] 成为已更新的新值
+            // 这样实现了硬币的重复使用
+            for (int j = 1; j <= targetAmount; j++) {
+                // 状态转移：dp[i][a] = dp[i-1][a] + dp[i][a-coins[i-1]]
+                // 压缩后：dp[j] = dp[j] + dp[j-coins[i-1]]
+                if (coins[i - 1] <= j) {
+                    dp[j] = dp[j] + dp[j - coins[i - 1]];
+                }
+            }
+        }
+        return dp[targetAmount];
+    }
 }
