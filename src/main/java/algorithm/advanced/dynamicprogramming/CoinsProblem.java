@@ -1,21 +1,32 @@
 package algorithm.advanced.dynamicprogramming;
 
 
+import java.util.Arrays;
+
 /**
  * project name: algorithm
  *
- * description: 零钱兑换问题
+ * description: 零钱兑换问题（完全背包变种）
  *
- * 这道题的目标仍然是求解某个特定的 dp 值，但是硬币数量等于 dp值。
- * 其余状态分别是
+ * 【问题特点】：
+ * 与传统背包问题的关键区别在于约束条件：
+ * - 传统背包：容量 ≤ 限制值（不超过约束）
+ * - 零钱兑换：总金额 = 目标值（等值约束）
+ * 
+ * 这种等值约束导致可能出现"无解"情况，需要特殊处理返回-1。
  *
- * 1. 问题的规模：i
- * 2. 问题的要求：总面值必须等于一个值 amount
+ * 【状态定义】：
+ * dp[i][amount] 表示用前i种硬币凑成金额amount所需的最少硬币数
+ * 
+ * 【状态转移】：
+ * dp[i][amount] = min(dp[i-1][amount], dp[i][amount-coins[i-1]] + 1)
+ * - 不选当前硬币：dp[i-1][amount]
+ * - 选择当前硬币：dp[i][amount-coins[i-1]] + 1（可重复选择）
+ * 
+ * 【边界条件】：
+ * - dp[i][0] = 0（金额为0不需要硬币）
+ * - dp[0][amount] = -1（没有硬币无法凑出正金额）
  *
- * 而这两个问题都是可以“收减”的，这构成了这类 dp 问题的通用模板
- * 允许重复选择本币多次
- *
- * dp[i][amount] = Math.min(dp[i-1][amount], dp[i][amount-coins[i-1]] + 1);
  * @author magicliang
  *
  *         date: 2025-08-29 15:10
@@ -50,9 +61,10 @@ public class CoinsProblem {
         if (targetAmount == 0) {
             return 0;
         }
-        
+
         // 【递归终止条件2】：没有硬币可用但目标金额不为0，无解
-        // 如果目标金额为0但是硬币问题规模为0（或者 targetAmount 被上层改成负数了，但是可以通过下面的去除剪枝来专门去掉），意味着无法凑出，应该直接返回错误值
+        // 零钱兑换问题的特殊性：目标约束是等于某个数值（总价）而不是不小于某个值（背包容量）
+        // 这种等值约束会出现凑不出的情况，与一般背包问题不同，需要返回异常值-1
         if (i == 0) {
             return -1;
         }
@@ -97,6 +109,60 @@ public class CoinsProblem {
 
         // 【情况3】：两种方案都有解，选择硬币数量更少的方案
         return Math.min(subProblemChoice, currentProblemChoice);
+    }
+
+    public int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount) {
+
+        // 创建记忆化数组
+        int[][] memo = new int[i + 1][targetAmount + 1];
+
+        // 初始化记忆化数组的目的是为了让“未计算”和“合法值0”分开
+        for (int[] row : memo) {
+            Arrays.fill(row, -1);
+        }
+
+
+        return unboundedKnapsackProblemMemoization(coins, i, targetAmount, memo);
+    }
+
+    private int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount, int[][] memo) {
+        if (targetAmount == 0) {
+            return 0;
+        }
+
+        // 如果硬币已经为0了，targetAmount 不为 0，说明无解
+        if (i == 0) {
+            return -1;
+        }
+
+        // targetAmount 不会小于0，下面会剪枝
+
+        // 命中缓存
+        if (memo[i][targetAmount] != -1) {
+            return memo[i][targetAmount];
+        }
+
+        int subProblemChoice = unboundedKnapsackProblemMemoization(coins, i - 1, targetAmount, memo);
+        memo[i][targetAmount] = subProblemChoice;
+
+        // 剪枝来了：不能做出选择
+        if (coins[i - 1] > targetAmount) {
+            return memo[i][targetAmount];
+        }
+
+        int currentProblemChoice = unboundedKnapsackProblemMemoization(coins, i, targetAmount - coins[i - 1], memo);
+        // 不能用 min 比对 -1，所以还是返回 subProblemChoice，不要把 + 1加上去
+        if (currentProblemChoice == -1) {
+            return memo[i][targetAmount];
+        }
+        currentProblemChoice += 1;
+        if (memo[i][targetAmount] == -1) {
+            memo[i][targetAmount] = currentProblemChoice;
+            return memo[i][targetAmount];
+        }
+
+        memo[i][targetAmount] = Math.min(subProblemChoice, currentProblemChoice);
+        return memo[i][targetAmount];
     }
 
 }
