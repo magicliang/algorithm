@@ -102,54 +102,5 @@ public class CoinsChangeCombinationProblem {
         return coinChangeDfs(coins, coins.length, amount);
     }
 
-    /**
-     * 测试方法
-     */
-    public static void main(String[] args) {
-        CoinsChangeCombinationProblem solution = new CoinsChangeCombinationProblem();
-        
-        // 测试用例1：基本情况
-        int[] coins1 = {1, 2, 5};
-        int amount1 = 5;
-        int result1 = solution.coinChange(coins1, amount1);
-        System.out.println("测试1 - 硬币: [1,2,5], 金额: " + amount1 + ", 组合数: " + result1);
-        // 预期结果: 4种组合 (5, 2+2+1, 2+1+1+1, 1+1+1+1+1)
-        
-        // 测试用例2：无解情况
-        int[] coins2 = {2};
-        int amount2 = 3;
-        int result2 = solution.coinChange(coins2, amount2);
-        System.out.println("测试2 - 硬币: [2], 金额: " + amount2 + ", 组合数: " + result2);
-        // 预期结果: 0种组合
-        
-        // 测试用例3：金额为0
-        int[] coins3 = {1, 2, 5};
-        int amount3 = 0;
-        int result3 = solution.coinChange(coins3, amount3);
-        System.out.println("测试3 - 硬币: [1,2,5], 金额: " + amount3 + ", 组合数: " + result3);
-        // 预期结果: 1种组合（不选任何硬币）
-        
-        // 测试用例4：较大金额
-        int[] coins4 = {1, 2, 5};
-        int amount4 = 11;
-        int result4 = solution.coinChange(coins4, amount4);
-        System.out.println("测试4 - 硬币: [1,2,5], 金额: " + amount4 + ", 组合数: " + result4);
-        // 预期结果: 11种组合
-        
-        // 测试用例5：单一硬币
-        int[] coins5 = {1};
-        int amount5 = 10;
-        int result5 = solution.coinChange(coins5, amount5);
-        System.out.println("测试5 - 硬币: [1], 金额: " + amount5 + ", 组合数: " + result5);
-        // 预期结果: 1种组合（10个1元硬币）
-        
-        // 验证递归调用过程（小规模示例）
-        System.out.println("\n=== 递归过程演示 ===");
-        int[] demoCoins = {1, 2};
-        int demoAmount = 3;
-        System.out.println("演示：硬币[1,2]组成金额3的过程");
-        int demoResult = solution.coinChangeDfs(demoCoins, demoCoins.length, demoAmount);
-        System.out.println("最终结果: " + demoResult + "种组合");
-        // 手工验证：3=1+1+1, 3=1+2 共2种组合
-    }
+
 }
