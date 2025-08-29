@@ -144,25 +144,27 @@ public class Kmp {
         return -1;
     }
 
-    public int[] buildNextArray2(String pattern) {
-        final int n = pattern.length();
-        int[] next = new int[n];
-       int j = 0; // j 有两重含义，当前已经匹配的字符串长度，以及下一个要匹配的字符串的位置
-        next[0] = 0;// 初始匹配数组一开始肯定是 0值
+    public int search2(String text, String pattern) {
+        if (text == null || pattern == null) {
+            return -1;
+        }
+        int[] next = buildNextArray(pattern);
 
-        // 不从 0 开始进行对前缀数组的匹配
-        for (int i = 1; i < n; i++) {
-            while (j > 0 && pattern.charAt(i) != pattern.charAt(j)) {
-                j = next[j-1];
+        final int n = text.length();
+        int j = 0;
+        for (int i = 0; i < n; i++) {
+            while (j > 0 && text.charAt(i) != pattern.charAt(j)) {
+                j = next[j - 1];
             }
-            if (pattern.charAt(i) == pattern.charAt(j)) {
+            if (text.charAt(i) == pattern.charAt(j)) {
                 j++;
             }
-            next[i] = j;
+            final int m = pattern.length();
+            // 找到第一个值
+            if (j == m) {
+                return i - m + 1;
+            }
         }
-
-       return next;
+        return -1;
     }
-
-
 }
