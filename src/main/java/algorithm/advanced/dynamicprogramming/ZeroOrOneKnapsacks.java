@@ -4,7 +4,7 @@ package algorithm.advanced.dynamicprogramming;
 /**
  * project name: algorithm
  *
- * description: 背包问题
+ * description: 0-1 背包问题
  *
  * ==================== 算法模板总结 ====================
  * 
@@ -47,7 +47,7 @@ package algorithm.advanced.dynamicprogramming;
  *
  *         date: 2025-08-28 18:49
  */
-public class Knapsacks {
+public class ZeroOrOneKnapsacks {
 
     /**
      * 使用深度优先搜索解决0-1背包问题

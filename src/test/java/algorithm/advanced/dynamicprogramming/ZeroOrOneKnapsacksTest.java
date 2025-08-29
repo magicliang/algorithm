@@ -3,9 +3,9 @@ package algorithm.advanced.dynamicprogramming;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
-public class KnapsacksTest {
+public class ZeroOrOneKnapsacksTest {
 
-    private final Knapsacks knapsacks = new Knapsacks();
+    private final ZeroOrOneKnapsacks zeroOrOneKnapsacks = new ZeroOrOneKnapsacks();
 
     @Test
     public void testKnapsacksDfsBasic() {
@@ -13,7 +13,7 @@ public class KnapsacksTest {
         int[] values = {3, 4, 5, 6};
         int capacity = 5;
         
-        int result = knapsacks.knapsacksDfs(weights, values, 4, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 4, capacity);
         assertEquals(7, result); // 选择物品0和1：重量2+3=5，价值3+4=7
     }
 
@@ -23,7 +23,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksDfs(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 3, capacity);
         assertEquals(6, result); // 所有物品都能装入
     }
 
@@ -33,7 +33,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 0;
         
-        int result = knapsacks.knapsacksDfs(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 3, capacity);
         assertEquals(0, result); // 容量为0，无法装入任何物品
     }
 
@@ -43,7 +43,7 @@ public class KnapsacksTest {
         int[] values = {};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksDfs(weights, values, 0, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 0, capacity);
         assertEquals(0, result); // 没有物品可装入
     }
 
@@ -53,7 +53,7 @@ public class KnapsacksTest {
         int[] values = {3, 4, 5, 6};
         int capacity = 5;
         
-        int result = knapsacks.knapsacksMemoization(weights, values, 4, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 4, capacity);
         assertEquals(7, result); // 应该与DFS结果一致
     }
 
@@ -63,7 +63,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksMemoization(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 3, capacity);
         assertEquals(6, result); // 应该与DFS结果一致
     }
 
@@ -73,7 +73,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 0;
         
-        int result = knapsacks.knapsacksMemoization(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 3, capacity);
         assertEquals(0, result); // 应该与DFS结果一致
     }
 
@@ -83,7 +83,7 @@ public class KnapsacksTest {
         int[] values = {};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksMemoization(weights, values, 0, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 0, capacity);
         assertEquals(0, result); // 应该与DFS结果一致
     }
 
@@ -93,8 +93,8 @@ public class KnapsacksTest {
         int[] values = {1, 4, 5, 7};
         int capacity = 7;
         
-        int dfsResult = knapsacks.knapsacksDfs(weights, values, 4, capacity);
-        int memoResult = knapsacks.knapsacksMemoization(weights, values, 4, capacity);
+        int dfsResult = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 4, capacity);
+        int memoResult = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 4, capacity);
         
         assertEquals(dfsResult, memoResult); // 两种方法结果应该一致
         assertEquals(9, memoResult); // 最优解：选择物品1和3（重量3+4=7，价值4+5=9）
@@ -106,7 +106,7 @@ public class KnapsacksTest {
         int[] values = {5};
         int capacity = 4;
         
-        int result = knapsacks.knapsacksMemoization(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 1, capacity);
         assertEquals(5, result); // 单个物品可以放入
     }
 
@@ -116,7 +116,7 @@ public class KnapsacksTest {
         int[] values = {10};
         int capacity = 3;
         
-        int result = knapsacks.knapsacksMemoization(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 1, capacity);
         assertEquals(0, result); // 单个物品太重，无法放入
     }
 
@@ -126,7 +126,7 @@ public class KnapsacksTest {
         int[] values = {3, 4, 5, 6};
         int capacity = 5;
         
-        int result = knapsacks.knapsacksDp(weights, values, 4, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 4, capacity);
         assertEquals(7, result); // 选择物品0和1：重量2+3=5，价值3+4=7
     }
 
@@ -136,7 +136,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksDp(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 3, capacity);
         assertEquals(6, result); // 所有物品都能装入
     }
 
@@ -146,7 +146,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 0;
         
-        int result = knapsacks.knapsacksDp(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 3, capacity);
         assertEquals(0, result); // 容量为0，无法装入任何物品
     }
 
@@ -156,7 +156,7 @@ public class KnapsacksTest {
         int[] values = {};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksDp(weights, values, 0, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 0, capacity);
         assertEquals(0, result); // 没有物品可装入
     }
 
@@ -166,7 +166,7 @@ public class KnapsacksTest {
         int[] values = {1, 4, 5, 7};
         int capacity = 7;
         
-        int result = knapsacks.knapsacksDp(weights, values, 4, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 4, capacity);
         assertEquals(9, result); // 最优解：选择物品1和2（重量3+4=7，价值4+5=9）
     }
 
@@ -176,7 +176,7 @@ public class KnapsacksTest {
         int[] values = {5};
         int capacity = 4;
         
-        int result = knapsacks.knapsacksDp(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 1, capacity);
         assertEquals(5, result); // 单个物品可以放入
     }
 
@@ -186,7 +186,7 @@ public class KnapsacksTest {
         int[] values = {10};
         int capacity = 3;
         
-        int result = knapsacks.knapsacksDp(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 1, capacity);
         assertEquals(0, result); // 单个物品太重，无法放入
     }
 
@@ -196,9 +196,9 @@ public class KnapsacksTest {
         int[] values = {3, 4, 5, 6, 2, 8};
         int capacity = 8;
         
-        int dfsResult = knapsacks.knapsacksDfs(weights, values, 6, capacity);
-        int memoResult = knapsacks.knapsacksMemoization(weights, values, 6, capacity);
-        int dpResult = knapsacks.knapsacksDp(weights, values, 6, capacity);
+        int dfsResult = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 6, capacity);
+        int memoResult = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 6, capacity);
+        int dpResult = zeroOrOneKnapsacks.knapsacksDp(weights, values, 6, capacity);
         
         // 三种方法结果应该一致
         assertEquals(dfsResult, memoResult);
@@ -211,7 +211,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 100;
         
-        int result = knapsacks.knapsacksDp(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 3, capacity);
         assertEquals(6, result); // 所有物品都能装入，总价值为1+2+3=6
     }
 
@@ -221,7 +221,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3, 4, 5};
         int capacity = 3;
         
-        int result = knapsacks.knapsacksDp(weights, values, 5, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDp(weights, values, 5, capacity);
         assertEquals(12, result); // 选择价值最高的3个物品：3+4+5=12
     }
 
@@ -231,7 +231,7 @@ public class KnapsacksTest {
         int[] values = {3, 4, 5, 6};
         int capacity = 5;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 4, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 4, capacity);
         assertEquals(7, result); // 选择物品0和1：重量2+3=5，价值3+4=7
     }
 
@@ -241,7 +241,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 3, capacity);
         assertEquals(6, result); // 所有物品都能装入
     }
 
@@ -251,7 +251,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 0;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 3, capacity);
         assertEquals(0, result); // 容量为0，无法装入任何物品
     }
 
@@ -261,7 +261,7 @@ public class KnapsacksTest {
         int[] values = {};
         int capacity = 10;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 0, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 0, capacity);
         assertEquals(0, result); // 没有物品可装入
     }
 
@@ -271,7 +271,7 @@ public class KnapsacksTest {
         int[] values = {1, 4, 5, 7};
         int capacity = 7;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 4, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 4, capacity);
         assertEquals(9, result); // 最优解：选择物品1和2（重量3+4=7，价值4+5=9）
     }
 
@@ -281,7 +281,7 @@ public class KnapsacksTest {
         int[] values = {5};
         int capacity = 4;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 1, capacity);
         assertEquals(5, result); // 单个物品可以放入
     }
 
@@ -291,7 +291,7 @@ public class KnapsacksTest {
         int[] values = {10};
         int capacity = 3;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 1, capacity);
         assertEquals(0, result); // 单个物品太重，无法放入
     }
 
@@ -301,10 +301,10 @@ public class KnapsacksTest {
         int[] values = {3, 4, 5, 6, 2, 8};
         int capacity = 8;
         
-        int dfsResult = knapsacks.knapsacksDfs(weights, values, 6, capacity);
-        int memoResult = knapsacks.knapsacksMemoization(weights, values, 6, capacity);
-        int dpResult = knapsacks.knapsacksDp(weights, values, 6, capacity);
-        int optimizedResult = knapsacks.knapsacksDpOptimized(weights, values, 6, capacity);
+        int dfsResult = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 6, capacity);
+        int memoResult = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 6, capacity);
+        int dpResult = zeroOrOneKnapsacks.knapsacksDp(weights, values, 6, capacity);
+        int optimizedResult = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 6, capacity);
         
         // 四种方法结果应该一致
         assertEquals(dfsResult, memoResult);
@@ -318,7 +318,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3};
         int capacity = 100;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 3, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 3, capacity);
         assertEquals(6, result); // 所有物品都能装入，总价值为1+2+3=6
     }
 
@@ -328,7 +328,7 @@ public class KnapsacksTest {
         int[] values = {1, 2, 3, 4, 5};
         int capacity = 3;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 5, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 5, capacity);
         assertEquals(12, result); // 选择价值最高的3个物品：3+4+5=12
     }
 
@@ -339,8 +339,8 @@ public class KnapsacksTest {
         int[] values = {4, 5, 6, 7, 8, 9, 10, 11};
         int capacity = 20;
         
-        int dpResult = knapsacks.knapsacksDp(weights, values, 8, capacity);
-        int optimizedResult = knapsacks.knapsacksDpOptimized(weights, values, 8, capacity);
+        int dpResult = zeroOrOneKnapsacks.knapsacksDp(weights, values, 8, capacity);
+        int optimizedResult = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 8, capacity);
         
         assertEquals(dpResult, optimizedResult);
     }
@@ -352,7 +352,7 @@ public class KnapsacksTest {
         int[] values = {100};
         int capacity = 1;
         
-        int result = knapsacks.knapsacksDpOptimized(weights, values, 1, capacity);
+        int result = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 1, capacity);
         assertEquals(100, result); // 刚好能放入高价值物品
     }
 
@@ -363,10 +363,10 @@ public class KnapsacksTest {
         int[] values = {1, 3, 4, 5, 7};
         int capacity = 7;
         
-        int dfs = knapsacks.knapsacksDfs(weights, values, 5, capacity);
-        int memo = knapsacks.knapsacksMemoization(weights, values, 5, capacity);
-        int dp = knapsacks.knapsacksDp(weights, values, 5, capacity);
-        int optimized = knapsacks.knapsacksDpOptimized(weights, values, 5, capacity);
+        int dfs = zeroOrOneKnapsacks.knapsacksDfs(weights, values, 5, capacity);
+        int memo = zeroOrOneKnapsacks.knapsacksMemoization(weights, values, 5, capacity);
+        int dp = zeroOrOneKnapsacks.knapsacksDp(weights, values, 5, capacity);
+        int optimized = zeroOrOneKnapsacks.knapsacksDpOptimized(weights, values, 5, capacity);
         
         assertEquals(dfs, memo);
         assertEquals(memo, dp);
