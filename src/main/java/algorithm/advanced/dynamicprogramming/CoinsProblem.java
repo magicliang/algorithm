@@ -24,8 +24,8 @@ import java.util.Arrays;
  * - 选择当前硬币：dp[i][amount-coins[i-1]] + 1（可重复选择）
  * 
  * 【边界条件】：
- * - dp[i][0] = 0（金额为0不需要硬币）
- * - dp[0][amount] = -1（没有硬币无法凑出正金额）
+ * - dp[i][0] = 0（金额为0不需要硬币），这里0是合法值
+ * - dp[0][amount] = -1 或者 amount + 1（没有硬币无法凑出正金额，可以给出一个负值或者一个利于min比较的值）
  *
  * @author magicliang
  *
@@ -284,7 +284,7 @@ public class CoinsProblem {
         // dp[i][0] = 0：凑出金额0需要0个硬币（默认值已经是0）
         
         // dp[0][j] = MAX：没有硬币无法凑出正金额，用MAX标记无效状态
-        // MAX恰好比所有有效解都大1，在min函数中会被自然淘汰
+        // MAX恰好比所有有效解都大1，在min函数中会被自然淘汰。注意，0行0列返回应该是0而不是 MAX
         for (int amount = 1; amount <= targetAmount; amount++) {
             dp[0][amount] = MAX;
         }
@@ -314,5 +314,64 @@ public class CoinsProblem {
         // 如果dp[item][targetAmount] < MAX，说明找到了有效解
         // 否则返回-1表示无解
         return dp[item][targetAmount] < MAX ? dp[item][targetAmount] : -1;
+    }
+
+    /**
+     * 使用空间优化的动态规划解决零钱兑换问题
+     * 
+     * 【空间优化原理】：
+     * 将二维DP表dp[i][j]压缩为一维数组dp[j]，空间复杂度从O(item*targetAmount)优化为O(targetAmount)
+     * 
+     * 【关键洞察】：
+     * 在完全背包问题中，dp[i][j]只依赖于：
+     * 1. dp[i-1][j]（上一轮迭代的值，即不选当前硬币）
+     * 2. dp[i][j-coins[i-1]]（本轮已更新的值，即选择当前硬币）
+     * 
+     * 【遍历顺序的重要性】：
+     * - 外层循环：硬币种类（从前往后）
+     * - 内层循环：金额（从前往后）
+     * 这样确保dp[j-coins[i-1]]是"当前硬币种类下已更新的值"，体现完全背包特性
+     * 
+     * @param coins 硬币面额数组
+     * @param item 硬币种类数量
+     * @param targetAmount 目标金额
+     * @return 最少硬币数量，无解时返回-1
+     */
+    public int coinChangeDpOptimization(int[] coins, int item, int targetAmount) {
+        if (targetAmount == 0) {
+            return 0;
+        }
+
+        if (item <= 0 || targetAmount < 0) {
+            return -1;
+        }
+
+        // 【无效状态标记】：MAX = targetAmount + 1
+        // 任何有效解的硬币数都不会超过targetAmount（最坏情况全用面额1的硬币）
+        int MAX = targetAmount + 1;
+
+        // 【空间优化核心】：用一维数组dp[j]替代二维数组dp[i][j]
+        // dp[j]表示凑出金额j所需的最少硬币数
+        int[] dp = new int[targetAmount + 1];
+        for (int i = 1; i <= targetAmount; i++) {
+            // i = 0 的时候，不管金额是多少，都无法凑出，所以这一行除了0列都是非法值
+            // 但是 targetAmount = 0 的时候，需要0个硬币凑出结果，所以这一列都赋值给合法值0（默认初始化就是0）
+            dp[i] = MAX;
+        }
+
+        // 【外层循环】：遍历硬币种类，每次考虑一种新硬币
+        for (int i = 1; i <= item; i++) {
+            // 【内层循环】：遍历所有金额，更新使用当前硬币后的最优解
+            for (int j = 1; j <= targetAmount; j++) {
+                // dp[i][j] = min(dp[i-1][j], dp[i][j-coins[i-1]] + 1)
+                // 这里要比的就是 j，就是当前这个序列上的容量
+                // 【状态转移】：dp[j]原值相当于dp[i-1][j]（不选当前硬币）
+                // dp[j-coins[i-1]]相当于dp[i][j-coins[i-1]]（选择当前硬币，已在本轮更新）
+                if (coins[i - 1] <= j) {
+                    dp[j] = Math.min(dp[j], dp[j - coins[i - 1]] + 1);
+                }
+            }
+        }
+        return dp[targetAmount] < MAX ? dp[targetAmount] : -1;
     }
 }
