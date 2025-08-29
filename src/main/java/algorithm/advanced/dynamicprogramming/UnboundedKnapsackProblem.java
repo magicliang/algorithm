@@ -94,4 +94,33 @@ public class UnboundedKnapsackProblem {
         return memo[item][cap];
     }
 
+    public int unboundedKnapsackProblemDp(int[] wgt, int[] val, int item, int cap) {
+        if (item == 0 || cap == 0) {
+            return 0;
+        }
+
+        // 未计算的值不是合法值，要先强力合法化
+        int[][] dp = new int[item + 1][cap + 1];
+        for (int i = 0; i <= item; i++) {
+            for (int j = 0; j <= cap; j++) {
+                if (i == 0 || j == 0) {
+                    dp[i][j] = 0;
+                } else {
+                    dp[i][j] = -1;
+                }
+            }
+        }
+
+        for (int i = 1; i <= item; i++) {
+            for (int j = 1; j <= cap; j++) {
+                if (wgt[item - 1] > cap) {
+                    dp[i][j] = dp[i - 1][cap];
+                } else {
+                    dp[i][j] = Math.max(dp[i - 1][cap], dp[i][cap - wgt[item - 1]] + val[item - 1]);
+                }
+            }
+        }
+
+        return dp[item][cap];
+    }
 }
