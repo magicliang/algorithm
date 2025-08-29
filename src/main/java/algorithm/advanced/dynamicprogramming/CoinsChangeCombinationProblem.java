@@ -130,14 +130,14 @@ public class CoinsChangeCombinationProblem {
 
         // dp[item][targetAmount] = dp[item - 1][targetAmount] + dp[item][targetAmount - coins[item - 1]]
 
-        int no = memo[item - 1][targetAmount];
+        int no = coinChangeMemoization(coins, item - 1, targetAmount, memo);
         // 剪掉一个不可选的枝
         if (coins[item -1] > targetAmount) {
             memo[item][targetAmount] = no;
             return memo[item][targetAmount];
         }
 
-        int yes = memo[item][targetAmount - coins[item - 1]];
+        int yes =coinChangeMemoization(coins, item, targetAmount - coins[item - 1], memo);
         memo[item][targetAmount] = no + yes;
 
         return memo[item][targetAmount];
