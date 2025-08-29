@@ -1,9 +1,5 @@
 package algorithm.advanced.dynamicprogramming;
 
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.BeforeEach;
-import static org.junit.jupiter.api.Assertions.*;
-
 /**
  * 硬币兑换组合问题的单元测试
  * 
@@ -14,13 +10,21 @@ public class CoinsChangeCombinationProblemTest {
     
     private CoinsChangeCombinationProblem solution;
     
-    @BeforeEach
-    void setUp() {
+    public void setUp() {
         solution = new CoinsChangeCombinationProblem();
     }
     
-    @Test
-    void testBasicCase() {
+    /**
+     * 简单的断言方法
+     */
+    private void assertEquals(int expected, int actual, String message) {
+        if (expected != actual) {
+            throw new AssertionError(message + " - 期望: " + expected + ", 实际: " + actual);
+        }
+        System.out.println("✅ " + message);
+    }
+    
+    public void testBasicCase() {
         // 测试基本情况：硬币[1,2,5]，金额5
         // 组合方式：5, 2+2+1, 2+1+1+1, 1+1+1+1+1
         int[] coins = {1, 2, 5};
@@ -30,8 +34,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "硬币[1,2,5]组成金额5应该有4种组合");
     }
     
-    @Test
-    void testNoSolution() {
+    public void testNoSolution() {
         // 测试无解情况：只有面值2的硬币，无法组成奇数金额3
         int[] coins = {2};
         int amount = 3;
@@ -40,8 +43,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "硬币[2]无法组成金额3");
     }
     
-    @Test
-    void testZeroAmount() {
+    public void testZeroAmount() {
         // 测试金额为0的情况：只有一种方式（不选任何硬币）
         int[] coins = {1, 2, 5};
         int amount = 0;
@@ -50,8 +52,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "金额为0时应该有1种组合（空组合）");
     }
     
-    @Test
-    void testSingleCoin() {
+    public void testSingleCoin() {
         // 测试单一硬币情况：只有面值1的硬币
         int[] coins = {1};
         int amount = 10;
@@ -60,8 +61,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "只有面值1的硬币组成金额10只有1种方式");
     }
     
-    @Test
-    void testLargerAmount() {
+    public void testLargerAmount() {
         // 测试较大金额：硬币[1,2,5]，金额11
         int[] coins = {1, 2, 5};
         int amount = 11;
@@ -70,8 +70,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "硬币[1,2,5]组成金额11应该有11种组合");
     }
     
-    @Test
-    void testSmallExample() {
+    public void testSmallExample() {
         // 测试小规模示例：硬币[1,2]，金额3
         // 组合方式：1+1+1, 1+2
         int[] coins = {1, 2};
@@ -81,8 +80,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "硬币[1,2]组成金额3应该有2种组合");
     }
     
-    @Test
-    void testEdgeCases() {
+    public void testEdgeCases() {
         // 测试边界情况
         
         // 空硬币数组
@@ -92,8 +90,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(0, solution.coinChange(new int[]{10}, 5), "硬币面值大于目标金额应返回0");
     }
     
-    @Test
-    void testComplexCase() {
+    public void testComplexCase() {
         // 测试复杂情况：多种硬币面值
         int[] coins = {1, 3, 4};
         int amount = 6;
@@ -107,8 +104,7 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(expected, actual, "硬币[1,3,4]组成金额6应该有4种组合");
     }
     
-    @Test
-    void testDirectDfsCall() {
+    public void testDirectDfsCall() {
         // 直接测试DFS方法
         int[] coins = {1, 2};
         
@@ -118,5 +114,29 @@ public class CoinsChangeCombinationProblemTest {
         assertEquals(2, solution.coinChangeDfs(coins, 2, 3), "硬币[1,2]组成金额3应有2种方式");
     }
     
-
+    /**
+     * 运行所有测试
+     */
+    public void runAllTests() {
+        System.out.println("=== 硬币兑换组合问题测试开始 ===\n");
+        
+        setUp();
+        
+        try {
+            testBasicCase();
+            testNoSolution();
+            testZeroAmount();
+            testSingleCoin();
+            testLargerAmount();
+            testSmallExample();
+            testEdgeCases();
+            testComplexCase();
+            testDirectDfsCall();
+            
+            System.out.println("\n=== 所有测试通过！ ===");
+        } catch (AssertionError e) {
+            System.out.println("\n❌ 测试失败: " + e.getMessage());
+            throw e;
+        }
+    }
 }
