@@ -116,15 +116,38 @@ public class CoinsProblem {
         // 创建记忆化数组
         int[][] memo = new int[i + 1][targetAmount + 1];
 
-        // 初始化记忆化数组的目的是为了让“未计算”和“合法值0”分开
+        // 初始化记忆化数组的目的是为了让"未计算"和"合法值0"分开
         for (int[] row : memo) {
             Arrays.fill(row, -1);
         }
-
-
+        
         return unboundedKnapsackProblemMemoization(coins, i, targetAmount, memo);
     }
 
+    /**
+     * 【记忆化搜索的核心思想】：
+     * 将DFS的指数级复杂度O(2^(n+targetAmount))优化为多项式级O(n*targetAmount)
+     * 通过缓存已计算的子问题结果，避免重复计算
+     * 
+     * 【缓存设计】：
+     * memo[i][amount]存储"使用前i种硬币凑出amount金额"的最优解
+     * -1表示该子问题尚未计算
+     * 其他值表示已计算的最优解（包括-1表示无解）
+     * 
+     * 【状态传播机制】：
+     * 1. 缓存命中：直接返回已存储的结果
+     * 2. 缓存未命中：计算后存储并返回
+     * 3. 无解状态传播：-1作为特殊值在递归中正确传播
+     * 
+     * 【与DFS的等价性】：
+     * 记忆化搜索与DFS的决策树结构完全相同，只是通过缓存避免了重复遍历
+     * 
+     * @param coins 硬币面额数组
+     * @param i 当前考虑的硬币种类数量（1-based）
+     * @param targetAmount 目标金额
+     * @param memo 记忆化缓存数组
+     * @return 最少硬币数量，无解时返回-1
+     */
     private int unboundedKnapsackProblemMemoization(int[] coins, int i, int targetAmount, int[][] memo) {
         if (targetAmount == 0) {
             return 0;
@@ -156,6 +179,11 @@ public class CoinsProblem {
             return memo[i][targetAmount];
         }
         currentProblemChoice += 1;
+        
+        // 【缓存更新策略】：
+        // 1. 如果subProblemChoice是无解(-1)，直接使用currentProblemChoice
+        // 2. 如果currentProblemChoice是无解(-1)，保持subProblemChoice
+        // 3. 两者都有解时，选择较小的值
         if (memo[i][targetAmount] == -1) {
             memo[i][targetAmount] = currentProblemChoice;
             return memo[i][targetAmount];
