@@ -17,9 +17,9 @@ public class UnboundedKnapsackProblem {
 
     /**
      * 使用深度优先搜索解决完全背包问题
-     * 
+     *
      * @param wgt 物品重量数组
-     * @param val 物品价值数组  
+     * @param val 物品价值数组
      * @param item 当前考虑的物品索引（从1开始）
      * @param cap 背包剩余容量
      * @return 在给定容量下能获得的最大价值
@@ -42,4 +42,56 @@ public class UnboundedKnapsackProblem {
         // 返回两种情况的最大值
         return Math.max(yes, no);
     }
+
+    /**
+     * 使用记忆化搜索解决完全背包问题
+     *
+     * @param wgt 物品重量数组
+     * @param val 物品价值数组
+     * @param item 物品数量
+     * @param cap 背包容量
+     * @return 在给定容量下能获得的最大价值
+     */
+    public int unboundedKnapsackProblemMemoization(int[] wgt, int[] val, int item, int cap) {
+        // 创建记忆化数组，memo[i][c] 表示前i个物品在容量c下的最大价值
+        int[][] memo = new int[item + 1][cap + 1];
+
+        return unboundedKnapsackProblemMemoization(wgt, val, item, cap, memo);
+    }
+
+    /**
+     * 记忆化搜索的递归实现
+     *
+     * @param wgt 物品重量数组
+     * @param val 物品价值数组
+     * @param item 当前考虑的物品索引（从1开始）
+     * @param cap 背包剩余容量
+     * @param memo 记忆化数组
+     * @return 在给定容量下能获得的最大价值
+     */
+    private int unboundedKnapsackProblemMemoization(int[] wgt, int[] val, int item, int cap, int[][] memo) {
+        // 这些边界值是没有缓存的，但是却可以推导出"更上层"的缓存
+        if (item == 0 || cap == 0) {
+            return 0;
+        }
+
+        // 如果已经计算过，直接返回缓存结果
+        if (memo[item][cap] != 0) {
+            return memo[item][cap];
+        }
+
+        // 不选择当前物品的情况
+        int no = unboundedKnapsackProblemMemoization(wgt, val, item - 1, cap, memo);
+        if (wgt[item - 1] > cap) {
+            // 当前物品重量超过容量，只能不选择
+            memo[item][cap] = no;
+            return memo[item][cap];
+        }
+        // 选择当前物品的情况（注意：item不减1，因为可以重复选择）
+        int yes = unboundedKnapsackProblemMemoization(wgt, val, item, cap - wgt[item - 1], memo) + val[item - 1];
+        // 缓存并返回两种情况的最大值
+        memo[item][cap] = Math.max(yes, no);
+        return memo[item][cap];
+    }
+
 }
