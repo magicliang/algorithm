@@ -236,34 +236,35 @@ public class UnboundedKnapsackProblem {
      * @param cap 背包容量
      * @return 最大价值
      */
-    public int unboundedKnapsackDpOptimized(int[] wgt, int[] val, int cap) {
-        int n = wgt.length;
-        
+    public int unboundedKnapsackDpOptimized(int[] wgt, int[] val,int item, int cap) {
+
         // 初始化一维DP数组
         // dp[j] 表示容量为j时的最大价值
         int[] dp = new int[cap + 1];
-        
+
+        // 当 item 为 0时，整个 dp 数组所有元素都是0是合法的
+
         // 【关键】外层循环：遍历物品（i正序扫描）
-        for (int i = 1; i <= n; i++) {
-            // 【关键】内层循环：遍历容量（j正序扫描）
-            // 正序扫描的原因：我们需要使用本轮已更新的值dp[j-w[i]]
-            // 这样可以实现物品的重复选择
-            for (int c = 1; c <= cap; c++) {
-                if (wgt[i - 1] > c) {
-                    // 若超过背包容量，则不选物品i
-                    // dp[c] = dp[c]; // 保持不变，这行可以省略
-                } else {
+        // 正序扫描的原因：我们需要使用本轮已更新的值dp[j-w[i]]
+        // 这样可以实现物品的重复选择
+        // 易错的点：忘记选坐标
+        for (int i = 1; i <= item; i++) {
+            for (int j = 1; j <= cap; j++) {
+                // 缺省值是不做选择，所以i等于i减一，如果可以放入等价于：dp[j] = dp[j];
+
+                // 这里不能比对 cap，而是比对 cap
+                if (wgt[i - 1] <= j) {
                     // 【核心状态转移】：
                     // dp[c] = max(不选物品i, 选择物品i)
                     // = max(dp[c], dp[c - wgt[i-1]] + val[i-1])
-                    // 
+                    //
                     // 关键理解：dp[c - wgt[i-1]]在正序扫描中已经被更新
                     // 它包含了可能多次选择物品i的结果，这正是完全背包所需要的
-                    dp[c] = Math.max(dp[c], dp[c - wgt[i - 1]] + val[i - 1]);
+                    dp[j] = Math.max(dp[j], dp[j - wgt[i - 1]] + val[i - 1]);
                 }
             }
         }
-        
+
         return dp[cap];
     }
 }
