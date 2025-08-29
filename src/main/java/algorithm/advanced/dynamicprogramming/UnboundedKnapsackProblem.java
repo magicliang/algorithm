@@ -94,29 +94,70 @@ public class UnboundedKnapsackProblem {
         return memo[item][cap];
     }
 
+    /**
+     * 使用动态规划解决完全背包问题
+     * 
+     * 【完全背包DP核心思想】：
+     * 与0-1背包的关键区别在状态转移方程：
+     * - 0-1背包：dp[i][j] = max(dp[i-1][j], dp[i-1][j-w[i]] + v[i])
+     * - 完全背包：dp[i][j] = max(dp[i-1][j], dp[i][j-w[i]] + v[i])
+     * 
+     * 【状态定义】：
+     * dp[i][j] 表示前i个物品，背包容量为j时的最大价值
+     * 
+     * 【状态转移详解】：
+     * 对于物品i和容量j，有两种选择：
+     * 1. 不选物品i：dp[i][j] = dp[i-1][j]
+     * 2. 选物品i：dp[i][j] = dp[i][j-w[i]] + v[i]
+     *    注意：这里是dp[i][j-w[i]]而不是dp[i-1][j-w[i]]
+     *    因为物品可以重复选择，所以还是在第i层决策
+     * 
+     * 【填表顺序】：
+     * - 外层循环：物品（从1到n）
+     * - 内层循环：容量（从1到capacity）
+     * - 这样保证计算dp[i][j]时，dp[i][j-w[i]]已经计算过
+     * 
+     * 【时间复杂度】：O(n × capacity)
+     * 【空间复杂度】：O(n × capacity)
+     * 
+     * @param wgt 物品重量数组（0-based索引）
+     * @param val 物品价值数组（0-based索引）
+     * @param item 物品数量
+     * @param cap 背包容量
+     * @return 在给定容量下能获得的最大价值
+     */
     public int unboundedKnapsackProblemDp(int[] wgt, int[] val, int item, int cap) {
+        // 边界条件检查
         if (item == 0 || cap == 0) {
             return 0;
         }
 
-        // 未计算的值不是合法值，要先强力合法化
+        // 创建DP表，dp[i][j]表示前i个物品在容量j下的最大价值
+        // 注意：Java数组默认初始化为0，这里0是合法的价值，所以不需要特殊初始化
         int[][] dp = new int[item + 1][cap + 1];
+        
+        // 初始化边界条件（实际上Java已经默认为0，这里显式写出便于理解）
+        // dp[0][j] = 0：没有物品时，价值为0
+        // dp[i][0] = 0：容量为0时，价值为0
         for (int i = 0; i <= item; i++) {
-            for (int j = 0; j <= cap; j++) {
-                if (i == 0 || j == 0) {
-                    dp[i][j] = 0;
-                } else {
-                    dp[i][j] = -1;
-                }
-            }
+            dp[i][0] = 0;
+        }
+        for (int j = 0; j <= cap; j++) {
+            dp[0][j] = 0;
         }
 
+        // 填充DP表
         for (int i = 1; i <= item; i++) {
             for (int j = 1; j <= cap; j++) {
-                if (wgt[item - 1] > cap) {
-                    dp[i][j] = dp[i - 1][cap];
-                } else {
-                    dp[i][j] = Math.max(dp[i - 1][cap], dp[i][cap - wgt[item - 1]] + val[item - 1]);
+                // 不选择当前物品i的价值
+                dp[i][j] = dp[i - 1][j];
+                
+                // 如果当前物品重量不超过容量，考虑选择当前物品
+                if (wgt[i - 1] <= j) {
+                    // 选择当前物品的价值：dp[i][j-wgt[i-1]] + val[i-1]
+                    // 注意：这里是dp[i][...]而不是dp[i-1][...]，体现了物品可重复选择
+                    int chooseItem = dp[i][j - wgt[i - 1]] + val[i - 1];
+                    dp[i][j] = Math.max(dp[i][j], chooseItem);
                 }
             }
         }

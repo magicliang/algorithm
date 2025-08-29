@@ -269,4 +269,111 @@ public class UnboundedKnapsackProblemTest {
         
         assertEquals(dfsResult, memoResult, "DFS和记忆化方法应该返回相同结果");
     }
+
+    // ==================== 动态规划方法测试 ====================
+
+    /**
+     * 测试动态规划方法的基本功能
+     * 
+     * 【测试目的】：验证DP实现的正确性
+     * 【DP优势】：
+     * - 自底向上计算，避免递归开销
+     * - 时间复杂度O(n×capacity)，与记忆化相同但常数更小
+     * - 空间复杂度O(n×capacity)，可优化为O(capacity)
+     */
+    @Test
+    public void testDpBasicCase() {
+        // 测试DP方法的基本情况
+        int[] wgt = {1, 2, 3};
+        int[] val = {1, 4, 4};
+        int capacity = 4;
+        
+        int result = solver.unboundedKnapsackProblemDp(wgt, val, 3, capacity);
+        assertEquals(8, result);
+    }
+
+    /**
+     * 测试DP方法的边界条件处理
+     * 
+     * 【测试重点】：验证DP表的初始化和边界处理
+     */
+    @Test
+    public void testDpZeroCapacity() {
+        // 测试DP方法容量为0的情况
+        int[] wgt = {1, 2, 3};
+        int[] val = {1, 4, 4};
+        
+        int result = solver.unboundedKnapsackProblemDp(wgt, val, 3, 0);
+        assertEquals(0, result);
+    }
+
+    /**
+     * 测试DP方法的最优选择能力
+     * 
+     * 【测试重点】：验证DP状态转移的正确性
+     */
+    @Test
+    public void testDpOptimalSelection() {
+        // 测试DP方法的最优选择
+        int[] wgt = {1, 3, 4};
+        int[] val = {15, 20, 30};
+        int capacity = 4;
+        
+        int result = solver.unboundedKnapsackProblemDp(wgt, val, 3, capacity);
+        assertEquals(60, result);
+    }
+
+    /**
+     * 测试三种算法实现的完全一致性
+     * 
+     * 【测试目的】：确保DFS、记忆化、DP三种方法产生相同结果
+     * 【算法对比】：
+     * - DFS：递归实现，时间复杂度O(2^n)，适合小规模问题
+     * - 记忆化：自顶向下DP，时间复杂度O(n×capacity)，递归有开销
+     * - DP：自底向上DP，时间复杂度O(n×capacity)，无递归开销
+     * 
+     * 【实际选择】：
+     * - 小规模：DFS简单直观
+     * - 中等规模：记忆化易于理解
+     * - 大规模：DP性能最优
+     */
+    @Test
+    public void testAllMethodsConsistency() {
+        // 测试三种方法结果的一致性
+        int[] wgt = {2, 3, 4, 5};
+        int[] val = {3, 4, 5, 6};
+        int capacity = 8;
+        
+        int dfsResult = solver.unboundedKnapsackProblemDfs(wgt, val, 4, capacity);
+        int memoResult = solver.unboundedKnapsackProblemMemoization(wgt, val, 4, capacity);
+        int dpResult = solver.unboundedKnapsackProblemDp(wgt, val, 4, capacity);
+        
+        assertEquals(dfsResult, memoResult, "DFS和记忆化方法应该返回相同结果");
+        assertEquals(memoResult, dpResult, "记忆化和DP方法应该返回相同结果");
+        assertEquals(dfsResult, dpResult, "DFS和DP方法应该返回相同结果");
+    }
+
+    /**
+     * 测试DP方法在复杂场景下的表现
+     * 
+     * 【测试场景】：多物品、不同性价比的综合测试
+     * 【验证要点】：DP填表过程的正确性和最优子结构性质
+     */
+    @Test
+    public void testDpComplexCase() {
+        // 测试DP方法的复杂情况
+        int[] wgt = {1, 2, 3, 4};
+        int[] val = {2, 3, 4, 5};
+        int capacity = 6;
+        
+        // 最优解分析：
+        // 物品1性价比：2/1=2.0
+        // 物品2性价比：3/2=1.5  
+        // 物品3性价比：4/3=1.33
+        // 物品4性价比：5/4=1.25
+        // 最优策略：选择6个物品1，总价值12
+        
+        int result = solver.unboundedKnapsackProblemDp(wgt, val, 4, capacity);
+        assertEquals(12, result);
+    }
 }
