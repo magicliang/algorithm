@@ -143,4 +143,35 @@ public class CoinsChangeCombinationProblem {
         return memo[item][targetAmount];
     }
 
+    public int coinChangeDp(int[] coins, int item, int targetAmount) {
+        if (targetAmount == 0) {
+            return 1;
+        }
+        if (item == 0) {
+            return 0;
+        }
+
+        int[][] dp = new int[item + 1][targetAmount + 1];
+
+        for (int i = 0; i <= item; i++) {
+            dp[i][0] = 1;
+        }
+
+        for (int j = 1; j <= targetAmount; j++) {
+            dp[0][j] = 0;
+        }
+        // dp[i][a] = dp[i-1][a] + dp[i][a - coins[i - 1]]
+        // 易错的点：i 从 1 开始，而不是从 0 开始。有意义的值是从边缘值开始的。
+        for (int i = 1; i <= item; i++) {
+            for (int j = 1; j <= targetAmount; j++) {
+                if (coins[i - 1] > j) {
+                    dp[i][j] = dp[i - 1][j];
+                } else {
+                    dp[i][j] = dp[i - 1][j] + dp[i][j - coins[i - 1]];;
+                }
+            }
+        }
+        return dp[item][targetAmount];
+    }
+
 }
