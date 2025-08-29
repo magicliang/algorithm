@@ -144,27 +144,4 @@ public class Kmp {
         return -1;
     }
 
-    public int search2(String text, String pattern) {
-        if (text == null || pattern == null) {
-            return -1;
-        }
-        int[] next = buildNextArray(pattern);
-
-        final int n = text.length();
-        int j = 0;
-        for (int i = 0; i < n; i++) {
-            while (j > 0 && text.charAt(i) != pattern.charAt(j)) {
-                j = next[j - 1];
-            }
-            if (text.charAt(i) == pattern.charAt(j)) {
-                j++;
-            }
-            final int m = pattern.length();
-            // 找到第一个值
-            if (j == m) {
-                return i - m + 1;
-            }
-        }
-        return -1;
-    }
 }
