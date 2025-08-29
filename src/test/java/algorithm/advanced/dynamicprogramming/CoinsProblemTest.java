@@ -124,7 +124,7 @@ public class CoinsProblemTest {
     public void testInvalidInput() {
         int[] coins = {1, 3, 4};
         
-        // 测试负数目标金额
+        // 测试硬币种类为0
         int result = coinsProblem.coinChangeDpOptimization(coins, 0, 5);
         assertEquals(-1, result);
 
