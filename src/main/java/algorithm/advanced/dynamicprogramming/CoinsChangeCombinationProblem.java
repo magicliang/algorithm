@@ -1,6 +1,8 @@
 package algorithm.advanced.dynamicprogramming;
 
 
+import java.util.Arrays;
+
 /**
  * project name: algorithm
  *
@@ -102,5 +104,43 @@ public class CoinsChangeCombinationProblem {
         return coinChangeDfs(coins, coins.length, amount);
     }
 
+    public int coinChangeMemoization(int[] coins, int item, int targetAmount) {
+        int[][] memo = new int[item + 1][targetAmount + 1];
+
+        // -1 意味着先初始化为未计算值
+        for (int[] row : memo) {
+            Arrays.fill(row, -1);
+        }
+
+        return coinChangeMemoization(coins, item, targetAmount, memo);
+    }
+
+    private int coinChangeMemoization(int[] coins, int item, int targetAmount, int[][] memo) {
+        // 0 和 1 都是合法值，没有非法值，所以无需处理非法值问题
+        if (targetAmount == 0) {
+            return 1;
+        }
+        if (item == 0) {
+            return 0;
+        }
+
+        if (memo[item][targetAmount] != -1) {
+            return memo[item][targetAmount];
+        }
+
+        // dp[item][targetAmount] = dp[item - 1][targetAmount] + dp[item][targetAmount - coins[item - 1]]
+
+        int no = memo[item - 1][targetAmount];
+        // 剪掉一个不可选的枝
+        if (coins[item -1] > targetAmount) {
+            memo[item][targetAmount] = no;
+            return memo[item][targetAmount];
+        }
+
+        int yes = memo[item][targetAmount - coins[item - 1]];
+        memo[item][targetAmount] = no + yes;
+
+        return memo[item][targetAmount];
+    }
 
 }
