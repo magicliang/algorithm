@@ -376,4 +376,148 @@ public class UnboundedKnapsackProblemTest {
         int result = solver.unboundedKnapsackProblemDp(wgt, val, 4, capacity);
         assertEquals(12, result);
     }
+
+    // ==================== 空间优化DP方法测试 ====================
+
+    /**
+     * 测试空间优化DP方法的基本功能
+     * 
+     * 【测试目的】：验证空间优化DP实现的正确性
+     * 【核心验证】：正序扫描实现物品重复选择的特性
+     * 【性能优势】：空间复杂度从O(n×capacity)降到O(capacity)
+     */
+    @Test
+    public void testDpOptimizedBasicCase() {
+        // 测试空间优化DP方法的基本情况
+        int[] wgt = {1, 2, 3};
+        int[] val = {1, 4, 4};
+        int capacity = 4;
+        
+        int result = solver.unboundedKnapsackDpOptimized(wgt, val, 3, capacity);
+        assertEquals(8, result);
+    }
+
+    /**
+     * 测试空间优化DP方法的边界条件处理
+     * 
+     * 【测试重点】：验证一维数组初始化和边界处理的正确性
+     */
+    @Test
+    public void testDpOptimizedZeroCapacity() {
+        // 测试空间优化DP方法容量为0的情况
+        int[] wgt = {1, 2, 3};
+        int[] val = {1, 4, 4};
+        
+        int result = solver.unboundedKnapsackDpOptimized(wgt, val, 3, 0);
+        assertEquals(0, result);
+    }
+
+    /**
+     * 测试空间优化DP方法的最优选择能力
+     * 
+     * 【测试重点】：验证正序扫描的物品重复选择逻辑
+     * 【扫描顺序验证】：确保j正序扫描实现了物品的重复选择
+     */
+    @Test
+    public void testDpOptimizedOptimalSelection() {
+        // 测试空间优化DP方法的最优选择
+        int[] wgt = {1, 3, 4};
+        int[] val = {15, 20, 30};
+        int capacity = 4;
+        
+        int result = solver.unboundedKnapsackDpOptimized(wgt, val, 3, capacity);
+        assertEquals(60, result);
+    }
+
+    /**
+     * 测试空间优化DP方法的扫描顺序特性
+     * 
+     * 【核心验证】：验证正序扫描实现物品重复选择的机制
+     * 【对比0-1背包】：完全背包正序vs0-1背包逆序的差异体现
+     */
+    @Test
+    public void testDpOptimizedScanningOrder() {
+        // 使用简单案例验证扫描顺序的影响
+        int[] wgt = {2};
+        int[] val = {3};
+        int capacity = 6;
+        
+        // 完全背包：物品可重复选择，应该选择3次，总价值9
+        int result = solver.unboundedKnapsackDpOptimized(wgt, val, 1, capacity);
+        assertEquals(9, result);
+    }
+
+    /**
+     * 测试四种算法实现的完全一致性
+     * 
+     * 【测试目的】：确保DFS、记忆化、DP、空间优化DP四种方法产生相同结果
+     * 【算法对比】：
+     * - DFS：递归实现，时间O(2^n)，空间O(n)
+     * - 记忆化：自顶向下DP，时间O(n×capacity)，空间O(n×capacity)
+     * - DP：自底向上DP，时间O(n×capacity)，空间O(n×capacity)
+     * - 空间优化DP：自底向上DP，时间O(n×capacity)，空间O(capacity)
+     * 
+     * 【实际选择】：
+     * - 理解问题：DFS最直观
+     * - 中等规模：记忆化易调试
+     * - 大规模问题：DP性能稳定
+     * - 内存受限：空间优化DP最优
+     */
+    @Test
+    public void testAllFourMethodsConsistency() {
+        // 测试四种方法结果的一致性
+        int[] wgt = {2, 3, 4, 5};
+        int[] val = {3, 4, 5, 6};
+        int capacity = 8;
+        
+        int dfsResult = solver.unboundedKnapsackProblemDfs(wgt, val, 4, capacity);
+        int memoResult = solver.unboundedKnapsackProblemMemoization(wgt, val, 4, capacity);
+        int dpResult = solver.unboundedKnapsackProblemDp(wgt, val, 4, capacity);
+        int dpOptimizedResult = solver.unboundedKnapsackDpOptimized(wgt, val, 4, capacity);
+        
+        assertEquals(dfsResult, memoResult, "DFS和记忆化方法应该返回相同结果");
+        assertEquals(memoResult, dpResult, "记忆化和DP方法应该返回相同结果");
+        assertEquals(dpResult, dpOptimizedResult, "DP和空间优化DP方法应该返回相同结果");
+        assertEquals(dfsResult, dpOptimizedResult, "DFS和空间优化DP方法应该返回相同结果");
+    }
+
+    /**
+     * 测试空间优化DP方法在复杂场景下的表现
+     * 
+     * 【测试场景】：验证空间优化不影响算法的正确性
+     * 【性能验证】：在复杂场景下仍能得到正确的最优解
+     */
+    @Test
+    public void testDpOptimizedComplexCase() {
+        // 测试空间优化DP方法的复杂情况
+        int[] wgt = {1, 2, 3, 4};
+        int[] val = {2, 3, 4, 5};
+        int capacity = 6;
+        
+        // 最优解分析：选择6个物品1，总价值12
+        int result = solver.unboundedKnapsackDpOptimized(wgt, val, 4, capacity);
+        assertEquals(12, result);
+    }
+
+    /**
+     * 测试空间优化DP方法的扫描顺序核心认知
+     * 
+     * 【核心验证】：验证"需要新值→正序扫描"的设计原理
+     * 【对比测试】：通过具体数值变化体现正序扫描的必要性
+     */
+    @Test
+    public void testDpOptimizedScanningOrderInsight() {
+        // 验证扫描顺序认知：完全背包需要新值，因此正序扫描
+        int[] wgt = {2};
+        int[] val = {3};
+        int capacity = 4;
+        
+        // 手动模拟正序扫描过程：
+        // j=2: dp[2] = max(0, dp[0] + 3) = 3
+        // j=4: dp[4] = max(0, dp[2] + 3) = 6 ← 使用了更新后的dp[2]
+        // 这体现了完全背包"需要新值"的特性
+        
+        int result = solver.unboundedKnapsackDpOptimized(wgt, val, 1, capacity);
+        assertEquals(6, result);
+    }
 }
