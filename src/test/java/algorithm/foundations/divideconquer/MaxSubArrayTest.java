@@ -43,49 +43,49 @@ public class MaxSubArrayTest {
     // --- JUnit 测试方法 ---
     @Test
     public void testMaxSubArrayDC_Mixed() {
-        assertEquals(EXPECTED1, MaxSubArray.maxSubArrayDC(ARR1), "Test 1 - Mixed failed");
+        assertEquals(EXPECTED1, new MaxSubArray().maxSubArrayDC(ARR1), "Test 1 - Mixed failed");
     }
 
     @Test
     public void testMaxSubArrayDC_AllNegative() {
-        assertEquals(EXPECTED2, MaxSubArray.maxSubArrayDC(ARR2), "Test 2 - All Negative failed");
+        assertEquals(EXPECTED2,new MaxSubArray().maxSubArrayDC(ARR2), "Test 2 - All Negative failed");
     }
 
     @Test
     public void testMaxSubArrayDC_AllPositive() {
-        assertEquals(EXPECTED3, MaxSubArray.maxSubArrayDC(ARR3), "Test 3 - All Positive failed");
+        assertEquals(EXPECTED3,new MaxSubArray().maxSubArrayDC(ARR3), "Test 3 - All Positive failed");
     }
 
     @Test
     public void testMaxSubArrayDC_SinglePositive() {
-        assertEquals(EXPECTED4, MaxSubArray.maxSubArrayDC(ARR4), "Test 4 - Single Positive failed");
+        assertEquals(EXPECTED4,new MaxSubArray().maxSubArrayDC(ARR4), "Test 4 - Single Positive failed");
     }
 
     @Test
     public void testMaxSubArrayDC_SingleNegative() {
-        assertEquals(EXPECTED5, MaxSubArray.maxSubArrayDC(ARR5), "Test 5 - Single Negative failed");
+        assertEquals(EXPECTED5,new MaxSubArray().maxSubArrayDC(ARR5), "Test 5 - Single Negative failed");
     }
 
     @Test
     public void testMaxSubArrayDC_WithZeros() {
-        assertEquals(EXPECTED6, MaxSubArray.maxSubArrayDC(ARR6), "Test 6 - With Zeros failed");
+        assertEquals(EXPECTED6,new MaxSubArray().maxSubArrayDC(ARR6), "Test 6 - With Zeros failed");
     }
 
     @Test
     public void testMaxSubArrayDC_CrossingMidpoint() {
-        assertEquals(EXPECTED7, MaxSubArray.maxSubArrayDC(ARR7), "Test 7 - Crossing Midpoint failed");
+        assertEquals(EXPECTED7,new MaxSubArray().maxSubArrayDC(ARR7), "Test 7 - Crossing Midpoint failed");
     }
 
     @Test
     public void testMaxSubArrayDC_NullAndEmptyArray() {
         // 测试 null 输入
         assertThrows(IllegalArgumentException.class, () -> {
-            MaxSubArray.maxSubArrayDC(null);
+            new MaxSubArray().maxSubArrayDC(null);
         }, "Should throw IllegalArgumentException for null array");
 
         // 测试空数组输入
         assertThrows(IllegalArgumentException.class, () -> {
-            MaxSubArray.maxSubArrayDC(new int[]{});
+            new MaxSubArray().maxSubArrayDC(new int[]{});
         }, "Should throw IllegalArgumentException for empty array");
     }
 }

@@ -22,6 +22,21 @@ package algorithm.foundations.divideconquer;
  */
 public class MaxSubArray {
 
+    public int maxSubArrayBrutalForce1(int[] arr) {
+
+        int max = arr[0];
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = i + 1; j < arr.length; j++) {
+                int sum = 0;
+                for (int k = i; k <= j; k++) {
+                    sum += arr[k];
+                }
+                max = Math.max(max, sum);
+            }
+        }
+        return max;
+    }
+
     /**
      * 公共入口方法，使用分治法找到数组中具有最大和的连续子数组的和。
      *
@@ -29,7 +44,7 @@ public class MaxSubArray {
      * @return 最大子数组的和
      * @throws IllegalArgumentException 如果数组为 null 或空
      */
-    public static int maxSubArrayDC(int[] arr) {
+    public int maxSubArrayDC(int[] arr) {
         if (arr == null || arr.length == 0) {
             throw new IllegalArgumentException("Input array must not be null or empty");
         }
@@ -56,7 +71,7 @@ public class MaxSubArray {
      * @param high 区间右边界 (inclusive)
      * @return 区间 [low, high] 内的最大子数组和
      */
-    private static int maxSubArrayDCHelper(int[] arr, int low, int high) {
+    private int maxSubArrayDCHelper(int[] arr, int low, int high) {
         // 基本情况：区间只有一个元素，最大和就是该元素本身
         // 这是递归的终止条件 ("看全局" 的基础)
         if (low == high) {
@@ -99,7 +114,7 @@ public class MaxSubArray {
      * @param high 区间右边界
      * @return 跨越中点的最大子数组和
      */
-    private static int findMidMaxSubArray(int[] arr, int low, int mid, int high) {
+    private int findMidMaxSubArray(int[] arr, int low, int mid, int high) {
         // --- 计算左半部分包含 arr[mid] 的最大和 (向左扩展) ---
         // 初始化为 arr[mid]，确保至少包含中点元素
         int lowBest = arr[mid];
