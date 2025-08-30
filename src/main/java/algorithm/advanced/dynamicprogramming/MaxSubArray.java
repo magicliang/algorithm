@@ -44,6 +44,7 @@ public class MaxSubArray {
                 currentDp = arr[i];
                 // 记录可能的新起始点
                 // 这里不能立刻改写 begin/end；只有当 currentDp > maxDp 时，才把 potentialBegin 落实为 begin，保证 begin 指向当前全局最优子数组的起点
+                // 易错的点：这里容易写成 arr[i] 神不知鬼不觉
                 potentialBegin = i;
             }
 
@@ -65,9 +66,56 @@ public class MaxSubArray {
         return getMaxSubArraySumCoOrdination(arr);
     }
 
-    // 返回 kadane 法的结果坐标，返回begin和end就行了
-    // 对于 Kadane DP 而言，所有的结果必定分布在以 i 结尾的各个子数组里
-    // 我们每次只要知道子数组是延续还是抛弃，然后更新 begin 和 end 就行了
+    /**
+     * 使用 Kadane 的动态规划方式返回最大子数组的下标范围 [begin, end]。
+     * <p>
+     * 算法思路 (Kadane's Algorithm):
+     * 1. 状态定义:
+     * - 定义 dp[i] 表示所有以 arr[i] 结尾的子数组中和的最大值。
+     * - 关键约束：每个子数组都必须包含 arr[i] 作为最后一个元素。
+     * 2. 状态转移方程:
+     * - 对于每个元素 arr[i]，以它结尾的最大子数组和要么：
+     *   a) 重新开始：只取 arr[i] 本身
+     *   b) 延续之前：取 dp[i-1] + arr[i]（将 arr[i] 加入之前的最优子数组）
+     * - 决策依据：如果 dp[i-1] > 0，说明前面有正贡献，选择延续；否则选择重新开始。
+     *
+     * 3. 选择模式的本质:
+     * - 这与背包问题的"选/不选"模式不同，而是"延续/重新开始"模式。
+     * - 根本原因：连续性约束要求必须包含当前元素，不能跳过。
+     * - 负数的引入使问题复杂化：正数累积，负数可能破坏累积效果。
+     *
+     * 4. 完备性论证:
+     * - 任何一个子数组 arr[i...j]（其中 0 <= i <= j <= n-1）都必须以某个元素 arr[j] 结尾。
+     * - 完备性 (Completeness): 每一个可能的子数组 arr[i...j] 都恰好属于一个集合 S_j
+     * （所有以 arr[j] 结尾的子数组）。因此，所有可能的子数组的和 sum(arr[i...j]) 都被
+     * 分配到了某个集合 S_j 中。
+     * - 通过计算每个 dp[j]（即每个集合 S_j 的最大值），然后取这些最大值中的最大值
+     * (max(dp[0], dp[1], ..., dp[n-1]))，我们保证能找到全局的最大子数组和。
+     * - 极易出错的点：因为 dp[i-1] 和 arr[i] 都可能是负数，所以 maxDp 也并不是顺序递增的！
+     *
+     * 5. 优化:
+     * - 状态转移 dp[i] = max(dp[i-1] + arr[i], arr[i]) 只依赖于前一个状态 dp[i-1].
+     * - 因此，可以使用两个变量代替整个 dp 数组，实现 O(1) 空间复杂度。
+     * </p>
+     * <p>
+     * 算法步骤:
+     * 1. 初始化 dpCurrent (当前以 arr[i] 结尾的最大和) 和 maxCurrent (到目前为止找到的全局最大和) 为 arr[0].
+     * 2. 从数组的第二个元素 (i = 1) 开始遍历.
+     * 3. 对于每个元素 arr[i]:
+     * a. 更新 dpCurrent: dpCurrent = max(dpCurrent + arr[i], arr[i])
+     * (这实现了状态转移方程 dp[i] = max(dp[i-1] + arr[i], arr[i])).
+     * b. 更新全局最大和 maxCurrent: maxCurrent = max(maxCurrent, dpCurrent).
+     * 4. 遍历结束后，maxCurrent 即为所求的最大子数组和.
+     * </p>
+     * <p>
+     * 时间复杂度: O(n) - 只需遍历数组一次.
+     * 空间复杂度: O(1) - 只使用了常数级别的额外空间.
+     * </p>
+     *
+     * @param arr 输入的整数数组.
+     * @return 最大子数组的下标范围 [begin, end].
+     * @throws IllegalArgumentException 如果输入数组为 null 或长度为 0.
+     */
     public static List<Integer> getMaxSubArraySumCoOrdination2(int[] arr) {
         List<Integer> result = new ArrayList<>();
 
@@ -88,6 +136,7 @@ public class MaxSubArray {
 
             if (currentDp < 0) {
                 currentDp = arr[i];
+                // 易错的点：这里容易写成 arr[i] 神不知鬼不觉
                 tmpBegin = i;  // 修正：这里应该是索引i，不是arr[i]
             } else {
                 currentDp = currentDp + arr[i];
