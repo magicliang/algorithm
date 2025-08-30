@@ -36,7 +36,7 @@ public class MaxSubArray {
         return max;
     }
 
-    public int maxSubArrayBrutalForce2(int[] arr) {
+    public int maxSubArrayBrutalForce3(int[] arr) {
         int max = arr[0];
         int n = arr.length;
         int[] rangeSum = new int[n];
