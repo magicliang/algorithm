@@ -115,7 +115,7 @@ public class MaxSubArray {
 
         /* 从第二个元素开始迭代计算，对应于计算 dp[1] 到 dp[n-1] */
         for (int i = 1; i < arr.length; i++) {
-            /* 状态转移方程: dp[i] = max(dp[i-1] + arr[i], arr[i])，这里 dp[i-1] 对应循环中的 dpCurrent */
+            // 状态转移方程: dp[i] = max(dp[i-1] + arr[i], arr[i])，这里 dp[i-1] 对应循环中的 dpCurrent
             dpCurrent = Math.max(dpCurrent + arr[i], arr[i]);
 
             /* 更新全局最大值: maxCurrent = max(maxCurrent, dp[i])，这里 maxCurrent 对应循环中到 i 为止的 max(dp[0], ..., dp[i]) */
