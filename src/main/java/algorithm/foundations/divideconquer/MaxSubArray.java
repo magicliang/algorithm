@@ -36,6 +36,23 @@ public class MaxSubArray {
         return max;
     }
 
+    public int maxSubArrayBrutalForce2(int[] arr) {
+        int max = arr[0];
+        int n = arr.length;
+        int[] rangeSum = new int[n];
+        for (int i = 1; i < n; i++) {
+            rangeSum[i] += rangeSum[i - 1] + arr[i];
+        }
+        for (int i = 0; i < arr.length; i++) {
+            for (int j = i + 1; j < arr.length; j++) {
+                int sum = rangeSum[j] - rangeSum[i];
+                max = Math.max(max, sum);
+            }
+        }
+
+        return max;
+    }
+
     /**
      * 公共入口方法，使用分治法找到数组中具有最大和的连续子数组的和。
      *
