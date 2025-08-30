@@ -1,15 +1,24 @@
 package algorithm.foundations.divideconquer;
 
 /**
- * 求解最大子数组问题
+ * 最大子数组（Maximum Subarray，LeetCode 53）的分治解法。
  * “一分为二看全局，三种情况须记牢，跨越边界莫忘记，合并结果定乾坤。”
- * 这个问题在 leetcode 是通过不过的。
- * 因为 leetcode 的数组还有如下特点：
- * 1. 可能长度为1-也就是允许不交易
- * 2. 整个总的子数组和也可能是负数，所以也应该允许不交易
+ * 
+ * 问题背景：
+ * - 《算法导论》：通过股票价格变化引入，寻找最佳买卖时机对应最大子数组
+ * - LeetCode 53：要求子数组非空，全负数时返回最大的单个元素
+ * 
+ * 算法特点：
+ * - 分治法时间复杂度 O(n log n)，空间复杂度 O(log n)
+ * - 可与 Kadane 算法的 O(n) 时间、O(1) 空间解法对比
+ * - 体现分治思想：分解、解决、合并三个步骤
  *
+ *  * 这个问题在 leetcode 是通过不过的。
+ *  * 因为 leetcode 的数组还有如下特点：
+ *  * 1. 可能长度为1-也就是允许不交易
+ *  * 2. 整个总的子数组和也可能是负数，所以也应该允许不交易
  * @author liangchuan
- * @version 1.1 // 标记版本更新
+ * @version 1.1
  */
 public class MaxSubArray {
 
@@ -119,7 +128,7 @@ public class MaxSubArray {
                 }
             }
         } else {
-            // 右半部分不存在（理论上不应该发生，但为了安全）
+            // 右半部分不存在（在 low < high 的前提下该分支不会触发，仅作防御性注释）
             highBest = 0;
         }
 

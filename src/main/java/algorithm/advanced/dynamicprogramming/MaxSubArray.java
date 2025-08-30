@@ -43,7 +43,7 @@ public class MaxSubArray {
             } else {
                 currentDp = arr[i];
                 // 记录可能的新起始点
-                // 易错的点：这里既然有了新起点，就应该记录潜在的点，但是不应该赋给 begin 和 end，这里不记录，只在 currentDp > maxDp 更新 begin 也是不对的-那样 begin 永远是0
+                // 这里不能立刻改写 begin/end；只有当 currentDp > maxDp 时，才把 potentialBegin 落实为 begin，保证 begin 指向当前全局最优子数组的起点
                 potentialBegin = i;
             }
 
@@ -57,17 +57,23 @@ public class MaxSubArray {
         return Arrays.asList(begin, end);
     }
 
+    /**
+     * 语义更准确的别名：返回最大子数组的下标范围 [begin, end]。
+     * 保留旧名以兼容，推荐使用本方法。
+     */
+    public static List<Integer> getMaxSubArrayCoordinates(int[] arr) {
+        return getMaxSubArraySumCoOrdination(arr);
+    }
+
     // 返回 kadane 法的结果坐标，返回begin和end就行了
-    // 对于 kane dp 而言，所有的结果必定分布在以i结尾各个子数组里
+    // 对于 Kadane DP 而言，所有的结果必定分布在以 i 结尾的各个子数组里
     // 我们每次只要知道子数组是延续还是抛弃，然后更新 begin 和 end 就行了
     public static List<Integer> getMaxSubArraySumCoOrdination2(int[] arr) {
         List<Integer> result = new ArrayList<>();
 
-        // 处理边界情况
+        // 处理边界情况：与其他方法保持一致，抛出异常
         if (arr == null || arr.length == 0) {
-            result.add(-1);
-            result.add(-1);
-            return result;
+            throw new IllegalArgumentException("Input array must not be null or empty");
         }
 
         int currentDp = arr[0];
