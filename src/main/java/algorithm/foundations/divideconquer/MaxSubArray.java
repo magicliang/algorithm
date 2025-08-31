@@ -22,10 +22,13 @@ package algorithm.foundations.divideconquer;
  */
 public class MaxSubArray {
 
+    /**
+     * brutal force: O(n^3)
+     */
     public int maxSubArrayBrutalForce1(int[] arr) {
-        int max = arr[0];
+        int max = 0;
         for (int i = 0; i < arr.length; i++) {
-            for (int j = i + 1; j < arr.length; j++) {
+            for (int j = i; j < arr.length; j++) {
                 int sum = 0;
                 for (int k = i; k <= j; k++) {
                     sum += arr[k];
@@ -36,6 +39,26 @@ public class MaxSubArray {
         return max;
     }
 
+    /**
+     * brutal force: O(n^2) - 优化版本，避免重复计算子数组和
+     * 通过在内层循环中累加元素，避免了第三层循环
+     */
+    public int maxSubArrayBrutalForce2(int[] arr) {
+        int max = 0;
+        for (int i = 0; i < arr.length; i++) {
+            int sum = 0;
+            for (int j = i; j < arr.length; j++) {
+                sum += arr[j];
+                max = Math.max(max, sum);
+            }
+        }
+        return max;
+    }
+    /**
+     * brutal force: O(n^2) - 使用前缀和优化
+     * 预计算前缀和数组，然后通过前缀和差值快速计算子数组和
+     * 注意：此实现有bug，rangeSum数组初始化不正确
+     */
     public int maxSubArrayBrutalForce3(int[] arr) {
         int max = arr[0];
         int n = arr.length;
