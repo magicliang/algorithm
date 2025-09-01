@@ -24,31 +24,53 @@ package algorithm.advanced.dynamicprogramming;
  */
 public class LevenshteinProblem {
 
+    /**
+     * 使用深度优先搜索（DFS）计算两个字符串之间的编辑距离
+     * 
+     * @param s 源字符串
+     * @param t 目标字符串
+     * @return 将源字符串转换为目标字符串所需的最少编辑操作数
+     */
     public int editDistanceDfs(String s, String t) {
-
-          // 0 字符串的变换需要全部另一个字符串的字符数
-          if (s == null || s.isEmpty()) {
-              return t.length();
-          }
-
-        if (t == null || t.isEmpty()) {
-              return s.length();
+        // 边界条件：如果源字符串为空，需要插入目标字符串的所有字符
+        if (s == null || s.isEmpty()) {
+            return t == null ? 0 : t.length();
         }
-        // 先解决尾部问题
+        
+        // 边界条件：如果目标字符串为空，需要删除源字符串的所有字符
+        if (t == null || t.isEmpty()) {
+            return s.length();
+        }
+        
+        // 获取两个字符串的长度
         final int n = s.length();
         final int m = t.length();
 
-        char last1 = s.charAt(n-1);
-        char last2 = t.charAt(n-1);
-        if (last1 == last2) {
-            return editDistanceDfs(s.substring(0, n -1), t.substring(0, m - 1));
+        // 比较两个字符串的最后一个字符
+        char lastCharOfS = s.charAt(n - 1);
+        char lastCharOfT = t.charAt(m - 1); // 修复bug：应该是m-1而不是n-1
+        
+        // 如果最后一个字符相同，则递归处理去掉最后一个字符的子字符串
+        if (lastCharOfS == lastCharOfT) {
+            return editDistanceDfs(s.substring(0, n - 1), t.substring(0, m - 1));
         }
 
-        int insert = editDistanceDfs(s, t.substring(m -1)) + 1;
-        int delete = editDistanceDfs(s.substring(0, n -1), t) + 1;
-        int update = editDistanceDfs(s.substring(0, n -1), t.substring(m -1)) + 1;
+        // 如果最后一个字符不同，考虑三种编辑操作：
+        
+        // 1. 插入操作：在s的末尾插入t的最后一个字符
+        // 相当于将s转换为t去掉最后一个字符的结果，然后加1步插入操作
+        int insertCost = editDistanceDfs(s, t.substring(0, m - 1)) + 1;
+        
+        // 2. 删除操作：删除s的最后一个字符
+        // 相当于将s去掉最后一个字符转换为t，然后加1步删除操作
+        int deleteCost = editDistanceDfs(s.substring(0, n - 1), t) + 1;
+        
+        // 3. 替换操作：将s的最后一个字符替换为t的最后一个字符
+        // 相当于将s和t都去掉最后一个字符进行转换，然后加1步替换操作
+        int replaceCost = editDistanceDfs(s.substring(0, n - 1), t.substring(0, m - 1)) + 1;
 
-        return Math.min(Math.min(insert, delete), update);
+        // 返回三种操作中成本最小的一种
+        return Math.min(Math.min(insertCost, deleteCost), replaceCost);
     }
 
 }
