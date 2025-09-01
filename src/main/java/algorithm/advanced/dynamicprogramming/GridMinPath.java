@@ -61,7 +61,28 @@ package algorithm.advanced.dynamicprogramming;
  * <ul>
  *   <li><strong>最优子结构：</strong>问题的最优解包含子问题的最优解</li>
  *   <li><strong>重叠子问题：</strong>递归过程中会重复计算相同的子问题</li>
- *   <li><strong>无后效性：</strong>当前状态只依赖于前面的状态，与后面的状态无关</li>
+ *   <li><strong>无后效性：</strong>当前状态的未来发展只与当前状态有关，与过去经历的所有状态无关</li>
+ * </ul>
+ * </p>
+ *
+ * <p>
+ * <strong>深层认知：DFS与DP的本质统一性</strong><br>
+ * 一个重要的认知是：<strong>DP迭代过程中的每个局部决策，本质上就是在做DFS对下层子问题所做的事情</strong>。
+ * 具体体现在：
+ * <ul>
+ *   <li><strong>决策逻辑一致：</strong>在相同状态点(i,j)，DFS和DP采用完全相同的决策逻辑：
+ *       <code>min(上方路径, 左方路径) + 当前格子值</code></li>
+ *   <li><strong>状态转移统一：</strong>两者的状态转移方程在形式上完全一致，只是计算顺序不同</li>
+ *   <li><strong>计算顺序差异：</strong>DFS自顶向下递归分解问题，DP自底向上迭代构建解</li>
+ *   <li><strong>效率差异根源：</strong>DFS因重复计算导致指数复杂度，DP通过表格存储避免重复实现多项式复杂度</li>
+ * </ul>
+ * 
+ * 因此，可以将DP理解为：<strong>将DFS的递归决策树"拍平"为表格，并按依赖顺序填充的优化版本</strong>。
+ * 这种统一认知有助于：
+ * <ul>
+ *   <li>理解为什么DFS能够直观地表达问题的递归结构</li>
+ *   <li>理解为什么DP能够高效地求解相同的问题</li>
+ *   <li>在设计算法时，可以先用DFS理清逻辑，再转换为DP实现</li>
  * </ul>
  * </p>
  *
