@@ -12,6 +12,12 @@ import java.util.Queue;
  * description: 基于数组的完全二叉树（complete binary tree）的堆实现
  * <p>
  * 这个类型的成员方法的 i 都是指的元素的索引
+ * <p>
+ * 关于堆操作的复杂度分析：
+ * - siftUp（上浮）操作相对简单：每次只需与1个父节点比较，边界条件简单（只需检查是否到达根节点）
+ * - siftDown（下沉）操作相对复杂：每次需与2个子节点比较并找出最大值，边界条件复杂（需检查左右子节点是否存在）
+ * - 虽然两者时间复杂度都是O(log n)，但siftDown的常数因子更大，代码逻辑也更复杂
+ * - 在教学中通常先介绍siftUp，再介绍siftDown，因为前者更容易理解和实现
  *
  * @author magicliang
  *
@@ -414,14 +420,16 @@ public class MaxHeap {
         }
 
         int size = heap.size();
-        // i 还在合法的范围里，i往下走走到头就退出循环，或者堆的性质得到满足则退出循环
-        while (i < size) {
+        // i往下走走到头就退出循环，或者堆的性质得到满足则退出循环
+        while (true) {
             int l = left(i);
             int r = right(i);
 
             // 注意，不是先跟l比较，l比较大就交换l，最大堆的意思是，i节点的左右子节点中，最大的那个节点跟i交换
 
             int largest = i;
+
+            // 这里不能直接用 max 来比对，是因为 heap get 取出值以后，要比值，但是 largest 的坐标
 
             if (l < size && heap.get(l) > heap.get(largest)) {
                 largest = l;
