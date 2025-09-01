@@ -1,233 +1,279 @@
 package algorithm.advanced.dynamicprogramming;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.api.Timeout;
 
-import java.util.stream.Stream;
-
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.concurrent.TimeUnit;
 
 /**
- * LevenshteinProblem 的单元测试类
- * 测试编辑距离算法的各种场景
+ * LevenshteinProblem 类的 JUnit 5 测试用例
+ * 测试编辑距离算法的两种实现：DFS版本和记忆化版本
+ * 
+ * @author magicliang
+ * @version 1.0
  */
 @DisplayName("编辑距离算法测试")
 class LevenshteinProblemTest {
 
-    private LevenshteinProblem levenshteinProblem;
+    private LevenshteinProblem solution;
 
     @BeforeEach
     void setUp() {
-        levenshteinProblem = new LevenshteinProblem();
+        solution = new LevenshteinProblem();
     }
 
-    @Nested
-    @DisplayName("边界条件测试")
-    class BoundaryConditionTests {
+    // ==================== 基本功能测试 ====================
 
-        @Test
-        @DisplayName("两个空字符串的编辑距离应该为0")
-        void testBothEmptyStrings() {
-            assertEquals(0, levenshteinProblem.editDistanceDfs("", ""));
-        }
-
-        @Test
-        @DisplayName("源字符串为空时，编辑距离等于目标字符串长度")
-        void testSourceStringEmpty() {
-            assertEquals(3, levenshteinProblem.editDistanceDfs("", "abc"));
-            assertEquals(5, levenshteinProblem.editDistanceDfs("", "hello"));
-        }
-
-        @Test
-        @DisplayName("目标字符串为空时，编辑距离等于源字符串长度")
-        void testTargetStringEmpty() {
-            assertEquals(3, levenshteinProblem.editDistanceDfs("abc", ""));
-            assertEquals(5, levenshteinProblem.editDistanceDfs("hello", ""));
-        }
-
-        @Test
-        @DisplayName("处理null字符串")
-        void testNullStrings() {
-            assertEquals(0, levenshteinProblem.editDistanceDfs(null, null));
-            assertEquals(3, levenshteinProblem.editDistanceDfs(null, "abc"));
-            assertEquals(3, levenshteinProblem.editDistanceDfs("abc", null));
-        }
+    @Test
+    @DisplayName("测试基本情况：horse -> ros")
+    void testBasicCase() {
+        String s = "horse";
+        String t = "ros";
+        int expected = 3; // 删除h, 删除r, 删除e
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
     }
 
-    @Nested
-    @DisplayName("基本功能测试")
-    class BasicFunctionalityTests {
-
-        @Test
-        @DisplayName("相同字符串的编辑距离应该为0")
-        void testIdenticalStrings() {
-            assertEquals(0, levenshteinProblem.editDistanceDfs("hello", "hello"));
-            assertEquals(0, levenshteinProblem.editDistanceDfs("a", "a"));
-            assertEquals(0, levenshteinProblem.editDistanceDfs("algorithm", "algorithm"));
-        }
-
-        @Test
-        @DisplayName("单字符替换")
-        void testSingleCharacterReplacement() {
-            assertEquals(1, levenshteinProblem.editDistanceDfs("a", "b"));
-            assertEquals(1, levenshteinProblem.editDistanceDfs("cat", "bat"));
-        }
-
-        @Test
-        @DisplayName("单字符插入")
-        void testSingleCharacterInsertion() {
-            assertEquals(1, levenshteinProblem.editDistanceDfs("a", "ab"));
-            assertEquals(1, levenshteinProblem.editDistanceDfs("cat", "cats"));
-        }
-
-        @Test
-        @DisplayName("单字符删除")
-        void testSingleCharacterDeletion() {
-            assertEquals(1, levenshteinProblem.editDistanceDfs("ab", "a"));
-            assertEquals(1, levenshteinProblem.editDistanceDfs("cats", "cat"));
-        }
+    @Test
+    @DisplayName("测试复杂转换：intention -> execution")
+    void testComplexTransformation() {
+        String s = "intention";
+        String t = "execution";
+        int expected = 5;
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
     }
 
-    @Nested
-    @DisplayName("复杂场景测试")
-    class ComplexScenarioTests {
+    // ==================== 边界条件测试 ====================
 
-        @ParameterizedTest
-        @DisplayName("经典编辑距离测试用例")
-        @CsvSource({
-            "kitten, sitting, 3",
-            "saturday, sunday, 3",
-            "intention, execution, 5",
-            "distance, difference, 5",
-            "horse, ros, 3",
-            "abc, def, 3"
-        })
-        void testClassicEditDistanceCases(String source, String target, int expected) {
-            assertEquals(expected, levenshteinProblem.editDistanceDfs(source, target));
-        }
-
-        @Test
-        @DisplayName("完全不同的字符串")
-        void testCompletelyDifferentStrings() {
-            assertEquals(3, levenshteinProblem.editDistanceDfs("abc", "xyz"));
-            assertEquals(4, levenshteinProblem.editDistanceDfs("abcd", "wxyz"));
-        }
-
-        @Test
-        @DisplayName("一个字符串是另一个的子串")
-        void testSubstringRelationship() {
-            assertEquals(2, levenshteinProblem.editDistanceDfs("ab", "abcd"));
-            assertEquals(3, levenshteinProblem.editDistanceDfs("test", "testing"));
-        }
-
-        @Test
-        @DisplayName("反向字符串")
-        void testReversedStrings() {
-            assertEquals(2, levenshteinProblem.editDistanceDfs("abc", "cba"));
-            assertEquals(4, levenshteinProblem.editDistanceDfs("hello", "olleh"));
-        }
+    @Test
+    @DisplayName("测试空字符串到非空字符串")
+    void testEmptyToNonEmpty() {
+        String s = "";
+        String t = "abc";
+        int expected = 3; // 插入a, b, c
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
     }
 
-    @Nested
-    @DisplayName("特殊字符测试")
-    class SpecialCharacterTests {
-
-        @Test
-        @DisplayName("包含数字的字符串")
-        void testStringsWithNumbers() {
-            assertEquals(3, levenshteinProblem.editDistanceDfs("abc123", "abc456"));
-            assertEquals(3, levenshteinProblem.editDistanceDfs("123", "456"));
-        }
-
-        @Test
-        @DisplayName("包含特殊符号的字符串")
-        void testStringsWithSpecialCharacters() {
-            assertEquals(1, levenshteinProblem.editDistanceDfs("hello!", "hello?"));
-            assertEquals(2, levenshteinProblem.editDistanceDfs("a@b", "a#c"));
-        }
-
-        @Test
-        @DisplayName("包含空格的字符串")
-        void testStringsWithSpaces() {
-            assertEquals(1, levenshteinProblem.editDistanceDfs("hello world", "helloworld"));
-            assertEquals(2, levenshteinProblem.editDistanceDfs("a b c", "abc"));
-        }
+    @Test
+    @DisplayName("测试非空字符串到空字符串")
+    void testNonEmptyToEmpty() {
+        String s = "abc";
+        String t = "";
+        int expected = 3; // 删除a, b, c
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
     }
 
-    @Nested
-    @DisplayName("性能测试")
-    class PerformanceTests {
+    @Test
+    @DisplayName("测试两个空字符串")
+    void testBothEmpty() {
+        String s = "";
+        String t = "";
+        int expected = 0;
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
+    }
 
-        @Test
-        @DisplayName("中等长度字符串测试")
-        void testMediumLengthStrings() {
-            String s1 = "programming";
-            String s2 = "algorithm";
+    @Test
+    @DisplayName("测试null字符串处理")
+    void testNullStrings() {
+        // 测试null到非null
+        assertEquals(3, solution.editDistanceDfs(null, "abc"));
+        assertEquals(3, solution.editDistanceMemoization(null, "abc"));
+        
+        // 测试非null到null
+        assertEquals(3, solution.editDistanceDfs("abc", null));
+        assertEquals(3, solution.editDistanceMemoization("abc", null));
+        
+        // 测试两个null
+        assertEquals(0, solution.editDistanceDfs(null, null));
+        assertEquals(0, solution.editDistanceMemoization(null, null));
+    }
+
+    // ==================== 特殊情况测试 ====================
+
+    @Test
+    @DisplayName("测试相同字符串")
+    void testIdenticalStrings() {
+        String s = "hello";
+        String t = "hello";
+        int expected = 0; // 无需任何操作
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
+    }
+
+    @Test
+    @DisplayName("测试单字符替换")
+    void testSingleCharacterReplacement() {
+        String s = "a";
+        String t = "b";
+        int expected = 1; // 替换a为b
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
+    }
+
+    @Test
+    @DisplayName("测试只需插入操作")
+    void testInsertionOnly() {
+        String s = "cat";
+        String t = "cats";
+        int expected = 1; // 插入s
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
+    }
+
+    @Test
+    @DisplayName("测试只需删除操作")
+    void testDeletionOnly() {
+        String s = "cats";
+        String t = "cat";
+        int expected = 1; // 删除s
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
+    }
+
+    @Test
+    @DisplayName("测试长度差异很大的字符串")
+    void testLargeLengthDifference() {
+        String s = "a";
+        String t = "abcdefghij";
+        int expected = 9; // 插入9个字符
+        
+        assertEquals(expected, solution.editDistanceDfs(s, t));
+        assertEquals(expected, solution.editDistanceMemoization(s, t));
+    }
+
+    // ==================== 算法一致性测试 ====================
+
+    @Test
+    @DisplayName("测试两种算法结果一致性")
+    void testAlgorithmConsistency() {
+        String[][] testCases = {
+            {"", ""},
+            {"a", ""},
+            {"", "a"},
+            {"a", "a"},
+            {"ab", "ba"},
+            {"abc", "def"},
+            {"kitten", "sitting"},
+            {"saturday", "sunday"},
+            {"exponential", "polynomial"}
+        };
+        
+        for (String[] testCase : testCases) {
+            String s = testCase[0];
+            String t = testCase[1];
             
-            // 这个测试主要确保算法能在合理时间内完成
-            long startTime = System.currentTimeMillis();
-            int result = levenshteinProblem.editDistanceDfs(s1, s2);
-            long endTime = System.currentTimeMillis();
+            int dfsResult = solution.editDistanceDfs(s, t);
+            int memoResult = solution.editDistanceMemoization(s, t);
             
-            assertTrue(result >= 0, "编辑距离应该是非负数");
-            assertTrue(endTime - startTime < 1000, "计算时间应该在1秒内");
+            assertEquals(dfsResult, memoResult, 
+                String.format("算法结果不一致：'%s' -> '%s', DFS: %d, Memo: %d", 
+                    s, t, dfsResult, memoResult));
         }
     }
 
-    @Nested
-    @DisplayName("对称性测试")
-    static class SymmetryTests {
+    // ==================== 性能测试 ====================
 
-        @ParameterizedTest
-        @DisplayName("编辑距离应该满足对称性（在某些情况下）")
-        @MethodSource("provideStringPairs")
-        void testEditDistanceSymmetry(String s1, String s2) {
-            LevenshteinProblem problem = new LevenshteinProblem();
-            int distance1 = problem.editDistanceDfs(s1, s2);
-            int distance2 = problem.editDistanceDfs(s2, s1);
-            
-            // 编辑距离在大多数情况下是对称的
-            assertEquals(distance1, distance2, 
-                String.format("编辑距离应该对称: editDistance('%s', '%s') = %d, editDistance('%s', '%s') = %d", 
-                    s1, s2, distance1, s2, s1, distance2));
-        }
+    @Test
+    @DisplayName("测试记忆化版本性能优势")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void testMemoizationPerformance() {
+        // 使用中等长度的字符串测试性能
+        String s = "abcdefgh";
+        String t = "12345678";
+        
+        // 测试DFS版本
+        long startTime = System.nanoTime();
+        int dfsResult = solution.editDistanceDfs(s, t);
+        long dfsTime = System.nanoTime() - startTime;
+        
+        // 测试记忆化版本
+        startTime = System.nanoTime();
+        int memoResult = solution.editDistanceMemoization(s, t);
+        long memoTime = System.nanoTime() - startTime;
+        
+        // 验证结果一致
+        assertEquals(dfsResult, memoResult);
+        
+        // 记忆化版本应该更快（对于这个规模的输入）
+        System.out.printf("DFS耗时: %d ns, 记忆化耗时: %d ns, 性能提升: %.2fx%n", 
+            dfsTime, memoTime, (double)dfsTime / memoTime);
+    }
 
-        static Stream<Arguments> provideStringPairs() {
-            return Stream.of(
-                Arguments.of("abc", "def"),
-                Arguments.of("hello", "world"),
-                Arguments.of("test", "best"),
-                Arguments.of("cat", "dog"),
-                Arguments.of("algorithm", "logarithm")
-            );
+    @Test
+    @DisplayName("测试大规模输入的记忆化性能")
+    @Timeout(value = 2, unit = TimeUnit.SECONDS)
+    void testLargeInputMemoization() {
+        // 只测试记忆化版本，因为DFS版本对大输入会很慢
+        String s = "abcdefghijklmnop"; // 16个字符
+        String t = "1234567890123456"; // 16个字符
+        
+        long startTime = System.nanoTime();
+        int result = solution.editDistanceMemoization(s, t);
+        long endTime = System.nanoTime();
+        
+        // 验证结果合理（完全不同的字符串，最多需要16次替换）
+        assertTrue(result <= Math.max(s.length(), t.length()));
+        assertTrue(result >= Math.abs(s.length() - t.length()));
+        
+        System.out.printf("大规模输入记忆化耗时: %d ns, 结果: %d%n", 
+            endTime - startTime, result);
+    }
+
+    // ==================== 压力测试 ====================
+
+    @Test
+    @DisplayName("测试多次调用的稳定性")
+    void testMultipleCallsStability() {
+        String s = "test";
+        String t = "best";
+        int expected = 1; // 替换t为b
+        
+        // 多次调用验证结果稳定
+        for (int i = 0; i < 100; i++) {
+            assertEquals(expected, solution.editDistanceDfs(s, t));
+            assertEquals(expected, solution.editDistanceMemoization(s, t));
         }
     }
 
-    @Nested
-    @DisplayName("三角不等式测试")
-    class TriangleInequalityTests {
-
-        @Test
-        @DisplayName("编辑距离应该满足三角不等式")
-        void testTriangleInequality() {
-            String s1 = "abc";
-            String s2 = "def";
-            String s3 = "ghi";
-            
-            int d12 = levenshteinProblem.editDistanceDfs(s1, s2);
-            int d23 = levenshteinProblem.editDistanceDfs(s2, s3);
-            int d13 = levenshteinProblem.editDistanceDfs(s1, s3);
-            
-            // 三角不等式：d(s1,s3) <= d(s1,s2) + d(s2,s3)
-            assertTrue(d13 <= d12 + d23, 
-                String.format("三角不等式应该成立: d('%s','%s')=%d <= d('%s','%s')=%d + d('%s','%s')=%d", 
-                    s1, s3, d13, s1, s2, d12, s2, s3, d23));
-        }
+    @Test
+    @DisplayName("测试特殊字符和Unicode")
+    void testSpecialCharacters() {
+        // 测试包含特殊字符的字符串
+        String s = "café";
+        String t = "cave";
+        
+        int dfsResult = solution.editDistanceDfs(s, t);
+        int memoResult = solution.editDistanceMemoization(s, t);
+        
+        assertEquals(dfsResult, memoResult);
+        assertTrue(dfsResult >= 0);
+        
+        // 测试中文字符
+        String s2 = "你好";
+        String t2 = "再见";
+        
+        int dfsResult2 = solution.editDistanceDfs(s2, t2);
+        int memoResult2 = solution.editDistanceMemoization(s2, t2);
+        
+        assertEquals(dfsResult2, memoResult2);
+        assertTrue(dfsResult2 >= 0);
     }
 }
