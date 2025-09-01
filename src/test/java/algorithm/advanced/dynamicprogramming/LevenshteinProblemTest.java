@@ -38,6 +38,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -49,6 +50,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     // ==================== 边界条件测试 ====================
@@ -62,6 +64,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -73,6 +76,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -84,6 +88,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -92,14 +97,17 @@ class LevenshteinProblemTest {
         // 测试null到非null
         assertEquals(3, solution.editDistanceDfs(null, "abc"));
         assertEquals(3, solution.editDistanceMemoization(null, "abc"));
+        assertEquals(3, solution.editDistanceDp(null, "abc"));
         
         // 测试非null到null
         assertEquals(3, solution.editDistanceDfs("abc", null));
         assertEquals(3, solution.editDistanceMemoization("abc", null));
+        assertEquals(3, solution.editDistanceDp("abc", null));
         
         // 测试两个null
         assertEquals(0, solution.editDistanceDfs(null, null));
         assertEquals(0, solution.editDistanceMemoization(null, null));
+        assertEquals(0, solution.editDistanceDp(null, null));
     }
 
     // ==================== 特殊情况测试 ====================
@@ -113,6 +121,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -124,6 +133,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -135,6 +145,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -146,6 +157,7 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     @Test
@@ -157,12 +169,13 @@ class LevenshteinProblemTest {
         
         assertEquals(expected, solution.editDistanceDfs(s, t));
         assertEquals(expected, solution.editDistanceMemoization(s, t));
+        assertEquals(expected, solution.editDistanceDp(s, t));
     }
 
     // ==================== 算法一致性测试 ====================
 
     @Test
-    @DisplayName("测试两种算法结果一致性")
+    @DisplayName("测试三种算法结果一致性")
     void testAlgorithmConsistency() {
         String[][] testCases = {
             {"", ""},
@@ -182,10 +195,17 @@ class LevenshteinProblemTest {
             
             int dfsResult = solution.editDistanceDfs(s, t);
             int memoResult = solution.editDistanceMemoization(s, t);
+            int dpResult = solution.editDistanceDp(s, t);
             
             assertEquals(dfsResult, memoResult, 
-                String.format("算法结果不一致：'%s' -> '%s', DFS: %d, Memo: %d", 
+                String.format("DFS与记忆化结果不一致：'%s' -> '%s', DFS: %d, Memo: %d", 
                     s, t, dfsResult, memoResult));
+            assertEquals(dfsResult, dpResult, 
+                String.format("DFS与DP结果不一致：'%s' -> '%s', DFS: %d, DP: %d", 
+                    s, t, dfsResult, dpResult));
+            assertEquals(memoResult, dpResult, 
+                String.format("记忆化与DP结果不一致：'%s' -> '%s', Memo: %d, DP: %d", 
+                    s, t, memoResult, dpResult));
         }
     }
 
@@ -250,6 +270,7 @@ class LevenshteinProblemTest {
         for (int i = 0; i < 100; i++) {
             assertEquals(expected, solution.editDistanceDfs(s, t));
             assertEquals(expected, solution.editDistanceMemoization(s, t));
+            assertEquals(expected, solution.editDistanceDp(s, t));
         }
     }
 
@@ -262,8 +283,10 @@ class LevenshteinProblemTest {
         
         int dfsResult = solution.editDistanceDfs(s, t);
         int memoResult = solution.editDistanceMemoization(s, t);
+        int dpResult = solution.editDistanceDp(s, t);
         
         assertEquals(dfsResult, memoResult);
+        assertEquals(dfsResult, dpResult);
         assertTrue(dfsResult >= 0);
         
         // 测试中文字符
@@ -272,8 +295,123 @@ class LevenshteinProblemTest {
         
         int dfsResult2 = solution.editDistanceDfs(s2, t2);
         int memoResult2 = solution.editDistanceMemoization(s2, t2);
+        int dpResult2 = solution.editDistanceDp(s2, t2);
         
         assertEquals(dfsResult2, memoResult2);
+        assertEquals(dfsResult2, dpResult2);
         assertTrue(dfsResult2 >= 0);
+    }
+
+    // ==================== 动态规划专项测试 ====================
+
+    @Test
+    @DisplayName("测试动态规划方法的性能优势")
+    @Timeout(value = 3, unit = TimeUnit.SECONDS)
+    void testDpPerformance() {
+        // 使用较长的字符串测试DP方法的性能
+        String s = "abcdefghijklmnop"; // 16个字符
+        String t = "1234567890123456"; // 16个字符
+        
+        long startTime = System.nanoTime();
+        int dpResult = solution.editDistanceDp(s, t);
+        long dpTime = System.nanoTime() - startTime;
+        
+        // 验证结果合理性
+        assertTrue(dpResult <= Math.max(s.length(), t.length()));
+        assertTrue(dpResult >= Math.abs(s.length() - t.length()));
+        
+        System.out.printf("DP方法处理16x16字符串耗时: %d ns, 结果: %d%n", 
+            dpTime, dpResult);
+    }
+
+    @Test
+    @DisplayName("测试动态规划边界条件处理")
+    void testDpBoundaryConditions() {
+        // 测试单字符到单字符
+        assertEquals(0, solution.editDistanceDp("a", "a"));
+        assertEquals(1, solution.editDistanceDp("a", "b"));
+        
+        // 测试单字符到多字符
+        assertEquals(2, solution.editDistanceDp("a", "abc"));
+        assertEquals(2, solution.editDistanceDp("abc", "a"));
+        
+        // 测试完全不同的字符串
+        assertEquals(3, solution.editDistanceDp("abc", "xyz"));
+        
+        // 测试包含重复字符的字符串
+        assertEquals(1, solution.editDistanceDp("aaa", "aa"));
+        assertEquals(1, solution.editDistanceDp("aaa", "aab"));
+    }
+
+    @Test
+    @DisplayName("测试动态规划经典案例")
+    void testDpClassicCases() {
+        // 经典的编辑距离测试案例
+        assertEquals(3, solution.editDistanceDp("kitten", "sitting"));
+        assertEquals(3, solution.editDistanceDp("saturday", "sunday"));
+        assertEquals(6, solution.editDistanceDp("exponential", "polynomial"));
+        
+        // 测试回文字符串
+        assertEquals(2, solution.editDistanceDp("abcba", "abcde"));
+        
+        // 测试前缀后缀相同的情况
+        assertEquals(10, solution.editDistanceDp("prefix_suffix", "prefix_different_suffix"));
+    }
+
+    @Test
+    @DisplayName("测试动态规划与其他方法的一致性验证")
+    void testDpConsistencyWithOtherMethods() {
+        String[][] complexTestCases = {
+            {"", "a"},
+            {"a", ""},
+            {"ab", "a"},
+            {"a", "ab"},
+            {"abc", "ab"},
+            {"ab", "abc"},
+            {"abc", "bac"},
+            {"abc", "acb"},
+            {"programming", "algorithm"},
+            {"dynamic", "programming"}
+        };
+        
+        for (String[] testCase : complexTestCases) {
+            String s = testCase[0];
+            String t = testCase[1];
+            
+            int dpResult = solution.editDistanceDp(s, t);
+            int memoResult = solution.editDistanceMemoization(s, t);
+            
+            assertEquals(memoResult, dpResult, 
+                String.format("DP与记忆化结果不一致：'%s' -> '%s', DP: %d, Memo: %d", 
+                    s, t, dpResult, memoResult));
+        }
+    }
+
+    @Test
+    @DisplayName("测试动态规划大规模输入处理")
+    @Timeout(value = 5, unit = TimeUnit.SECONDS)
+    void testDpLargeInput() {
+        // 构造较大的测试用例
+        StringBuilder sb1 = new StringBuilder();
+        StringBuilder sb2 = new StringBuilder();
+        
+        for (int i = 0; i < 20; i++) {
+            sb1.append((char)('a' + i % 26));
+            sb2.append((char)('z' - i % 26));
+        }
+        
+        String s = sb1.toString();
+        String t = sb2.toString();
+        
+        long startTime = System.nanoTime();
+        int result = solution.editDistanceDp(s, t);
+        long endTime = System.nanoTime();
+        
+        // 验证结果的合理性
+        assertTrue(result >= 0);
+        assertTrue(result <= Math.max(s.length(), t.length()));
+        
+        System.out.printf("DP方法处理20x20字符串耗时: %d ns, 结果: %d%n", 
+            endTime - startTime, result);
     }
 }

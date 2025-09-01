@@ -75,6 +75,14 @@ public class LevenshteinProblem {
         return Math.min(Math.min(insertCost, deleteCost), replaceCost);
     }
 
+    /**
+     * 使用记忆化搜索计算两个字符串之间的编辑距离
+     * 通过缓存中间结果避免重复计算，提高算法效率
+     *
+     * @param s 源字符串
+     * @param t 目标字符串
+     * @return 将源字符串转换为目标字符串所需的最少编辑操作数
+     */
     public int editDistanceMemoization(String s, String t) {
         // 边界条件：如果源字符串为空，需要插入目标字符串的所有字符
         if (s == null || s.isEmpty()) {
@@ -86,19 +94,35 @@ public class LevenshteinProblem {
             return s.length();
         }
 
+        // 获取字符串长度
         int m = s.length();
         int n = t.length();
 
+        // 初始化记忆化数组，-1表示未计算过的状态
         int[][] memo = new int[m + 1][n + 1];
         for (int[] row : memo) {
             Arrays.fill(row, -1);
         }
 
+        // 调用辅助方法进行记忆化搜索
         return editDistanceMemoization(s, t, memo);
     }
 
     /**
      * 使用记忆化搜索计算两个字符串之间的编辑距离（私有辅助方法）
+     *
+     * @param s 源字符串
+     * @param t 目标字符串
+     * @param memo 记忆化数组，memo[i][j]表示长度为i的字符串转换为长度为j的字符串的最小编辑距离
+     * @return 将源字符串转换为目标字符串所需的最少编辑操作数
+     */
+    /**
+     * 使用记忆化搜索计算两个字符串之间的编辑距离（私有辅助方法）
+     * 
+     * 算法思路：
+     * 1. 如果两个字符串的最后一个字符相同，则问题转化为处理去掉最后字符的子字符串
+     * 2. 如果不同，则考虑三种编辑操作：插入、删除、替换，选择成本最小的
+     * 3. 使用记忆化数组缓存已计算的结果，避免重复计算
      *
      * @param s 源字符串
      * @param t 目标字符串
@@ -159,6 +183,21 @@ public class LevenshteinProblem {
         return memo[s.length()][t.length()];
     }
 
+    /**
+     * 使用动态规划计算两个字符串之间的编辑距离
+     * 这是最优的解法，时间复杂度O(m*n)，空间复杂度O(m*n)
+     * 
+     * 算法思路：
+     * 1. 创建二维DP表，dp[i][j]表示s[0..i-1]转换为t[0..j-1]的最小编辑距离
+     * 2. 初始化边界条件：空字符串到非空字符串的转换成本
+     * 3. 状态转移：
+     *    - 如果字符相同：dp[i][j] = dp[i-1][j-1]
+     *    - 如果字符不同：dp[i][j] = min(插入, 删除, 替换) + 1
+     *
+     * @param s 源字符串
+     * @param t 目标字符串
+     * @return 将源字符串转换为目标字符串所需的最少编辑操作数
+     */
     public int editDistanceDp(String s, String t) {
 
         // 边界条件：如果源字符串为空，需要插入目标字符串的所有字符
@@ -171,6 +210,7 @@ public class LevenshteinProblem {
             return s.length();
         }
 
+        // 获取字符串长度
         int m = s.length();
         int n = t.length();
 
@@ -195,16 +235,24 @@ public class LevenshteinProblem {
         // 易错的点：从初始值之外的值开始遍历，因为0值实际上是非问题本身，是问题退化到极致才会遇到的值
         for (int i = 1; i <= m; i++) { // 易错的点：这里的变量是问题规模，而不是索引
             for (int j = 1; j <= n; j++) { // 易错的点：这里的变量是问题规模，而不是索引
-                // 比较两个字符串的最后一个字符
+                // 比较两个字符串的当前位置字符
                 char lastCharOfS = s.charAt(i - 1); // 易错的点：虽然是从1开始，但是索引还是从0开始
                 char lastCharOfT = t.charAt(j - 1); // 易错的点：虽然是从1开始，但是索引还是从0开始
+                
+                // 如果字符相同，不需要编辑操作，直接继承对角线的值
                 if (lastCharOfS == lastCharOfT) {
                     dp[i][j] = dp[i - 1][j - 1];
                 } else {
+                    // 如果字符不同，考虑三种操作，选择成本最小的：
+                    // dp[i-1][j] + 1: 删除操作
+                    // dp[i][j-1] + 1: 插入操作  
+                    // dp[i-1][j-1] + 1: 替换操作
                     dp[i][j] = Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]) + 1;
                 }
             }
         }
+        
+        // 返回右下角的值，即完整字符串的编辑距离
         return dp[m][n];
     }
 
