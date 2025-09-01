@@ -1,6 +1,8 @@
 package algorithm.advanced.dynamicprogramming;
 
 
+import java.util.Arrays;
+
 /**
  * project name: algorithm
  *
@@ -71,6 +73,67 @@ public class LevenshteinProblem {
 
         // 返回三种操作中成本最小的一种
         return Math.min(Math.min(insertCost, deleteCost), replaceCost);
+    }
+
+    public int editDistanceMemoization(String s, String t) {
+        // 边界条件：如果源字符串为空，需要插入目标字符串的所有字符
+        if (s == null || s.isEmpty()) {
+            return t == null ? 0 : t.length();
+        }
+
+        // 边界条件：如果目标字符串为空，需要删除源字符串的所有字符
+        if (t == null || t.isEmpty()) {
+            return s.length();
+        }
+
+        int m = s.length();
+        int n = t.length();
+
+        int[][] memo = new int[m + 1][n + 1];
+        for (int[] row : memo) {
+            Arrays.fill(row, -1);
+        }
+
+        return editDistanceMemoization(s, t, memo);
+    }
+
+    int editDistanceMemoization(String s, String t, int[][] memo) {
+        // 不再剪枝
+
+        if (memo[s.length()][t.length()] != -1) {
+            return memo[s.length()][t.length()];
+        }
+
+        // 获取两个字符串的长度
+        final int n = s.length();
+        final int m = t.length();
+
+        char lastCharOfS = s.charAt(n - 1);
+        char lastCharOfT = t.charAt(m - 1); // 修复bug：应该是m-1而不是n-1
+
+        // 如果最后一个字符相同，则递归处理去掉最后一个字符的子字符串
+        if (lastCharOfS == lastCharOfT) {
+            memo[s.length()][t.length()] = editDistanceMemoization(s.substring(0, n - 1), t.substring(0, m - 1), memo);
+            return memo[s.length()][t.length()];
+        }
+
+        // 如果最后一个字符不同，考虑三种编辑操作：
+
+        // 1. 插入操作：在s的末尾插入t的最后一个字符
+        // 相当于将s转换为t去掉最后一个字符的结果，然后加1步插入操作
+        int insertCost = editDistanceMemoization(s, t.substring(0, m - 1), memo) + 1;
+
+        // 2. 删除操作：删除s的最后一个字符
+        // 相当于将s去掉最后一个字符转换为t，然后加1步删除操作
+        int deleteCost = editDistanceMemoization(s.substring(0, n - 1), t, memo) + 1;
+
+        // 3. 替换操作：将s的最后一个字符替换为t的最后一个字符
+        // 相当于将s和t都去掉最后一个字符进行转换，然后加1步替换操作
+        int replaceCost = editDistanceMemoization(s.substring(0, n - 1), t.substring(0, m - 1), memo) + 1;
+
+        // 返回三种操作中成本最小的一种
+        memo[s.length()][t.length()] = Math.min(Math.min(insertCost, deleteCost), replaceCost);
+        return memo[s.length()][t.length()];
     }
 
 }
