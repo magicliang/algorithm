@@ -28,7 +28,7 @@ public class LevenshteinProblem {
 
     /**
      * 使用深度优先搜索（DFS）计算两个字符串之间的编辑距离
-     * 
+     *
      * @param s 源字符串
      * @param t 目标字符串
      * @return 将源字符串转换为目标字符串所需的最少编辑操作数
@@ -38,35 +38,35 @@ public class LevenshteinProblem {
         if (s == null || s.isEmpty()) {
             return t == null ? 0 : t.length();
         }
-        
+
         // 边界条件：如果目标字符串为空，需要删除源字符串的所有字符
         if (t == null || t.isEmpty()) {
             return s.length();
         }
-        
+
         // 获取两个字符串的长度
         final int n = s.length();
         final int m = t.length();
 
         // 比较两个字符串的最后一个字符
         char lastCharOfS = s.charAt(n - 1);
-        char lastCharOfT = t.charAt(m - 1); // 修复bug：应该是m-1而不是n-1
-        
+        char lastCharOfT = t.charAt(m - 1);
+
         // 如果最后一个字符相同，则递归处理去掉最后一个字符的子字符串
         if (lastCharOfS == lastCharOfT) {
             return editDistanceDfs(s.substring(0, n - 1), t.substring(0, m - 1));
         }
 
         // 如果最后一个字符不同，考虑三种编辑操作：
-        
+
         // 1. 插入操作：在s的末尾插入t的最后一个字符
         // 相当于将s转换为t去掉最后一个字符的结果，然后加1步插入操作
         int insertCost = editDistanceDfs(s, t.substring(0, m - 1)) + 1;
-        
+
         // 2. 删除操作：删除s的最后一个字符
         // 相当于将s去掉最后一个字符转换为t，然后加1步删除操作
         int deleteCost = editDistanceDfs(s.substring(0, n - 1), t) + 1;
-        
+
         // 3. 替换操作：将s的最后一个字符替换为t的最后一个字符
         // 相当于将s和t都去掉最后一个字符进行转换，然后加1步替换操作
         int replaceCost = editDistanceDfs(s.substring(0, n - 1), t.substring(0, m - 1)) + 1;
@@ -97,9 +97,30 @@ public class LevenshteinProblem {
         return editDistanceMemoization(s, t, memo);
     }
 
+    /**
+     * 使用记忆化搜索计算两个字符串之间的编辑距离（私有辅助方法）
+     *
+     * @param s 源字符串
+     * @param t 目标字符串
+     * @param memo 记忆化数组，memo[i][j]表示长度为i的字符串转换为长度为j的字符串的最小编辑距离
+     * @return 将源字符串转换为目标字符串所需的最少编辑操作数
+     */
     int editDistanceMemoization(String s, String t, int[][] memo) {
-        // 不再剪枝
+        // 易错的点：不能不再剪枝，因为 editDistanceDfs 递归调用自己，它能处理"0问题"，但是这个辅助方法也要解决"0问题"
 
+        // 边界条件：处理空字符串
+        // 如果源字符串为空，需要插入目标字符串的所有字符
+        if (s.isEmpty()) {
+            memo[s.length()][t.length()] = t.length();
+            return t.length();
+        }
+        // 如果目标字符串为空，需要删除源字符串的所有字符
+        if (t.isEmpty()) {
+            memo[s.length()][t.length()] = s.length();
+            return s.length();
+        }
+
+        // 检查记忆化缓存，如果已经计算过则直接返回
         if (memo[s.length()][t.length()] != -1) {
             return memo[s.length()][t.length()];
         }
@@ -108,10 +129,12 @@ public class LevenshteinProblem {
         final int n = s.length();
         final int m = t.length();
 
+        // 获取两个字符串的最后一个字符进行比较
         char lastCharOfS = s.charAt(n - 1);
         char lastCharOfT = t.charAt(m - 1); // 修复bug：应该是m-1而不是n-1
 
         // 如果最后一个字符相同，则递归处理去掉最后一个字符的子字符串
+        // 此时不需要任何编辑操作，直接处理子问题
         if (lastCharOfS == lastCharOfT) {
             memo[s.length()][t.length()] = editDistanceMemoization(s.substring(0, n - 1), t.substring(0, m - 1), memo);
             return memo[s.length()][t.length()];
@@ -131,9 +154,58 @@ public class LevenshteinProblem {
         // 相当于将s和t都去掉最后一个字符进行转换，然后加1步替换操作
         int replaceCost = editDistanceMemoization(s.substring(0, n - 1), t.substring(0, m - 1), memo) + 1;
 
-        // 返回三种操作中成本最小的一种
+        // 返回三种操作中成本最小的一种，并存储到记忆化数组中
         memo[s.length()][t.length()] = Math.min(Math.min(insertCost, deleteCost), replaceCost);
         return memo[s.length()][t.length()];
+    }
+
+    public int editDistanceDp(String s, String t) {
+
+        // 边界条件：如果源字符串为空，需要插入目标字符串的所有字符
+        if (s == null || s.isEmpty()) {
+            return t == null ? 0 : t.length();
+        }
+
+        // 边界条件：如果目标字符串为空，需要删除源字符串的所有字符
+        if (t == null || t.isEmpty()) {
+            return s.length();
+        }
+
+        int m = s.length();
+        int n = t.length();
+
+        // 准备dp表，dp 的意思是 dp[i][j] 表示 s[0..i-1] 转换成 t[0..j-1] 的最小编辑距离
+        int[][] dp = new int[m + 1][n + 1];
+
+        // 初始化边界值
+
+        // 如果 s 是非空字符串，t是空字符串，则0列所有值都是 s 的长度
+        for (int i = 0; i <= m; i++) {
+            dp[i][0] = i; // 易错的点：每个子问题的复制值是非空子字符串本身，而不是总字符串
+        }
+
+        // 同理，如果 s 空，t 非空，
+        for (int j = 0; j <= n; j++) {
+            dp[0][j] = j;
+        }
+
+        // 最后，如果 s 和 t 都是空字符串，没有编辑距离，0是合法值
+        dp[0][0] = 0;
+
+        // 易错的点：从初始值之外的值开始遍历，因为0值实际上是非问题本身，是问题退化到极致才会遇到的值
+        for (int i = 1; i <= m; i++) { // 易错的点：这里的变量是问题规模，而不是索引
+            for (int j = 1; j <= n; j++) { // 易错的点：这里的变量是问题规模，而不是索引
+                // 比较两个字符串的最后一个字符
+                char lastCharOfS = s.charAt(i - 1); // 易错的点：虽然是从1开始，但是索引还是从0开始
+                char lastCharOfT = t.charAt(j - 1); // 易错的点：虽然是从1开始，但是索引还是从0开始
+                if (lastCharOfS == lastCharOfT) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = Math.min(Math.min(dp[i - 1][j], dp[i][j - 1]), dp[i - 1][j - 1]) + 1;
+                }
+            }
+        }
+        return dp[m][n];
     }
 
 }
