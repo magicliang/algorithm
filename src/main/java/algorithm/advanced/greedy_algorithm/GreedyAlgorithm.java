@@ -1,4 +1,4 @@
-package algorithm.greedy_algorithm;
+package algorithm.advanced.greedy_algorithm;
 
 public class GreedyAlgorithm {
     public static void main(String[] args) {
