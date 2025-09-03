@@ -87,6 +87,11 @@ public class MajorityElementSolutions {
      * 其他元素总出现次数为 n-k < n/2
      * 在最坏情况下，x 的每次出现都被其他元素抵消一次
      * 但由于 k > n-k，最终 x 一定会剩余 k-(n-k) = 2k-n > 0 次
+     * 
+     * 重要边界条件分析：
+     * - 当众数恰好比n/2多1个时：仍然可以胜出（如n=7,众数4次 vs 其他3次）
+     * - 当众数恰好等于n/2个时：不满足众数定义，算法行为不确定
+     * - 算法的数学保证基于众数出现次数严格大于n/2，这也是题目的前提条件
      */
     public int majorityElementBoyerMoore(int[] nums) {
         int candidate = nums[0];  // 候选多数元素
@@ -99,6 +104,10 @@ public class MajorityElementSolutions {
             } else {
                 count--;          // 反对票+1
                 if (count == 0) { // 票数归零，更换候选人
+                    // 关键理解：为什么选择nums[i]而不是nums[i+1]？
+                    // 1. nums[i]正是导致旧候选人被完全抵消的元素，它有潜力成为新候选人
+                    // 2. 不能跳过nums[i]，每个元素都必须参与投票过程
+                    // 3. count==0意味着前面元素已相互抵消，从nums[i]重新开始计票合理
                     candidate = nums[i];
                     count = 1;
                 }
