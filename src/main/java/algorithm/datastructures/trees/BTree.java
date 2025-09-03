@@ -657,6 +657,87 @@ public class BTree {
     }
 
     /**
+     * 递归实现的分层层序遍历（返回二维列表）
+     *
+     * 算法核心：深度递归分层收集模式
+     * 1. 深度参数：使用depth参数标识当前节点所在的层级（0-based）
+     * 2. 动态扩展：当访问到新层级时，动态创建该层的列表
+     * 3. 层级收集：将同一层的节点值收集到对应层级的列表中
+     *
+     * 工作流程：
+     * - 从根节点开始，depth=0
+     * - 每向下一层，depth+1
+     * - 检查result是否有对应层级的列表，没有则创建
+     * - 将当前节点值添加到对应层级的列表中
+     * - 递归处理左右子树，传递depth+1
+     *
+     * 与levelOrderRecursive的区别：
+     * - levelOrderRecursive：返回一维列表，需要预先计算层数
+     * - levelOrderByDepth：返回二维列表，动态创建层级列表
+     *
+     * 时间复杂度：O(n) - 每个节点访问一次
+     * 空间复杂度：O(h) - 递归栈深度，h为树高
+     *
+     * @param root 二叉树的根节点
+     * @return 分层的层序遍历结果，每一层是一个独立的列表
+     */
+    public List<List<Integer>> levelOrderByDepth(Node root) {
+        List<List<Integer>> result = new ArrayList<>();
+        levelOrderHelper(root, result, 0);
+        return result;
+    }
+
+    /**
+     * 递归层序遍历的辅助方法
+     *
+     * 深度递归分层收集模式的核心实现：
+     * - depth参数就像"楼层标识"，告诉函数当前节点在第几层
+     * - 动态扩展：当访问到新楼层时，为该楼层创建房间（列表）
+     * - 层级收集：将访客（节点值）安排到对应楼层的房间中
+     *
+     * 算法精髓：
+     * 1. 深度优先遍历 + 层级标识 = 分层收集
+     * 2. 通过depth参数实现层级区分，避免了预先计算层数的开销
+     * 3. 动态扩展result列表，适应任意深度的树结构
+     *
+     * 形象理解：就像给一栋楼的每个房间分配访客
+     * - depth就是楼层号
+     * - result就是整栋楼
+     * - result.get(depth)就是指定楼层的房间
+     * - 每个访客（节点值）都被安排到正确的楼层
+     *
+     * @param root 当前子树的根节点
+     * @param result 分层结果收集器
+     * @param depth 当前节点的深度（层级），从0开始
+     */
+    private void levelOrderHelper(Node root, List<List<Integer>> result, int depth) {
+        if (root == null) {
+            return;
+        }
+
+        // 动态扩展：如果当前深度对应的层级列表还不存在，则创建它
+        // 这是一个关键的动态扩展逻辑：
+        // - 当depth=0时，创建第0层列表
+        // - 当depth=1时，创建第1层列表
+        // - 以此类推...
+        if (result.size() == depth) {
+            result.add(new ArrayList<>());
+        }
+
+        // 获取当前层级的列表，并将当前节点值添加进去
+        List<Integer> currentLevel = result.get(depth);
+        currentLevel.add(root.val);
+
+        // 递归处理左右子树，深度加1
+        // 这里体现了深度优先遍历的特点：
+        // - 先处理左子树的所有节点
+        // - 再处理右子树的所有节点
+        // - 但通过depth参数，每个节点都被正确分配到对应的层级
+        levelOrderHelper(root.left, result, depth + 1);
+        levelOrderHelper(root.right, result, depth + 1);
+    }
+
+    /**
      * 根据前序遍历和中序遍历构建二叉树
      *
      * 算法原理：
