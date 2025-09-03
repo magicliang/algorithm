@@ -57,6 +57,9 @@ public class FastPower {
             if ((exponent & 1) == 1) {
                 result *= currentBase;
             }
+
+            // 在一个循环里做两个操作
+
             currentBase *= currentBase;
             exponent >>>= 1;
         }
