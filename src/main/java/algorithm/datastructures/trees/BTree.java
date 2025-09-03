@@ -10,6 +10,14 @@ import java.util.Map;
  * project name: domain-driven-transaction-sys
  *
  * description: 基础二叉树
+ * 
+ * 二叉树遍历的核心原理：
+ * 1. DFS（深度优先搜索）本质上使用栈结构，BFS（广度优先搜索）本质上使用队列结构
+ * 2. 递归实现的DFS利用系统调用栈；非递归实现需要显式使用栈数据结构
+ * 3. 标准BFS使用队列按层级顺序处理节点；非队列实现需要额外的状态管理：
+ *    - 可以使用递归+层级参数的方式（如levelOrderRecursive方法）
+ *    - 需要显式保存层级信息、访问状态等辅助数据
+ *    - 时间复杂度通常会从O(n)增加到O(n²)
  *
  * @author magicliang
  *
@@ -38,6 +46,25 @@ public class BTree {
 
         /**
          * 链式设置左子节点
+         * 
+         * 功能说明：
+         * 1. 为当前节点创建并设置左子节点
+         * 2. 返回新创建的左子节点，支持链式调用
+         * 3. 适用于动态构建二叉树的场景
+         * 
+         * 使用示例：
+         * Node root = new Node(1);
+         * root.left(2).left(4);  // 创建 1->2->4 的左子树链
+         * 
+         * 注意事项：
+         * - 如果当前节点已有左子节点，会被新节点覆盖
+         * - 返回的是新创建的左子节点，不是当前节点
+         * 
+         * @param val 左子节点的值
+         * @return 新创建的左子节点，支持继续链式调用
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public Node left(int val) {
             this.left = new Node(val);
@@ -46,6 +73,25 @@ public class BTree {
 
         /**
          * 链式设置右子节点
+         * 
+         * 功能说明：
+         * 1. 为当前节点创建并设置右子节点
+         * 2. 返回新创建的右子节点，支持链式调用
+         * 3. 适用于动态构建二叉树的场景
+         * 
+         * 使用示例：
+         * Node root = new Node(1);
+         * root.right(3).right(7);  // 创建 1->3->7 的右子树链
+         * 
+         * 注意事项：
+         * - 如果当前节点已有右子节点，会被新节点覆盖
+         * - 返回的是新创建的右子节点，不是当前节点
+         * 
+         * @param val 右子节点的值
+         * @return 新创建的右子节点，支持继续链式调用
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public Node right(int val) {
             this.right = new Node(val);
@@ -54,6 +100,29 @@ public class BTree {
 
         /**
          * 链式设置左子节点为已有节点
+         * 
+         * 功能说明：
+         * 1. 将已存在的节点设置为当前节点的左子节点
+         * 2. 返回当前节点本身，支持继续在当前节点上进行链式调用
+         * 3. 适用于将已构建的子树连接到当前节点的场景
+         * 
+         * 使用示例：
+         * Node leftSubtree = new Node(2);
+         * Node root = new Node(1).left(leftSubtree).right(3);
+         * 
+         * 与 left(int val) 的区别：
+         * - left(int val)：创建新节点并返回新节点
+         * - left(Node node)：使用已有节点并返回当前节点
+         * 
+         * 注意事项：
+         * - 如果传入null，会将左子节点设置为null
+         * - 不会检查是否会形成环路，使用时需注意
+         * 
+         * @param node 要设置为左子节点的已有节点
+         * @return 当前节点本身，支持继续链式调用
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public Node left(Node node) {
             this.left = node;
@@ -62,6 +131,29 @@ public class BTree {
 
         /**
          * 链式设置右子节点为已有节点
+         * 
+         * 功能说明：
+         * 1. 将已存在的节点设置为当前节点的右子节点
+         * 2. 返回当前节点本身，支持继续在当前节点上进行链式调用
+         * 3. 适用于将已构建的子树连接到当前节点的场景
+         * 
+         * 使用示例：
+         * Node rightSubtree = new Node(3);
+         * Node root = new Node(1).left(2).right(rightSubtree);
+         * 
+         * 与 right(int val) 的区别：
+         * - right(int val)：创建新节点并返回新节点
+         * - right(Node node)：使用已有节点并返回当前节点
+         * 
+         * 注意事项：
+         * - 如果传入null，会将右子节点设置为null
+         * - 不会检查是否会形成环路，使用时需注意
+         * 
+         * @param node 要设置为右子节点的已有节点
+         * @return 当前节点本身，支持继续链式调用
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public Node right(Node node) {
             this.right = node;
@@ -70,6 +162,32 @@ public class BTree {
 
         /**
          * 返回父节点，用于链式调用的回溯
+         * 
+         * 功能说明：
+         * 1. 理论上应该返回当前节点的父节点，用于链式调用中的回溯
+         * 2. 当前简化实现中返回this，实际使用中需要外部维护父节点引用
+         * 3. 设计目的是支持复杂的链式构建模式
+         * 
+         * 理想使用场景：
+         * Node root = new Node(1)
+         *     .left(2).left(4).up().right(5).up()  // 回到节点2
+         *     .up()  // 回到根节点1
+         *     .right(3);
+         * 
+         * 当前实现的局限性：
+         * - 没有维护父节点引用，无法实现真正的回溯
+         * - 返回this只是占位实现，实际效果有限
+         * - 如需完整实现，需要在Node中添加parent字段
+         * 
+         * 改进建议：
+         * 1. 添加parent字段：private Node parent;
+         * 2. 在设置子节点时同时设置parent引用
+         * 3. up()方法返回parent != null ? parent : this;
+         * 
+         * @return 当前实现返回this（简化版本），完整实现应返回父节点
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public Node up() {
             // 注意：这里需要外部维护父节点引用，简化实现中返回this
@@ -151,6 +269,35 @@ public class BTree {
 
         /**
          * 链式设置左子节点并返回子构建器
+         * 
+         * 功能说明：
+         * 1. 为当前根节点创建左子节点
+         * 2. 返回一个新的TreeBuilder，以新创建的左子节点为根
+         * 3. 支持在子树上继续进行构建操作
+         * 
+         * 使用场景：
+         * - 需要在子节点上继续构建复杂子树的情况
+         * - 适合构建深层嵌套的树结构
+         * 
+         * 使用示例：
+         * TreeBuilder builder = TreeBuilder.create(1)
+         *     .leftChild(2)      // 返回以节点2为根的构建器
+         *         .left(4)       // 在节点2上添加左子节点4
+         *         .right(5);     // 在节点2上添加右子节点5
+         * 
+         * 与 left(int val) 的区别：
+         * - left(int val)：返回当前构建器，继续在当前根上操作
+         * - leftChild(int val)：返回新构建器，转向子节点操作
+         * 
+         * 注意事项：
+         * - 返回的是新的TreeBuilder实例，与原构建器无关
+         * - 无法直接回到父节点的构建器，需要重新引用
+         * 
+         * @param val 左子节点的值
+         * @return 以新创建的左子节点为根的TreeBuilder
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public TreeBuilder leftChild(int val) {
             root.left = new Node(val);
@@ -159,6 +306,35 @@ public class BTree {
 
         /**
          * 链式设置右子节点并返回子构建器
+         * 
+         * 功能说明：
+         * 1. 为当前根节点创建右子节点
+         * 2. 返回一个新的TreeBuilder，以新创建的右子节点为根
+         * 3. 支持在子树上继续进行构建操作
+         * 
+         * 使用场景：
+         * - 需要在子节点上继续构建复杂子树的情况
+         * - 适合构建深层嵌套的树结构
+         * 
+         * 使用示例：
+         * TreeBuilder builder = TreeBuilder.create(1)
+         *     .rightChild(3)     // 返回以节点3为根的构建器
+         *         .left(6)       // 在节点3上添加左子节点6
+         *         .right(7);     // 在节点3上添加右子节点7
+         * 
+         * 与 right(int val) 的区别：
+         * - right(int val)：返回当前构建器，继续在当前根上操作
+         * - rightChild(int val)：返回新构建器，转向子节点操作
+         * 
+         * 注意事项：
+         * - 返回的是新的TreeBuilder实例，与原构建器无关
+         * - 无法直接回到父节点的构建器，需要重新引用
+         * 
+         * @param val 右子节点的值
+         * @return 以新创建的右子节点为根的TreeBuilder
+         * 
+         * 时间复杂度：O(1)
+         * 空间复杂度：O(1)
          */
         public TreeBuilder rightChild(int val) {
             root.right = new Node(val);
@@ -168,6 +344,40 @@ public class BTree {
 
     /**
      * 快速创建树的工具方法
+     * 
+     * 功能说明：
+     * 1. 提供一个简洁的静态方法来创建 TreeBuilder 实例
+     * 2. 避免了直接使用 TreeBuilder.create() 的冗余写法
+     * 3. 提供更加直观和简洁的 API
+     * 
+     * 使用场景：
+     * - 需要快速创建二叉树的所有情况
+     * - 作为测试中构建树的便捷入口
+     * - 提供更加友好的 API 设计
+     * 
+     * 使用示例：
+     * // 传统写法
+     * TreeBuilder builder = TreeBuilder.create(1);
+     * 
+     * // 简化写法
+     * TreeBuilder builder = BTree.tree(1);
+     * 
+     * // 链式调用示例
+     * Node root = BTree.tree(1)
+     *     .left(2)
+     *     .right(3)
+     *     .build();
+     * 
+     * 设计优势：
+     * - 更简洁的语法：BTree.tree(1) vs TreeBuilder.create(1)
+     * - 与类名保持一致，提高可读性
+     * - 静态导入时更加方便
+     * 
+     * @param rootVal 根节点的值
+     * @return TreeBuilder 实例，用于继续构建二叉树
+     * 
+     * 时间复杂度：O(1)
+     * 空间复杂度：O(1)
      */
     public static TreeBuilder tree(int rootVal) {
         return TreeBuilder.create(rootVal);
