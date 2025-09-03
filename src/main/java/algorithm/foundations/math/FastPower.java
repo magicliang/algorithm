@@ -53,6 +53,7 @@ public class FastPower {
         long currentBase = base; // 使用 long 避免整数溢出，仅在最后一步转换为 double
 
         while (exponent > 0) {
+            // 标准的做法是，不需要使用两个循环，只要一个循环就够了
             if ((exponent & 1) == 1) {
                 result *= currentBase;
             }
