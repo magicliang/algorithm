@@ -111,10 +111,10 @@ public class SlidingWindowTest {
     @Test
     void testMinWindowComplexCases() {
         // 目标字符串有重复字符
-        assertEquals("cwae", solution.minWindow("ADOBECODEBANC", "AABC"), "目标有重复字符测试失败");
+        assertEquals("ADOBECODEBA", solution.minWindow("ADOBECODEBANC", "AABC"), "目标有重复字符测试失败");
         
         // 源字符串中目标字符分散
-        assertEquals("dcodeba", solution.minWindow("ADOBECODEBANC", "ABCD"), "分散字符测试失败");
+        assertEquals("ADOBEC", solution.minWindow("ADOBECODEBANC", "ABCD"), "分散字符测试失败");
     }
 
     @Test

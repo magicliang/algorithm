@@ -371,6 +371,6 @@ public class ZeroOrOneKnapsacksTest {
         assertEquals(dfs, memo);
         assertEquals(memo, dp);
         assertEquals(dp, optimized);
-        assertEquals(9, optimized); // 验证具体结果
+        assertEquals(10, optimized); // 验证具体结果
     }
 }

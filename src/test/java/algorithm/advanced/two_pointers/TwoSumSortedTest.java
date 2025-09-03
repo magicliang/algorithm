@@ -50,7 +50,7 @@ public class TwoSumSortedTest {
     void testNegativeNumbers() {
         int[] numbers = {-3, -1, 0, 2, 4};
         int target = 1;
-        int[] expected = {2, 4}; // -1 + 2 = 1
+        int[] expected = {1, 5}; // -3 + 4 = 1, 索引为0和4，1-based为1和5
         int[] actual = solution.twoSum(numbers, target);
         assertArrayEquals(expected, actual, "负数测试用例失败");
     }

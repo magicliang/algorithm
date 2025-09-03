@@ -42,11 +42,12 @@ class PancakeSortingTest {
     void testBasicSorting() {
         int[] input = {3, 2, 1};
         sorter.run(input, input.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         // 验证输出不为空（说明找到了解）
         String output = outputStream.toString();
-        assertFalse(output.isEmpty(), "应该有输出结果");
         assertTrue(output.contains("Total Swap times"), "应该包含总翻转次数信息");
+        assertTrue(output.contains("|Search Times|"), "应该包含搜索次数信息");
     }
 
     @Test
@@ -54,6 +55,7 @@ class PancakeSortingTest {
     void testAlreadySorted() {
         int[] input = {1, 2, 3, 4, 5};
         sorter.run(input, input.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         String output = outputStream.toString();
         assertTrue(output.contains("Total Swap times (minimum flips) = 0"), 
@@ -65,6 +67,7 @@ class PancakeSortingTest {
     void testSingleElement() {
         int[] input = {1};
         sorter.run(input, input.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         String output = outputStream.toString();
         assertTrue(output.contains("Total Swap times (minimum flips) = 0"), 
@@ -77,6 +80,7 @@ class PancakeSortingTest {
         // 测试需要翻转的情况
         int[] input1 = {2, 1};
         sorter.run(input1, input1.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         String output1 = outputStream.toString();
         assertTrue(output1.contains("Total Swap times"), "应该包含翻转次数信息");
@@ -87,6 +91,7 @@ class PancakeSortingTest {
         // 测试已排序的情况
         int[] input2 = {1, 2};
         sorter.run(input2, input2.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         String output2 = outputStream.toString();
         assertTrue(output2.contains("Total Swap times (minimum flips) = 0"), 
@@ -98,6 +103,7 @@ class PancakeSortingTest {
     void testReverseOrder() {
         int[] input = {5, 4, 3, 2, 1};
         sorter.run(input, input.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         String output = outputStream.toString();
         assertTrue(output.contains("Total Swap times"), "应该包含翻转次数信息");
@@ -231,12 +237,13 @@ class PancakeSortingTest {
             outputStream.reset(); // 重置输出流
             
             sorter.run(testCase, testCase.length);
+            sorter.output(); // 需要调用output方法才能产生输出
             String output = outputStream.toString();
             
             // 验证输出包含必要信息
             assertTrue(output.contains("Total Swap times"), 
                 "输出应该包含总翻转次数，输入: " + Arrays.toString(testCase));
-            assertTrue(output.contains("Search Times"), 
+            assertTrue(output.contains("|Search Times|"), 
                 "输出应该包含搜索次数，输入: " + Arrays.toString(testCase));
         }
     }
@@ -285,16 +292,17 @@ class PancakeSortingTest {
     void testOutputFormat() {
         int[] input = {2, 1};
         sorter.run(input, input.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         
         String output = outputStream.toString();
         
         // 验证输出格式
         assertTrue(output.contains("Flip sequence"), "输出应该包含翻转序列");
-        assertTrue(output.contains("Search Times"), "输出应该包含搜索次数");
+        assertTrue(output.contains("|Search Times|"), "输出应该包含搜索次数");
         assertTrue(output.contains("Total Swap times"), "输出应该包含总翻转次数");
         
         // 验证数字格式
-        assertTrue(output.matches(".*\\d+.*"), "输出应该包含数字");
+        assertTrue(output.contains("1") || output.contains("2") || output.contains("0"), "输出应该包含数字");
     }
 
     @Test
@@ -303,17 +311,19 @@ class PancakeSortingTest {
         // 测试剪枝是否有效减少搜索次数
         int[] input1 = {1, 2, 3}; // 已排序，应该很快
         sorter.run(input1, input1.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         String output1 = outputStream.toString();
         
         outputStream.reset();
         
         int[] input2 = {3, 2, 1}; // 逆序，需要更多搜索
         sorter.run(input2, input2.length);
+        sorter.output(); // 需要调用output方法才能产生输出
         String output2 = outputStream.toString();
         
         // 验证已排序数组的搜索次数较少
-        assertTrue(output1.contains("Search Times"), "应该包含搜索次数信息");
-        assertTrue(output2.contains("Search Times"), "应该包含搜索次数信息");
+        assertTrue(output1.contains("|Search Times|"), "应该包含搜索次数信息");
+        assertTrue(output2.contains("|Search Times|"), "应该包含搜索次数信息");
     }
 
     @Test

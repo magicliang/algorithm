@@ -86,7 +86,7 @@ public class SlidingWindow {
      * @return 最小覆盖子串
      */
     public String minWindow(String s, String t) {
-        if (s == null || t == null || s.length() < t.length()) {
+        if (s == null || t == null || t.length() == 0 || s.length() < t.length()) {
             return "";
         }
         
