@@ -163,11 +163,44 @@ public class RepeatedSubstringPattern {
      * 核心思想：
      * 如果s由重复子串构成，那么s一定是(s+s)的子串(除了开头和结尾位置)
      * 
-     * 原理：
-     * 设s = "abcabc"，由"abc"重复构成
-     * s+s = "abcabcabcabc"
-     * 在s+s中去掉首尾字符后："bcabcabcab"
-     * 原字符串"abcabc"仍然出现在其中
+     * 数学原理详细证明：
+     * 
+     * 【定理】设字符串S长度为n，则S由重复子串构成 ⟺ S在(S+S)[1...2n-2]中出现
+     * 
+     * 【必要性证明】(重复字符串 → 在拼接中出现)：
+     * 设S由长度为k的子串P重复m次构成，即S = P^m，其中n = m*k
+     * 
+     * 构造S+S：
+     * S+S = P^m + P^m = P₁P₂...Pₘ + P₁P₂...Pₘ
+     * 
+     * 关键观察：由于P具有周期性，S+S中存在"错位匹配"
+     * - 在位置k处：S+S[k...k+n-1] = P₂P₃...PₘP₁ = S的一个旋转
+     * - 由于S由P重复构成，S的任何k位置的旋转都等于S本身
+     * - 因此S在S+S的位置k处完整出现
+     * 
+     * 具体例子：S = "abcabc" (P="abc", k=3, m=2)
+     * S+S = "abcabcabcabc"
+     * 位置3: "abcabc" ✓ (完全匹配)
+     * 
+     * 【充分性证明】(在拼接中出现 → 重复字符串)：
+     * 设S在(S+S)[1...2n-2]的某位置i出现，其中1 ≤ i ≤ n-1
+     * 
+     * 这意味着：S[0...n-1] = (S+S)[i...i+n-1]
+     * 即：S = S[i...n-1] + S[0...i-1]  (S的一个旋转)
+     * 
+     * 由于S等于自己的旋转，说明S具有周期性，周期长度为gcd(n,i)
+     * 由于1 ≤ i ≤ n-1，所以gcd(n,i) < n，因此S由重复子串构成
+     * 
+     * 【为什么要去掉首尾？】
+     * - 去掉首位：避免在位置0找到S本身 (平凡匹配)
+     * - 去掉末位：避免在位置n找到S本身 (平凡匹配)
+     * - 只在位置1到n-1查找，确保找到的是"真正的重复结构"
+     * 
+     * 【算法的几何直观】
+     * 可以将重复字符串想象为圆环上的模式：
+     * - 重复字符串在圆环上任意旋转后都与原串相同
+     * - S+S相当于将圆环"展开"两圈
+     * - 在展开的任意位置都能找到完整的原模式
      * 
      * 时间复杂度：O(n) - 字符串查找
      * 空间复杂度：O(n) - 拼接字符串
@@ -179,121 +212,7 @@ public class RepeatedSubstringPattern {
         return sub.contains(s);
     }
     
-    /**
-     * 演示和测试方法
-     */
-    public static void main(String[] args) {
-        RepeatedSubstringPattern solution = new RepeatedSubstringPattern();
-        
-        System.out.println("🔄 重复子串模式问题 - KMP算法解法演示");
-        System.out.println("=".repeat(50));
-        
-        // 测试用例
-        String[] testCases = {
-            "abab",           // true: "ab"重复2次
-            "aba",            // false: 无法重复构成
-            "abcabcabcabc",   // true: "abc"重复4次
-            "a",              // false: 单字符无法重复
-            "aa",             // true: "a"重复2次
-            "aaa",            // true: "a"重复3次
-            "abcabc",         // true: "abc"重复2次
-            "abcabcabc",      // true: "abc"重复3次
-            "abcdefg",        // false: 无重复模式
-            "aabaaba"         // true: "aab"重复2次 + "a"
-        };
-        
-        System.out.println("\n📋 测试结果对比");
-        System.out.println("-".repeat(30));
-        
-        for (String test : testCases) {
-            boolean kmpResult = solution.repeatedSubstringPattern(test);
-            boolean bruteResult = solution.repeatedSubstringPatternBruteForce(test);
-            boolean concatResult = solution.repeatedSubstringPatternConcat(test);
-            
-            System.out.printf("字符串: %-15s | KMP: %s | 暴力: %s | 拼接: %s%n", 
-                "\"" + test + "\"", kmpResult, bruteResult, concatResult);
-            
-            // 验证结果一致性
-            if (kmpResult != bruteResult || bruteResult != concatResult) {
-                System.out.println("❌ 结果不一致！");
-            }
-        }
-        
-        // KMP算法详细演示
-        System.out.println("\n🔍 KMP算法详细演示");
-        System.out.println("-".repeat(30));
-        
-        demonstrateKMP(solution, "abcabc");
-        demonstrateKMP(solution, "abab");
-        demonstrateKMP(solution, "aba");
-        
-        // 算法复杂度对比
-        System.out.println("\n📊 算法复杂度对比");
-        System.out.println("-".repeat(30));
-        printComplexityComparison();
-    }
-    
-    /**
-     * 演示KMP算法的详细过程
-     */
-    private static void demonstrateKMP(RepeatedSubstringPattern solution, String s) {
-        System.out.println("\n字符串: \"" + s + "\"");
-        
-        // 构建next数组
-        int[] next = solution.buildNext(s);
-        
-        // 显示next数组
-        System.out.print("索引:   ");
-        for (int i = 0; i < s.length(); i++) {
-            System.out.printf("%2d ", i);
-        }
-        System.out.println();
-        
-        System.out.print("字符:   ");
-        for (char c : s.toCharArray()) {
-            System.out.printf("%2c ", c);
-        }
-        System.out.println();
-        
-        System.out.print("next:   ");
-        for (int val : next) {
-            System.out.printf("%2d ", val);
-        }
-        System.out.println();
-        
-        // 分析结果
-        int n = s.length();
-        int longestPS = next[n - 1];
-        int repeatLen = n - longestPS;
-        
-        System.out.println("最长相等前后缀长度: " + longestPS);
-        System.out.println("重复单元长度: " + repeatLen);
-        System.out.println("是否能整除: " + (n % repeatLen == 0));
-        System.out.println("是否有重复模式: " + (longestPS > 0 && n % repeatLen == 0));
-        
-        if (longestPS > 0 && n % repeatLen == 0) {
-            System.out.println("重复单元: \"" + s.substring(0, repeatLen) + "\"");
-        }
-    }
-    
-    /**
-     * 打印算法复杂度对比
-     */
-    private static void printComplexityComparison() {
-        System.out.println("┌─────────────┬─────────────┬─────────────┬─────────────┐");
-        System.out.println("│    算法     │ 时间复杂度  │ 空间复杂度  │    特点     │");
-        System.out.println("├─────────────┼─────────────┼─────────────┼─────────────┤");
-        System.out.println("│ KMP算法     │    O(n)     │    O(n)     │ 最优解法    │");
-        System.out.println("│ 暴力枚举    │    O(n²)    │    O(1)     │ 直观易懂    │");
-        System.out.println("│ 字符串拼接  │    O(n)     │    O(n)     │ 思路巧妙    │");
-        System.out.println("└─────────────┴─────────────┴─────────────┴─────────────┘");
-        
-        System.out.println("\n💡 KMP算法优势:");
-        System.out.println("• 时间复杂度最优: O(n)");
-        System.out.println("• 利用字符串内在结构特性");
-        System.out.println("• 一次预处理即可得到答案");
-        System.out.println("• 体现了算法设计的数学美感");
-    }
+
 }
 
 /**
