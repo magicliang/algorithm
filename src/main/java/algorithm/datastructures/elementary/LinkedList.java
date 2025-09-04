@@ -152,28 +152,32 @@ public class LinkedList {
      * @return 倒数第k个节点，如果k超出链表长度则返回null
      */
     public ListNode findKthFromEnd(ListNode head, int k) {
+        // k 必须至少是1，这样才能至少走到尾部
         if (head == null || k <= 0) {
             return null;
         }
-        
+
         ListNode fast = head; // 快指针
         ListNode slow = head; // 慢指针
-        
-        // 快指针先移动k步
+
+        // 我们对链表到底有多长是一无所知的，所以要主动一步一步试错
         for (int i = 0; i < k; i++) {
+            // 能走七步算七步
             if (fast == null) {
-                return null; // k超出链表长度
+                return null;
             }
+
+            // fast 是有可能走到 null 的
             fast = fast.next;
         }
-        
-        // 快慢指针同时移动，直到快指针到达末尾
+
+        // fast 要走过最后一个节点，slow 要走到倒数第k个，这样其实fast和slow距离是k，fast走到null以后，slow和尾部节点的距离是 k-1
         while (fast != null) {
             slow = slow.next;
             fast = fast.next;
         }
-        
-        return slow; // 慢指针指向倒数第k个节点
+
+        return slow;
     }
     
     /**
@@ -184,29 +188,77 @@ public class LinkedList {
      * @return 删除节点后的链表头
      */
     public ListNode removeKthFromEnd(ListNode head, int k) {
-        // 创建虚拟头节点，简化边界处理
-        ListNode dummy = new ListNode(0);
+        if (head == null || k <= 0) {
+            return null;
+        }
+
+        // 之所以要引入 dummy 节点，是因为 head 可能被删除，比较麻烦
+        ListNode dummy = new ListNode();
         dummy.next = head;
-        
+
         ListNode fast = dummy;
         ListNode slow = dummy;
-        
-        // 快指针先移动k+1步
-        for (int i = 0; i <= k; i++) {
+        // 不管快慢节点是不是从 dummy 节点开始出发，他们之间的相对距离此时是 k + 1而不是k，而且下面的循环仍然会让 fast 停在链表末尾的 null上，这也就意味着 slow会停在倒数 k + 1
+        // 个节点上（也就是k的前驱）
+        for (int i = 0; i < k + 1; i++) {
+            if (fast == null) {
+                return null;
+            }
             fast = fast.next;
         }
-        
-        // 快慢指针同时移动
+
         while (fast != null) {
             slow = slow.next;
             fast = fast.next;
         }
-        
-        // 删除倒数第k个节点
+
+        // 在没有前驱节点的前提下，用后继节点删除本节点错误
+//        slow.val = slow.next.val;
+//        slow.next = slow.next.next;
+
+        // 删除 slow 的下一个节点
         slow.next = slow.next.next;
-        
+
+        // 仍然使用 dummy 来解决这个问题
         return dummy.next;
     }
 
+    /**
+     * 删除链表的倒数第k个节点
+     *
+     * @param head 链表头节点
+     * @param k 倒数第k个
+     * @return 删除节点后的链表头
+     */
+    public ListNode removeKthFromEnd2(ListNode head, int k) {
+        if (head == null || k <= 0) {
+            return null;
+        }
+
+        // 之所以要引入 dummy 节点，是因为 head 可能被删除，比较麻烦
+        ListNode dummy = new ListNode();
+        dummy.next = head;
+
+        ListNode fast = dummy;
+        ListNode slow = dummy;
+        // 不管快慢节点是不是从 dummy 节点开始出发，他们之间的相对距离此时是 k，而且下面的循环仍然会让 fast 停在链表末尾的 null上，这也就意味着 slow会停在倒数 k 个节点上
+        for (int i = 0; i < k; i++) {
+            if (fast == null) {
+                return null;
+            }
+            fast = fast.next;
+        }
+
+        while (fast != null) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        slow.val = slow.next.val;
+        slow.next = slow.next.next;
+
+        // 仍然使用 dummy 来解决这个问题
+        return dummy.next;
+    }
 
 }

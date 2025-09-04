@@ -165,6 +165,23 @@ public class LinkedListTest {
     }
 
     @Test
+    void testRemoveKthFromEnd2() {
+        // 链表：1->2->3->4->5，删除倒数第2个（4）
+        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
+        ListNode result = solution.removeKthFromEnd2(head, 2);
+
+        // 验证结果：1->2->3->5
+        int[] expected = {1, 2, 3, 5};
+        ListNode current = result;
+        for (int value : expected) {
+            assertNotNull(current, "链表长度不正确");
+            assertEquals(value, current.val, "节点值不正确");
+            current = current.next;
+        }
+        assertNull(current, "链表应该结束");
+    }
+
+    @Test
     void testRemoveKthFromEndFirstNode() {
         // 删除倒数第5个（第1个）：1->2->3->4->5 变成 2->3->4->5
         ListNode head = createList(new int[]{1, 2, 3, 4, 5});
