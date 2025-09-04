@@ -33,28 +33,43 @@ public class FastSlowPointers {
             this.val = val;
             this.next = next;
         }
-        
-        /**
-         * 反转链表
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(1)
-         *
-         * @return 反转后的链表头节点
-         */
-        public ListNode reverse() {
-            ListNode prev = null;
-            ListNode current = this;
-            ListNode next = null;
+    }
 
-            while (current != null) {
-                next = current.next;
-                current.next = prev;
-                prev = current;
-                current = next;
-            }
+    /**
+     * 反转链表
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @return 反转后的链表头节点
+     */
+    public ListNode reverse(ListNode head) {
+        // 不使用 dummy节点的解法，实际上仍然是 O(1) 复杂度的算法
 
-            return prev;
+        ListNode prev = null;
+        ListNode current = head;
+
+        while (current != null) {
+            // 这个算法每次都是引入 p c n
+            // 让 p c n 的顺序交换
+            // 首先从中间节点开始
+            // 从 p c n 变成 c p n
+            // 然后把下一轮的 p 指向 cp 的头
+            // 这样下一轮开始的时候，就产生新的 cp n
+             ListNode next = current.next;
+
+            // 反转自己，前链表和本链表断链
+            current.next = prev;
+            // 本链表整体成为一个 prev 链表
+            prev = current;
+
+            // 下一轮从后续链表开始
+            current = next;
+
+            // 当 current 等于null的时候，整个原链表都变成了prev链表，可以直接使用 prev 了
         }
+
+        // 最后 prev 是新头
+        return prev;
     }
     
     /**
@@ -192,4 +207,6 @@ public class FastSlowPointers {
         
         return dummy.next;
     }
+
+
 }

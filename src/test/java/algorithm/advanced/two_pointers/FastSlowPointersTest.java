@@ -181,4 +181,51 @@ public class FastSlowPointersTest {
         
         assertNull(result, "删除单节点后应该返回null");
     }
+
+    @Test
+    void testReverse() {
+        // 测试正常链表反转：1->2->3 变成 3->2->1
+        ListNode head = createList(new int[]{1, 2, 3});
+        ListNode reversedHead = solution.reverse(head);
+        
+        // 验证反转后的链表：3->2->1
+        assertEquals(3, reversedHead.val, "反转后头节点应为3");
+        assertEquals(2, reversedHead.next.val, "第二个节点应为2");
+        assertEquals(1, reversedHead.next.next.val, "第三个节点应为1");
+        assertNull(reversedHead.next.next.next, "链表应终止于第三个节点");
+    }
+
+    @Test
+    void testReverseSingleNode() {
+        // 测试单节点反转
+        ListNode head = new ListNode(1);
+        ListNode reversedHead = solution.reverse(head);
+        
+        assertEquals(1, reversedHead.val, "单节点反转后值应不变");
+        assertNull(reversedHead.next, "单节点反转后应无后续节点");
+    }
+
+    @Test
+    void testReverseEmptyList() {
+        // 测试空链表反转
+        ListNode reversedHead = solution.reverse(null);
+        assertNull(reversedHead, "空链表反转后应为null");
+    }
+
+    @Test
+    void testReverseLongList() {
+        // 测试较长链表反转：1->2->3->4->5 变成 5->4->3->2->1
+        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
+        ListNode reversedHead = solution.reverse(head);
+        
+        // 验证反转后的链表：5->4->3->2->1
+        int[] expected = {5, 4, 3, 2, 1};
+        ListNode current = reversedHead;
+        for (int value : expected) {
+            assertNotNull(current, "链表长度不正确");
+            assertEquals(value, current.val, "节点值不正确");
+            current = current.next;
+        }
+        assertNull(current, "链表应该结束");
+    }
 }
