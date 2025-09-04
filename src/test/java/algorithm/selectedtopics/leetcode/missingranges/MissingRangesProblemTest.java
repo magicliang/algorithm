@@ -256,4 +256,116 @@ public class MissingRangesProblemTest {
         
         assertEquals(expected, result, "末元素小于 upper 时应正确处理后置缺失");
     }
+
+    // ==================== 新算法 findMissingRangesV2 的测试 ====================
+
+    @Test
+    @DisplayName("V2算法 - 测试经典示例")
+    void testFindMissingRangesV2ClassicExample() {
+        // 测试目的：验证新算法对经典示例的处理
+        int[] nums = {0, 1, 3, 50, 75};
+        int lower = 0;
+        int upper = 99;
+        
+        List<String> result = solution.findMissingRangesV2(nums, lower, upper);
+        List<String> expected = Arrays.asList("2", "4->49", "51->74", "76->99");
+        
+        assertEquals(expected, result, "V2算法经典示例测试失败");
+    }
+
+    @Test
+    @DisplayName("V2算法 - 测试空数组")
+    void testFindMissingRangesV2EmptyArray() {
+        // 测试目的：验证新算法对空数组的处理
+        int[] nums = {};
+        int lower = 1;
+        int upper = 10;
+        
+        List<String> result = solution.findMissingRangesV2(nums, lower, upper);
+        List<String> expected = Arrays.asList("1->10");
+        
+        assertEquals(expected, result, "V2算法空数组测试失败");
+    }
+
+    @Test
+    @DisplayName("V2算法 - 测试提前终止优化")
+    void testFindMissingRangesV2EarlyTermination() {
+        // 测试目的：验证当数组中某个元素等于upper时的提前终止优化
+        int[] nums = {1, 3, 5, 7, 10, 15, 20}; // 10 == upper，后面的15,20应该被忽略
+        int lower = 0;
+        int upper = 10;
+        
+        List<String> result = solution.findMissingRangesV2(nums, lower, upper);
+        List<String> expected = Arrays.asList("0", "2", "4", "6", "8->9");
+        
+        assertEquals(expected, result, "V2算法提前终止优化测试失败");
+    }
+
+    @Test
+    @DisplayName("V2算法 - 测试单点范围")
+    void testFindMissingRangesV2SinglePoint() {
+        // 测试目的：验证新算法对单点范围的处理
+        int[] nums = {};
+        int lower = 5;
+        int upper = 5;
+        
+        List<String> result = solution.findMissingRangesV2(nums, lower, upper);
+        List<String> expected = Arrays.asList("5");
+        
+        assertEquals(expected, result, "V2算法单点范围测试失败");
+    }
+
+    @Test
+    @DisplayName("V2算法 - 测试连续数组无缺失")
+    void testFindMissingRangesV2NoMissing() {
+        // 测试目的：验证新算法对连续无缺失数组的处理
+        int[] nums = {1, 2, 3, 4, 5};
+        int lower = 1;
+        int upper = 5;
+        
+        List<String> result = solution.findMissingRangesV2(nums, lower, upper);
+        List<String> expected = Arrays.asList();
+        
+        assertEquals(expected, result, "V2算法连续数组无缺失测试失败");
+    }
+
+    @Test
+    @DisplayName("V2算法 - 测试负数范围")
+    void testFindMissingRangesV2NegativeRange() {
+        // 测试目的：验证新算法对负数范围的处理
+        int[] nums = {-2, 0, 2};
+        int lower = -5;
+        int upper = 5;
+        
+        List<String> result = solution.findMissingRangesV2(nums, lower, upper);
+        List<String> expected = Arrays.asList("-5->-3", "-1", "1", "3->5");
+        
+        assertEquals(expected, result, "V2算法负数范围测试失败");
+    }
+
+    @Test
+    @DisplayName("V2算法 - 对比两种算法结果一致性")
+    void testBothAlgorithmsConsistency() {
+        // 测试目的：验证两种算法在各种情况下结果的一致性
+        int[][] testCases = {
+            {},                    // 空数组
+            {1},                   // 单元素
+            {1, 2, 3},            // 连续数组
+            {0, 1, 3, 50, 75},    // 经典示例
+            {-2, 0, 2},           // 负数
+            {5, 7, 9}             // 有间隔
+        };
+        
+        int[] lowers = {0, 1, 1, 0, -5, 1};
+        int[] uppers = {10, 1, 3, 99, 5, 10};
+        
+        for (int i = 0; i < testCases.length; i++) {
+            List<String> result1 = solution.findMissingRanges(testCases[i], lowers[i], uppers[i]);
+            List<String> result2 = solution.findMissingRangesV2(testCases[i], lowers[i], uppers[i]);
+            
+            assertEquals(result1, result2, 
+                String.format("测试用例 %d: 两种算法结果不一致\n数组: %s, lower: %d, upper: %d", 
+                    i, Arrays.toString(testCases[i]), lowers[i], uppers[i]));
+        }
+    }
 }
