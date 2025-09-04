@@ -1,9 +1,9 @@
-package algorithm.advanced.two_pointers;
+package algorithm.datastructures.elementary;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-import algorithm.advanced.two_pointers.FastSlowPointers.ListNode;
+import algorithm.datastructures.elementary.LinkedList.ListNode;
 
 /**
  * FastSlowPointers的测试类
@@ -11,13 +11,13 @@ import algorithm.advanced.two_pointers.FastSlowPointers.ListNode;
  * @author magicliang
  * @date 2025-09-02
  */
-public class FastSlowPointersTest {
+public class LinkedListTest {
 
-    private FastSlowPointers solution;
+    private LinkedList solution;
 
     @BeforeEach
     void setUp() {
-        solution = new FastSlowPointers();
+        solution = new LinkedList();
     }
 
     // 辅助方法：创建链表

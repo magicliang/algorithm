@@ -1,4 +1,4 @@
-package algorithm.advanced.two_pointers;
+package algorithm.datastructures.elementary;
 
 /**
  * 快慢指针算法示例
@@ -14,7 +14,7 @@ package algorithm.advanced.two_pointers;
  * @author magicliang
  * @date 2025-09-02
  */
-public class FastSlowPointers {
+public class LinkedList {
     
     /**
      * 链表节点定义
