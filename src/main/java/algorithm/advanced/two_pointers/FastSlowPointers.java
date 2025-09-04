@@ -33,6 +33,28 @@ public class FastSlowPointers {
             this.val = val;
             this.next = next;
         }
+        
+        /**
+         * 反转链表
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(1)
+         *
+         * @return 反转后的链表头节点
+         */
+        public ListNode reverse() {
+            ListNode prev = null;
+            ListNode current = this;
+            ListNode next = null;
+
+            while (current != null) {
+                next = current.next;
+                current.next = prev;
+                prev = current;
+                current = next;
+            }
+
+            return prev;
+        }
     }
     
     /**
