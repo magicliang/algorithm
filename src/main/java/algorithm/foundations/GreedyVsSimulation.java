@@ -56,19 +56,19 @@ public class GreedyVsSimulation {
         
         while (!isNonDecreasing(list)) {
             // 贪心选择：找到和最小的相邻对
-            int minSum = Integer.MAX_VALUE;
+            Integer minSum = null;  // 使用可空的Integer
             int minIndex = -1;
             
             for (int i = 0; i < list.size() - 1; i++) {
                 int sum = list.get(i) + list.get(i + 1);
-                if (sum < minSum) {
+                if (minSum == null || sum < minSum) {  // 更优雅的比较
                     minSum = sum;
                     minIndex = i;
                 }
             }
             
             // 执行贪心选择
-            if (minIndex != -1) {
+            if (minSum != null) {  // 更清晰的判断条件
                 list.set(minIndex, minSum);
                 list.remove(minIndex + 1);
                 operations++;

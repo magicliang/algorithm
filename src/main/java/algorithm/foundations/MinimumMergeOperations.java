@@ -100,20 +100,20 @@ public class MinimumMergeOperations {
         // 持续合并直到数组有序
         while (!isNonDecreasing(list)) {
             // 找到所有相邻对的和
-            int minSum = Integer.MAX_VALUE;
+            Integer minSum = null;  // 使用可空的Integer
             int minIndex = -1;
             
             // 找到和最小的相邻对（最左边的）
             for (int i = 0; i < list.size() - 1; i++) {
                 int sum = list.get(i) + list.get(i + 1);
-                if (sum < minSum) {
+                if (minSum == null || sum < minSum) {  // 更优雅的比较
                     minSum = sum;
                     minIndex = i;
                 }
             }
             
             // 如果找到了最小和的相邻对，进行合并
-            if (minIndex != -1) {
+            if (minSum != null) {  // 更清晰的判断条件
                 int val1 = list.get(minIndex);
                 int val2 = list.get(minIndex + 1);
                 
