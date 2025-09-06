@@ -1,286 +1,435 @@
 package algorithm.datastructures.elementary;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.BeforeEach;
 import static org.junit.jupiter.api.Assertions.*;
-import algorithm.datastructures.elementary.LinkedList.ListNode;
 
 /**
- * FastSlowPointers的测试类
+ * LinkedList类的单元测试
+ * 测试快慢指针算法和链表操作的各种场景
  * 
  * @author magicliang
- * @date 2025-09-02
+ * @date 2025-09-06
  */
 public class LinkedListTest {
-
-    private LinkedList solution;
-
+    
+    private LinkedList linkedList;
+    
     @BeforeEach
     void setUp() {
-        solution = new LinkedList();
+        linkedList = new LinkedList();
     }
-
-    // 辅助方法：创建链表
-    private ListNode createList(int[] values) {
-        if (values == null || values.length == 0) {
-            return null;
-        }
+    
+    /**
+     * 创建测试用的链表：1->2->3->4->5
+     */
+    private LinkedList.ListNode createTestList() {
+        LinkedList.ListNode node1 = new LinkedList.ListNode(1);
+        LinkedList.ListNode node2 = new LinkedList.ListNode(2);
+        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
+        LinkedList.ListNode node4 = new LinkedList.ListNode(4);
+        LinkedList.ListNode node5 = new LinkedList.ListNode(5);
         
-        ListNode head = new ListNode(values[0]);
-        ListNode current = head;
+        node1.next = node2;
+        node2.next = node3;
+        node3.next = node4;
+        node4.next = node5;
         
-        for (int i = 1; i < values.length; i++) {
-            current.next = new ListNode(values[i]);
+        return node1;
+    }
+    
+    /**
+     * 创建带环的测试链表：1->2->3->4->5->2 (环从节点2开始)
+     */
+    private LinkedList.ListNode createCyclicList() {
+        LinkedList.ListNode node1 = new LinkedList.ListNode(1);
+        LinkedList.ListNode node2 = new LinkedList.ListNode(2);
+        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
+        LinkedList.ListNode node4 = new LinkedList.ListNode(4);
+        LinkedList.ListNode node5 = new LinkedList.ListNode(5);
+        
+        node1.next = node2;
+        node2.next = node3;
+        node3.next = node4;
+        node4.next = node5;
+        node5.next = node2; // 形成环
+        
+        return node1;
+    }
+    
+    /**
+     * 将链表转换为数组，用于验证结果
+     */
+    private int[] listToArray(LinkedList.ListNode head) {
+        if (head == null) return new int[0];
+        
+        java.util.List<Integer> result = new java.util.ArrayList<>();
+        LinkedList.ListNode current = head;
+        
+        // 防止无限循环，最多遍历100个节点
+        int count = 0;
+        while (current != null && count < 100) {
+            result.add(current.val);
             current = current.next;
+            count++;
         }
         
-        return head;
+        return result.stream().mapToInt(i -> i).toArray();
     }
-
-    // 辅助方法：创建有环链表
-    private ListNode createCyclicList(int[] values, int cycleStart) {
-        ListNode head = createList(values);
-        if (head == null || cycleStart < 0 || cycleStart >= values.length) {
-            return head;
-        }
+    
+    // ==================== 反转链表测试 ====================
+    
+    @Test
+    void testReverse_normalList() {
+        LinkedList.ListNode head = createTestList();
+        LinkedList.ListNode reversed = linkedList.reverse(head);
         
-        ListNode tail = head;
-        ListNode cycleNode = head;
-        
-        // 找到尾节点和环开始节点
-        for (int i = 0; i < values.length - 1; i++) {
-            if (i == cycleStart) {
-                cycleNode = tail;
-            }
-            tail = tail.next;
-        }
-        
-        // 创建环
-        tail.next = cycleNode;
-        return head;
-    }
-
-    @Test
-    void testHasCycleWithCycle() {
-        // 创建有环链表：1->2->3->4->2 (环从索引1开始)
-        ListNode head = createCyclicList(new int[]{1, 2, 3, 4}, 1);
-        assertTrue(solution.hasCycle(head), "应该检测到环");
-    }
-
-    @Test
-    void testHasCycleWithoutCycle() {
-        // 创建无环链表：1->2->3->4->null
-        ListNode head = createList(new int[]{1, 2, 3, 4});
-        assertFalse(solution.hasCycle(head), "不应该检测到环");
-    }
-
-    @Test
-    void testHasCycleEmptyList() {
-        assertFalse(solution.hasCycle(null), "空链表不应该有环");
-    }
-
-    @Test
-    void testHasCycleSingleNode() {
-        ListNode head = new ListNode(1);
-        assertFalse(solution.hasCycle(head), "单节点无环链表不应该有环");
-        
-        // 创建自环
-        head.next = head;
-        assertTrue(solution.hasCycle(head), "单节点自环应该检测到环");
-    }
-
-    @Test
-    void testFindMiddleOddLength() {
-        // 奇数长度：1->2->3->4->5，中间是3
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        ListNode middle = solution.findMiddle(head);
-        assertEquals(3, middle.val, "奇数长度链表中间节点错误");
-    }
-
-    @Test
-    void testFindMiddleEvenLength() {
-        // 偶数长度：1->2->3->4，中间是3（第二个中间节点）
-        ListNode head = createList(new int[]{1, 2, 3, 4});
-        ListNode middle = solution.findMiddle(head);
-        assertEquals(3, middle.val, "偶数长度链表中间节点错误");
-    }
-
-    @Test
-    void testFindMiddleSingleNode() {
-        ListNode head = new ListNode(1);
-        ListNode middle = solution.findMiddle(head);
-        assertEquals(1, middle.val, "单节点链表中间节点错误");
-    }
-
-    @Test
-    void testFindMiddleEmptyList() {
-        assertNull(solution.findMiddle(null), "空链表中间节点应该为null");
-    }
-
-    @Test
-    void testFindKthFromEnd() {
-        // 链表：1->2->3->4->5
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        
-        // 倒数第1个：5
-        ListNode kth1 = solution.findKthFromEnd(head, 1);
-        assertEquals(5, kth1.val, "倒数第1个节点错误");
-        
-        // 倒数第3个：3
-        ListNode kth3 = solution.findKthFromEnd(head, 3);
-        assertEquals(3, kth3.val, "倒数第3个节点错误");
-        
-        // 倒数第5个：1
-        ListNode kth5 = solution.findKthFromEnd(head, 5);
-        assertEquals(1, kth5.val, "倒数第5个节点错误");
-    }
-
-    @Test
-    void testFindKthFromEndInvalidK() {
-        ListNode head = createList(new int[]{1, 2, 3});
-        
-        // k超出链表长度
-        assertNull(solution.findKthFromEnd(head, 5), "k超出长度应该返回null");
-        
-        // k为0或负数
-        assertNull(solution.findKthFromEnd(head, 0), "k为0应该返回null");
-        assertNull(solution.findKthFromEnd(head, -1), "k为负数应该返回null");
-    }
-
-    @Test
-    void testRemoveKthFromEnd() {
-        // 链表：1->2->3->4->5，删除倒数第2个（4）
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        ListNode result = solution.removeKthFromEnd(head, 2);
-        
-        // 验证结果：1->2->3->5
-        int[] expected = {1, 2, 3, 5};
-        ListNode current = result;
-        for (int value : expected) {
-            assertNotNull(current, "链表长度不正确");
-            assertEquals(value, current.val, "节点值不正确");
-            current = current.next;
-        }
-        assertNull(current, "链表应该结束");
-    }
-
-    @Test
-    void testRemoveKthFromEnd2() {
-        // 链表：1->2->3->4->5，删除倒数第2个（4）
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        ListNode result = solution.removeKthFromEnd2(head, 2);
-
-        // 验证结果：1->2->3->5
-        int[] expected = {1, 2, 3, 5};
-        ListNode current = result;
-        for (int value : expected) {
-            assertNotNull(current, "链表长度不正确");
-            assertEquals(value, current.val, "节点值不正确");
-            current = current.next;
-        }
-        assertNull(current, "链表应该结束");
-    }
-
-    @Test
-    void testRemoveKthFromEndFirstNode() {
-        // 删除倒数第5个（第1个）：1->2->3->4->5 变成 2->3->4->5
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        ListNode result = solution.removeKthFromEnd(head, 5);
-        
-        assertEquals(2, result.val, "删除第一个节点后，头节点应该是2");
-    }
-
-    @Test
-    void testRemoveKthFromEndSingleNode() {
-        // 删除单节点链表的倒数第1个
-        ListNode head = new ListNode(1);
-        ListNode result = solution.removeKthFromEnd(head, 1);
-        
-        assertNull(result, "删除单节点后应该返回null");
-    }
-
-    @Test
-    void testReverse() {
-        // 测试正常链表反转：1->2->3 变成 3->2->1
-        ListNode head = createList(new int[]{1, 2, 3});
-        ListNode reversedHead = solution.reverse(head);
-        
-        // 验证反转后的链表：3->2->1
-        assertEquals(3, reversedHead.val, "反转后头节点应为3");
-        assertEquals(2, reversedHead.next.val, "第二个节点应为2");
-        assertEquals(1, reversedHead.next.next.val, "第三个节点应为1");
-        assertNull(reversedHead.next.next.next, "链表应终止于第三个节点");
-    }
-
-    @Test
-    void testReverseSingleNode() {
-        // 测试单节点反转
-        ListNode head = new ListNode(1);
-        ListNode reversedHead = solution.reverse(head);
-        
-        assertEquals(1, reversedHead.val, "单节点反转后值应不变");
-        assertNull(reversedHead.next, "单节点反转后应无后续节点");
-    }
-
-    @Test
-    void testReverseEmptyList() {
-        // 测试空链表反转
-        ListNode reversedHead = solution.reverse(null);
-        assertNull(reversedHead, "空链表反转后应为null");
-    }
-
-    @Test
-    void testReverseLongList() {
-        // 测试较长链表反转：1->2->3->4->5 变成 5->4->3->2->1
-        ListNode head = createList(new int[]{1, 2, 3, 4, 5});
-        ListNode reversedHead = solution.reverse(head);
-        
-        // 验证反转后的链表：5->4->3->2->1
         int[] expected = {5, 4, 3, 2, 1};
-        ListNode current = reversedHead;
-        for (int value : expected) {
-            assertNotNull(current, "链表长度不正确");
-            assertEquals(value, current.val, "节点值不正确");
+        int[] actual = listToArray(reversed);
+        
+        assertArrayEquals(expected, actual, "反转链表结果不正确");
+    }
+    
+    @Test
+    void testReverse_singleNode() {
+        LinkedList.ListNode head = new LinkedList.ListNode(1);
+        LinkedList.ListNode reversed = linkedList.reverse(head);
+        
+        assertEquals(1, reversed.val, "单节点反转后值应该不变");
+        assertNull(reversed.next, "单节点反转后next应该为null");
+    }
+    
+    @Test
+    void testReverse_emptyList() {
+        LinkedList.ListNode reversed = linkedList.reverse(null);
+        assertNull(reversed, "空链表反转后应该为null");
+    }
+    
+    // ==================== 反转前n个节点测试 ====================
+    
+    @Test
+    void testReverseFirstN_recursiveVersion() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = createTestList();
+        
+        // 反转前3个节点：1->2->3->4->5 变成 3->2->1->4->5
+        LinkedList.ListNode result = reverser.reverse(head, 3);
+        
+        int[] expected = {3, 2, 1, 4, 5};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "递归版本反转前3个节点结果不正确");
+    }
+    
+    @Test
+    void testReverseFirstN_iterativeVersion() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = createTestList();
+        
+        // 反转前3个节点：1->2->3->4->5 变成 3->2->1->4->5
+        LinkedList.ListNode result = reverser.reverse2(head, 3);
+        
+        int[] expected = {3, 2, 1, 4, 5};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "迭代版本反转前3个节点结果不正确");
+    }
+    
+    @Test
+    void testReverseFirstN_reverseAll() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = createTestList();
+        
+        // 反转所有5个节点
+        LinkedList.ListNode result = reverser.reverse2(head, 5);
+        
+        int[] expected = {5, 4, 3, 2, 1};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "反转所有节点结果不正确");
+    }
+    
+    @Test
+    void testReverseFirstN_singleNode() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = new LinkedList.ListNode(1);
+        
+        LinkedList.ListNode result = reverser.reverse2(head, 1);
+        
+        assertEquals(1, result.val, "反转单个节点值应该不变");
+        assertNull(result.next, "反转单个节点next应该为null");
+    }
+    
+    // ==================== 环检测测试 ====================
+    
+    @Test
+    void testHasCycle_withCycle() {
+        LinkedList.ListNode cyclicList = createCyclicList();
+        assertTrue(linkedList.hasCycle(cyclicList), "应该检测到环");
+    }
+    
+    @Test
+    void testHasCycle_withoutCycle() {
+        LinkedList.ListNode normalList = createTestList();
+        assertFalse(linkedList.hasCycle(normalList), "不应该检测到环");
+    }
+    
+    @Test
+    void testHasCycle_emptyList() {
+        assertFalse(linkedList.hasCycle(null), "空链表不应该有环");
+    }
+    
+    @Test
+    void testHasCycle_singleNode() {
+        LinkedList.ListNode singleNode = new LinkedList.ListNode(1);
+        assertFalse(linkedList.hasCycle(singleNode), "单节点无环链表不应该有环");
+    }
+    
+    @Test
+    void testHasCycle_singleNodeWithSelfCycle() {
+        LinkedList.ListNode selfCycle = new LinkedList.ListNode(1);
+        selfCycle.next = selfCycle;
+        assertTrue(linkedList.hasCycle(selfCycle), "自环节点应该检测到环");
+    }
+    
+    // ==================== 寻找中间节点测试 ====================
+    
+    @Test
+    void testFindMiddle_oddLength() {
+        LinkedList.ListNode head = createTestList(); // 1->2->3->4->5
+        LinkedList.ListNode middle = linkedList.findMiddle(head);
+        
+        assertEquals(3, middle.val, "奇数长度链表的中间节点应该是3");
+    }
+    
+    @Test
+    void testFindMiddle_evenLength() {
+        // 创建偶数长度链表：1->2->3->4
+        LinkedList.ListNode head = createTestList();
+        LinkedList.ListNode current = head;
+        while (current.next.next != null) {
             current = current.next;
         }
-        assertNull(current, "链表应该结束");
+        current.next = null; // 移除最后一个节点
+        
+        LinkedList.ListNode middle = linkedList.findMiddle(head);
+        assertEquals(3, middle.val, "偶数长度链表应该返回第二个中间节点");
     }
-
+    
     @Test
-    void testGetIntersectionNode() {
-        // 构造两个相交链表
-        ListNode commonNode = new ListNode(3, new ListNode(4));
-        ListNode headA = new ListNode(1, new ListNode(2, commonNode));
-        ListNode headB = new ListNode(5, commonNode);
+    void testFindMiddle_singleNode() {
+        LinkedList.ListNode singleNode = new LinkedList.ListNode(1);
+        LinkedList.ListNode middle = linkedList.findMiddle(singleNode);
         
-        // 验证交点
-        assertEquals(commonNode, solution.getIntersectionNode(headA, headB), "应找到交点节点");
-        
-        // 无交点情况
-        ListNode headC = new ListNode(6, new ListNode(7));
-        assertNull(solution.getIntersectionNode(headA, headC), "无交点时应返回null");
-        
-        // 空链表情况
-        assertNull(solution.getIntersectionNode(null, headB), "链表A为空时应返回null");
-        assertNull(solution.getIntersectionNode(headA, null), "链表B为空时应返回null");
+        assertEquals(1, middle.val, "单节点链表的中间节点就是自己");
     }
-
+    
     @Test
-    void testGetIntersectionNodeByCycle() {
-        // 构造两个相交链表
-        ListNode commonNode = new ListNode(3, new ListNode(4));
-        ListNode headA = new ListNode(1, new ListNode(2, commonNode));
-        ListNode headB = new ListNode(5, commonNode);
+    void testFindMiddle_emptyList() {
+        LinkedList.ListNode middle = linkedList.findMiddle(null);
+        assertNull(middle, "空链表的中间节点应该为null");
+    }
+    
+    // ==================== 寻找倒数第k个节点测试 ====================
+    
+    @Test
+    void testFindKthFromEnd_normalCase() {
+        LinkedList.ListNode head = createTestList(); // 1->2->3->4->5
         
-        // 验证交点
-        assertEquals(commonNode, solution.getIntersectionNodeByCycle(headA, headB), "应找到交点节点");
+        LinkedList.ListNode result = linkedList.findKthFromEnd(head, 2);
+        assertEquals(4, result.val, "倒数第2个节点应该是4");
         
-        // 无交点情况
-        ListNode headC = new ListNode(6, new ListNode(7));
-        assertNull(solution.getIntersectionNodeByCycle(headA, headC), "无交点时应返回null");
+        result = linkedList.findKthFromEnd(head, 1);
+        assertEquals(5, result.val, "倒数第1个节点应该是5");
         
-        // 空链表情况
-        assertNull(solution.getIntersectionNodeByCycle(null, headB), "链表A为空时应返回null");
-        assertNull(solution.getIntersectionNodeByCycle(headA, null), "链表B为空时应返回null");
+        result = linkedList.findKthFromEnd(head, 5);
+        assertEquals(1, result.val, "倒数第5个节点应该是1");
+    }
+    
+    @Test
+    void testFindKthFromEnd_kTooLarge() {
+        LinkedList.ListNode head = createTestList(); // 长度为5
+        LinkedList.ListNode result = linkedList.findKthFromEnd(head, 6);
+        
+        assertNull(result, "k超出链表长度应该返回null");
+    }
+    
+    @Test
+    void testFindKthFromEnd_invalidK() {
+        LinkedList.ListNode head = createTestList();
+        
+        assertNull(linkedList.findKthFromEnd(head, 0), "k=0应该返回null");
+        assertNull(linkedList.findKthFromEnd(head, -1), "k<0应该返回null");
+    }
+    
+    @Test
+    void testFindKthFromEnd_emptyList() {
+        LinkedList.ListNode result = linkedList.findKthFromEnd(null, 1);
+        assertNull(result, "空链表应该返回null");
+    }
+    
+    // ==================== 删除倒数第k个节点测试 ====================
+    
+    @Test
+    void testRemoveKthFromEnd_normalCase() {
+        LinkedList.ListNode head = createTestList(); // 1->2->3->4->5
+        
+        // 删除倒数第2个节点（节点4）
+        LinkedList.ListNode result = linkedList.removeKthFromEnd(head, 2);
+        
+        int[] expected = {1, 2, 3, 5};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "删除倒数第2个节点后应该是1->2->3->5");
+    }
+    
+    @Test
+    void testRemoveKthFromEnd_removeHead() {
+        LinkedList.ListNode head = createTestList(); // 1->2->3->4->5
+        
+        // 删除倒数第5个节点（头节点）
+        LinkedList.ListNode result = linkedList.removeKthFromEnd(head, 5);
+        
+        int[] expected = {2, 3, 4, 5};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "删除头节点后应该是2->3->4->5");
+    }
+    
+    @Test
+    void testRemoveKthFromEnd_removeTail() {
+        LinkedList.ListNode head = createTestList(); // 1->2->3->4->5
+        
+        // 删除倒数第1个节点（尾节点）
+        LinkedList.ListNode result = linkedList.removeKthFromEnd(head, 1);
+        
+        int[] expected = {1, 2, 3, 4};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "删除尾节点后应该是1->2->3->4");
+    }
+    
+    @Test
+    void testRemoveKthFromEnd_singleNode() {
+        LinkedList.ListNode singleNode = new LinkedList.ListNode(1);
+        
+        LinkedList.ListNode result = linkedList.removeKthFromEnd(singleNode, 1);
+        
+        assertNull(result, "删除单节点链表的唯一节点后应该为null");
+    }
+    
+    // ==================== 链表交点测试 ====================
+    
+    @Test
+    void testGetIntersectionNode_withIntersection() {
+        // 创建两个相交的链表
+        // listA: 1->2->3->6->7
+        // listB: 4->5->3->6->7 (从节点3开始相交)
+        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
+        LinkedList.ListNode node6 = new LinkedList.ListNode(6);
+        LinkedList.ListNode node7 = new LinkedList.ListNode(7);
+        node3.next = node6;
+        node6.next = node7;
+        
+        LinkedList.ListNode listA = new LinkedList.ListNode(1);
+        listA.next = new LinkedList.ListNode(2);
+        listA.next.next = node3;
+        
+        LinkedList.ListNode listB = new LinkedList.ListNode(4);
+        listB.next = new LinkedList.ListNode(5);
+        listB.next.next = node3;
+        
+        LinkedList.ListNode intersection = linkedList.getIntersectionNode(listA, listB);
+        
+        assertEquals(3, intersection.val, "交点应该是节点3");
+        assertSame(node3, intersection, "应该返回相同的节点引用");
+    }
+    
+    @Test
+    void testGetIntersectionNode_noIntersection() {
+        LinkedList.ListNode listA = createTestList(); // 1->2->3->4->5
+        
+        LinkedList.ListNode listB = new LinkedList.ListNode(6);
+        listB.next = new LinkedList.ListNode(7);
+        listB.next.next = new LinkedList.ListNode(8);
+        
+        LinkedList.ListNode intersection = linkedList.getIntersectionNode(listA, listB);
+        
+        assertNull(intersection, "无交点的链表应该返回null");
+    }
+    
+    @Test
+    void testGetIntersectionNode_emptyLists() {
+        assertNull(linkedList.getIntersectionNode(null, null), "两个空链表应该返回null");
+        assertNull(linkedList.getIntersectionNode(createTestList(), null), "一个空链表应该返回null");
+        assertNull(linkedList.getIntersectionNode(null, createTestList()), "一个空链表应该返回null");
+    }
+    
+    // ==================== 通过环检测找交点测试 ====================
+    
+    @Test
+    void testGetIntersectionNodeByCycle_withIntersection() {
+        // 创建两个相交的链表
+        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
+        LinkedList.ListNode node6 = new LinkedList.ListNode(6);
+        LinkedList.ListNode node7 = new LinkedList.ListNode(7);
+        node3.next = node6;
+        node6.next = node7;
+        
+        LinkedList.ListNode listA = new LinkedList.ListNode(1);
+        listA.next = new LinkedList.ListNode(2);
+        listA.next.next = node3;
+        
+        LinkedList.ListNode listB = new LinkedList.ListNode(4);
+        listB.next = new LinkedList.ListNode(5);
+        listB.next.next = node3;
+        
+        LinkedList.ListNode intersection = linkedList.getIntersectionNodeByCycle(listA, listB);
+        
+        assertEquals(3, intersection.val, "通过环检测找到的交点应该是节点3");
+        assertSame(node3, intersection, "应该返回相同的节点引用");
+    }
+    
+    @Test
+    void testGetIntersectionNodeByCycle_noIntersection() {
+        LinkedList.ListNode listA = createTestList();
+        
+        LinkedList.ListNode listB = new LinkedList.ListNode(6);
+        listB.next = new LinkedList.ListNode(7);
+        
+        LinkedList.ListNode intersection = linkedList.getIntersectionNodeByCycle(listA, listB);
+        
+        assertNull(intersection, "无交点时通过环检测应该返回null");
+    }
+    
+    // ==================== 边界情况和异常测试 ====================
+    
+    @Test
+    void testRemoveKthFromEnd2_normalCase() {
+        LinkedList.ListNode head = createTestList(); // 1->2->3->4->5
+        
+        // 删除倒数第3个节点（节点3）
+        LinkedList.ListNode result = linkedList.removeKthFromEnd2(head, 3);
+        
+        int[] expected = {1, 2, 4, 5};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "removeKthFromEnd2删除倒数第3个节点后应该是1->2->4->5");
+    }
+    
+    @Test
+    void testListNodeConstructors() {
+        // 测试ListNode的各种构造函数
+        LinkedList.ListNode node1 = new LinkedList.ListNode();
+        assertEquals(0, node1.val, "默认构造函数应该设置val为0");
+        assertNull(node1.next, "默认构造函数应该设置next为null");
+        
+        LinkedList.ListNode node2 = new LinkedList.ListNode(42);
+        assertEquals(42, node2.val, "单参数构造函数应该正确设置val");
+        assertNull(node2.next, "单参数构造函数应该设置next为null");
+        
+        LinkedList.ListNode node3 = new LinkedList.ListNode(99, node2);
+        assertEquals(99, node3.val, "双参数构造函数应该正确设置val");
+        assertSame(node2, node3.next, "双参数构造函数应该正确设置next");
     }
 }

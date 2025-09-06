@@ -18,20 +18,44 @@ public class LinkedList {
     
     /**
      * 链表节点定义
+     * 
+     * 提供三种构造方式：
+     * 1. 默认构造：创建值为0的节点
+     * 2. 值构造：创建指定值的节点
+     * 3. 完整构造：创建指定值和下一个节点的节点
      */
     public static class ListNode {
-        int val;
-        ListNode next;
+        int val;        // 节点存储的值
+        ListNode next;  // 指向下一个节点的指针
         
+        /** 默认构造函数，创建值为0的节点 */
         ListNode() {}
         
+        /** 
+         * 值构造函数
+         * @param val 节点的值
+         */
         ListNode(int val) {
             this.val = val;
         }
         
+        /** 
+         * 完整构造函数
+         * @param val 节点的值
+         * @param next 下一个节点的引用
+         */
         ListNode(int val, ListNode next) {
             this.val = val;
             this.next = next;
+        }
+        
+        /**
+         * 重写toString方法，便于调试
+         * @return 节点的字符串表示
+         */
+        @Override
+        public String toString() {
+            return "ListNode{val=" + val + "}";
         }
     }
 
@@ -73,12 +97,22 @@ public class LinkedList {
         return prev;
     }
 
+    /**
+     * 链表反转器内部类
+     * 提供两种反转前n个节点的实现方式：递归和迭代
+     */
     class Reverser {
 
         ListNode successor; // 保存未反转部分的头节点
 
         /**
-         * 反转链表的前 n 个节点
+         * 反转链表的前 n 个节点（递归实现）
+         * 
+         * 算法思路：
+         * 1. 递归到第n个节点作为新的头节点
+         * 2. 在回溯过程中逐步反转指针方向
+         * 3. 保存第n+1个节点作为successor，用于连接未反转部分
+         * 
          * 时间复杂度：O(n)
          * 空间复杂度：O(n)（递归栈开销）
          *
@@ -99,6 +133,53 @@ public class LinkedList {
             head.next = successor; // 这个 head.next 会发生多次，最终是最初的head连上了 successor
             return newHead; // 这个 newHead 回不断被返回回去，不会被替换
         }
+
+        /**
+         * 反转链表的前 n 个节点（迭代实现）
+         * 
+         * 算法思路：
+         * 1. 使用三个指针：prev（前驱）、current（当前）、next（后继）
+         * 2. 逐个反转前n个节点的指针方向
+         * 3. 反转完成后，原头节点变成尾节点，连接剩余未反转部分
+         * 
+         * 相比递归实现的优势：
+         * - 空间复杂度更优：O(1)
+         * - 避免递归栈溢出风险
+         * - 逻辑更直观易懂
+         * 
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(1)
+         *
+         * @param head 链表头节点
+         * @param n    需要反转的节点数
+         * @return     反转后的链表头节点
+         */
+        public ListNode reverse2(ListNode head, int n) {
+            ListNode current =  head;
+            ListNode prev = null;
+
+            // 边界情况处理
+            if (head == null || n == 1) {
+                return head;
+            }
+
+            // 反转前n个节点
+            while (n > 0) {
+                ListNode nxt = current.next;  // 保存下一个节点
+                current.next = prev;          // 反转当前节点指针
+                prev = current;               // 移动prev指针
+                current = nxt;                // 移动current指针
+                n--;
+            }
+
+            // 这个算法里的head天然就是末尾，只要直接赋值到 current 的越界值就行了
+            // 连接反转部分和未反转部分：原头节点现在是尾节点，连接到剩余部分
+            head.next = current;
+
+            // prev 是新的头
+            return prev;
+        }
+
     }
 
 
