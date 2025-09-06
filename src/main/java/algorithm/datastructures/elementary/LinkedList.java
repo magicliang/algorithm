@@ -38,18 +38,19 @@ public class LinkedList {
     /**
      * 反转链表
      * 时间复杂度：O(n)
-     * 空间复杂度：O(1)
+     * 空间复杂度：不使用 dummy节点的解法，实际上仍然是 O(1) 复杂度的算法
      *
      * @return 反转后的链表头节点
      */
     public ListNode reverse(ListNode head) {
-        // 不使用 dummy节点的解法，实际上仍然是 O(1) 复杂度的算法
 
         ListNode prev = null;
         ListNode current = head;
 
         while (current != null) {
             // 这个算法每次都是引入 p c n
+            // 先保存 n，再逆转c，再把 p 指向新头：
+            //
             // 让 p c n 的顺序交换
             // 首先从中间节点开始
             // 从 p c n 变成 c p n
@@ -71,20 +72,49 @@ public class LinkedList {
         // 最后 prev 是新头
         return prev;
     }
-    
-    /**
-     * 检测链表是否有环（Floyd判圈算法）
-     * 
-     * 算法原理：
-     * - 如果链表有环，快指针最终会追上慢指针
-     * - 如果链表无环，快指针会先到达末尾
-     * 
-     * 时间复杂度：O(n)
-     * 空间复杂度：O(1)
-     * 
-     * @param head 链表头节点
-     * @return 是否有环
-     */
+
+    class Reverser {
+
+        ListNode successor; // 保存未反转部分的头节点
+
+        /**
+         * 反转链表的前 n 个节点
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(n)（递归栈开销）
+         *
+         * @param head 链表头节点
+         * @param n    需要反转的节点数
+         * @return     反转后的链表头节点
+         */
+        public ListNode reverse(ListNode head, int n) {
+            if (n == 1) {
+                // 找到尾巴节点
+                successor = head.next; // 记录第 n+1 个节点
+                return head;
+            }
+            ListNode newHead = reverse(head.next, n - 1);
+            // 此时本头还保留新尾的引用，即 head.next 是子链表的尾，把本头放到子链表的尾部去
+            head.next.next = head;
+            // 从底部返回 successor 必已赋值
+            head.next = successor; // 这个 head.next 会发生多次，最终是最初的head连上了 successor
+            return newHead; // 这个 newHead 回不断被返回回去，不会被替换
+        }
+    }
+
+
+        /**
+         * 检测链表是否有环（Floyd判圈算法）
+         *
+         * 算法原理：
+         * - 如果链表有环，快指针最终会追上慢指针
+         * - 如果链表无环，快指针会先到达末尾
+         *
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(1)
+         *
+         * @param head 链表头节点
+         * @return 是否有环
+         */
     public boolean hasCycle(ListNode head) {
         if (head == null || head.next == null) {
             return false;
