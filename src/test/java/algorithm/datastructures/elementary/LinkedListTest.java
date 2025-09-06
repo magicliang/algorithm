@@ -245,4 +245,42 @@ public class LinkedListTest {
         }
         assertNull(current, "链表应该结束");
     }
+
+    @Test
+    void testGetIntersectionNode() {
+        // 构造两个相交链表
+        ListNode commonNode = new ListNode(3, new ListNode(4));
+        ListNode headA = new ListNode(1, new ListNode(2, commonNode));
+        ListNode headB = new ListNode(5, commonNode);
+        
+        // 验证交点
+        assertEquals(commonNode, solution.getIntersectionNode(headA, headB), "应找到交点节点");
+        
+        // 无交点情况
+        ListNode headC = new ListNode(6, new ListNode(7));
+        assertNull(solution.getIntersectionNode(headA, headC), "无交点时应返回null");
+        
+        // 空链表情况
+        assertNull(solution.getIntersectionNode(null, headB), "链表A为空时应返回null");
+        assertNull(solution.getIntersectionNode(headA, null), "链表B为空时应返回null");
+    }
+
+    @Test
+    void testGetIntersectionNodeByCycle() {
+        // 构造两个相交链表
+        ListNode commonNode = new ListNode(3, new ListNode(4));
+        ListNode headA = new ListNode(1, new ListNode(2, commonNode));
+        ListNode headB = new ListNode(5, commonNode);
+        
+        // 验证交点
+        assertEquals(commonNode, solution.getIntersectionNodeByCycle(headA, headB), "应找到交点节点");
+        
+        // 无交点情况
+        ListNode headC = new ListNode(6, new ListNode(7));
+        assertNull(solution.getIntersectionNodeByCycle(headA, headC), "无交点时应返回null");
+        
+        // 空链表情况
+        assertNull(solution.getIntersectionNodeByCycle(null, headB), "链表A为空时应返回null");
+        assertNull(solution.getIntersectionNodeByCycle(headA, null), "链表B为空时应返回null");
+    }
 }

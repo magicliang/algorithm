@@ -269,4 +269,96 @@ public class LinkedList {
         return dummy.next;
     }
 
+    /**
+     * 求两个链表的交点（假设链表无环）
+     * 
+     * 算法原理：
+     * - 双指针法：指针A从链表A出发，指针B从链表B出发。
+     * - 当指针A到达链表A末尾时，跳转到链表B头部；指针B同理。
+     * - 如果两链表相交，指针A和指针B会在交点相遇；否则同时到达末尾（null）。
+     * 
+     * 时间复杂度：O(m + n)
+     * 空间复杂度：O(1)
+     * 
+     * @param headA 链表A的头节点
+     * @param headB 链表B的头节点
+     * @return 交点节点，若无交点则返回null
+     */
+    public ListNode getIntersectionNode(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
+        }
+
+        ListNode pA = headA;
+        ListNode pB = headB;
+
+        // 双指针遍历，直到相遇或同时到达末尾（null）
+        while (pA != pB) {
+            pA = (pA == null) ? headB : pA.next;
+            pB = (pB == null) ? headA : pB.next;
+        }
+
+        return pA; // 返回交点或null
+    }
+
+    /**
+     * 求两个链表的交点（通过修改链表结构形成环）
+     * 
+     * 算法原理：
+     * - 将链表A的尾部连接到其头部，形成环。
+     * - 使用快慢指针法从链表B的头节点出发，检测环并找到入环点（即交点）。
+     * - 最后还原链表A的结构。
+     * 
+     * 时间复杂度：O(m + n)
+     * 空间复杂度：O(1)
+     * 
+     * @param headA 链表A的头节点
+     * @param headB 链表B的头节点
+     * @return 交点节点，若无交点则返回null
+     */
+    public ListNode getIntersectionNodeByCycle(ListNode headA, ListNode headB) {
+        if (headA == null || headB == null) {
+            return null;
+        }
+
+        // 1. 找到链表A的尾节点，并记录其原始next指针
+        ListNode tailA = headA;
+        while (tailA.next != null) {
+            tailA = tailA.next;
+        }
+        ListNode originalTailNext = tailA.next;
+
+        // 2. 将链表A的尾部连接到链表A的头部，形成环
+        tailA.next = headA;
+
+        // 3. 使用快慢指针法从链表B的头节点出发，寻找入环点（即交点）
+        ListNode slow = headB;
+        ListNode fast = headB;
+
+        boolean hasCycle = false;
+        while (fast != null && fast.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+            if (slow == fast) {
+                hasCycle = true;
+                break;
+            }
+        }
+
+        ListNode intersection = null;
+        if (hasCycle) {
+            slow = headB;
+            while (slow != fast) {
+                slow = slow.next;
+                fast = fast.next;
+            }
+            intersection = slow;
+        }
+
+        // 4. 还原链表A的结构
+        tailA.next = originalTailNext;
+
+        return intersection;
+    }
+
 }
