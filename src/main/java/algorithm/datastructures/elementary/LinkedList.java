@@ -2,23 +2,23 @@ package algorithm.datastructures.elementary;
 
 /**
  * 快慢指针算法示例
- * 
+ * <p>
  * 快慢指针是双指针技巧的一种，两个指针以不同的速度移动。
  * 常用于链表问题，如检测环、寻找中点、寻找倒数第k个节点等。
- * 
+ * <p>
  * 双指针策略：快慢指针移动
  * - 慢指针每次移动1步
  * - 快指针每次移动2步（或更多步）
  * - 通过速度差异来解决特定问题
- * 
+ *
  * @author magicliang
  * @date 2025-09-02
  */
 public class LinkedList {
-    
+
     /**
      * 链表节点定义
-     * 
+     * <p>
      * 提供三种构造方式：
      * 1. 默认构造：创建值为0的节点
      * 2. 值构造：创建指定值的节点
@@ -27,30 +27,36 @@ public class LinkedList {
     public static class ListNode {
         int val;        // 节点存储的值
         ListNode next;  // 指向下一个节点的指针
-        
-        /** 默认构造函数，创建值为0的节点 */
-        ListNode() {}
-        
-        /** 
+
+        /**
+         * 默认构造函数，创建值为0的节点
+         */
+        ListNode() {
+        }
+
+        /**
          * 值构造函数
+         *
          * @param val 节点的值
          */
         ListNode(int val) {
             this.val = val;
         }
-        
-        /** 
+
+        /**
          * 完整构造函数
-         * @param val 节点的值
+         *
+         * @param val  节点的值
          * @param next 下一个节点的引用
          */
         ListNode(int val, ListNode next) {
             this.val = val;
             this.next = next;
         }
-        
+
         /**
          * 重写toString方法，便于调试
+         *
          * @return 节点的字符串表示
          */
         @Override
@@ -80,7 +86,7 @@ public class LinkedList {
             // 从 p c n 变成 c p n
             // 然后把下一轮的 p 指向 cp 的头
             // 这样下一轮开始的时候，就产生新的 cp n
-             ListNode next = current.next;
+            ListNode next = current.next;
 
             // 反转自己，前链表和本链表断链
             current.next = prev;
@@ -107,18 +113,18 @@ public class LinkedList {
 
         /**
          * 反转链表的前 n 个节点（递归实现）
-         * 
+         * <p>
          * 算法思路：
          * 1. 递归到第n个节点作为新的头节点
          * 2. 在回溯过程中逐步反转指针方向
          * 3. 保存第n+1个节点作为successor，用于连接未反转部分
-         * 
+         * <p>
          * 时间复杂度：O(n)
          * 空间复杂度：O(n)（递归栈开销）
          *
          * @param head 链表头节点
          * @param n    需要反转的节点数
-         * @return     反转后的链表头节点
+         * @return 反转后的链表头节点
          */
         public ListNode reverse(ListNode head, int n) {
             if (n == 1) {
@@ -136,26 +142,26 @@ public class LinkedList {
 
         /**
          * 反转链表的前 n 个节点（迭代实现）
-         * 
+         * <p>
          * 算法思路：
          * 1. 使用三个指针：prev（前驱）、current（当前）、next（后继）
          * 2. 逐个反转前n个节点的指针方向
          * 3. 反转完成后，原头节点变成尾节点，连接剩余未反转部分
-         * 
+         * <p>
          * 相比递归实现的优势：
          * - 空间复杂度更优：O(1)
          * - 避免递归栈溢出风险
          * - 逻辑更直观易懂
-         * 
+         * <p>
          * 时间复杂度：O(n)
          * 空间复杂度：O(1)
          *
          * @param head 链表头节点
          * @param n    需要反转的节点数
-         * @return     反转后的链表头节点
+         * @return 反转后的链表头节点
          */
         public ListNode reverse2(ListNode head, int n) {
-            ListNode current =  head;
+            ListNode current = head;
             ListNode prev = null;
 
             // 边界情况处理
@@ -180,53 +186,99 @@ public class LinkedList {
             return prev;
         }
 
-    }
-
-
         /**
-         * 检测链表是否有环（Floyd判圈算法）
-         *
-         * 算法原理：
-         * - 如果链表有环，快指针最终会追上慢指针
-         * - 如果链表无环，快指针会先到达末尾
-         *
+         * 反转链表的前 n 个节点（dummy头节点实现）
+         * <p>
+         * 算法思路：
+         * 1. 使用dummy头节点简化边界处理
+         * 2. 通过头插法逐个将节点插入到dummy节点后面
+         * 3. 最终形成反转效果
+         * <p>
+         * 核心技巧：头插法反转
+         * - 每次将current节点插入到dummyHead的后面
+         * - 这样自然形成了反转的顺序
+         * <p>
+         * 相比其他实现的特点：
+         * - 使用dummy节点避免特殊处理头节点
+         * - 头插法思路清晰直观
+         * - 代码简洁优雅
+         * <p>
          * 时间复杂度：O(n)
          * 空间复杂度：O(1)
          *
          * @param head 链表头节点
-         * @return 是否有环
+         * @param n    需要反转的节点数
+         * @return 反转后的链表头节点
          */
+        public ListNode reverse3(ListNode head, int n) {
+            // 创建dummy头节点，简化边界处理
+            ListNode dummyHead = new ListNode();
+            dummyHead.next = head;
+
+            ListNode current = head;
+            while (n > 0) {
+                // 这一步对所有的翻转都是一样的
+                // 头插法：将current节点插入到dummyHead后面
+                ListNode nxt = current.next;        // 保存下一个节点，下一圈的节点有用
+                current.next = dummyHead.next;      // current指向当前dummyHead的下一个节点
+                dummyHead.next = current;           // dummyHead指向current（头插）
+                current = nxt;                      // 移动到下一个节点
+                n--;
+            }
+
+            // 此时 head 本身就是新链表的末尾，链表结构即使被破坏了也无所谓
+            // 连接反转部分和未反转部分
+            head.next = current;
+            return dummyHead.next;
+        }
+
+    }
+
+
+    /**
+     * 检测链表是否有环（Floyd判圈算法）
+     * <p>
+     * 算法原理：
+     * - 如果链表有环，快指针最终会追上慢指针
+     * - 如果链表无环，快指针会先到达末尾
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @return 是否有环
+     */
     public boolean hasCycle(ListNode head) {
         if (head == null || head.next == null) {
             return false;
         }
-        
+
         ListNode slow = head;      // 慢指针，每次移动1步
         ListNode fast = head.next; // 快指针，每次移动2步
-        
+
         while (slow != fast) {
             // 快指针到达末尾，说明无环
             if (fast == null || fast.next == null) {
                 return false;
             }
-            
+
             slow = slow.next;        // 慢指针移动1步
             fast = fast.next.next;   // 快指针移动2步
         }
-        
+
         return true; // 快慢指针相遇，说明有环
     }
-    
+
     /**
      * 寻找链表的中间节点
-     * 
+     * <p>
      * 算法原理：
      * - 当快指针到达末尾时，慢指针正好在中间位置
      * - 对于偶数长度链表，返回第二个中间节点
-     * 
+     * <p>
      * 时间复杂度：O(n)
      * 空间复杂度：O(1)
-     * 
+     *
      * @param head 链表头节点
      * @return 中间节点
      */
@@ -234,32 +286,32 @@ public class LinkedList {
         if (head == null) {
             return null;
         }
-        
+
         ListNode slow = head; // 慢指针
         ListNode fast = head; // 快指针
-        
+
         // 快指针每次移动2步，慢指针每次移动1步
         while (fast != null && fast.next != null) {
             slow = slow.next;
             fast = fast.next.next;
         }
-        
+
         return slow; // 慢指针指向中间节点
     }
-    
+
     /**
      * 寻找链表的倒数第k个节点
-     * 
+     * <p>
      * 算法原理：
      * - 让快指针先移动k步
      * - 然后快慢指针同时移动，直到快指针到达末尾
      * - 此时慢指针指向倒数第k个节点
-     * 
+     * <p>
      * 时间复杂度：O(n)
      * 空间复杂度：O(1)
-     * 
+     *
      * @param head 链表头节点
-     * @param k 倒数第k个
+     * @param k    倒数第k个
      * @return 倒数第k个节点，如果k超出链表长度则返回null
      */
     public ListNode findKthFromEnd(ListNode head, int k) {
@@ -290,7 +342,7 @@ public class LinkedList {
 
         return slow;
     }
-    
+
     /**
      * 删除链表的倒数第k个节点
      * 这个算法的 k + 1 和 dummyHead 是必须匹配存在的
@@ -301,8 +353,9 @@ public class LinkedList {
      * 1. 如果要让 slow 停在倒数第k个节点，要让 fast 先走 k 步。
      * 2. 如果要删除 k 节点（包括头），就要让 slow 停在倒数 k + 1 处。
      * 3. 所以要让 fast 先走 k + 1 步。
+     *
      * @param head 链表头节点
-     * @param k 倒数第k个
+     * @param k    倒数第k个
      * @return 删除节点后的链表头
      */
     public ListNode removeKthFromEnd(ListNode head, int k) {
@@ -346,7 +399,7 @@ public class LinkedList {
      * 这个算法是正确的，因为头结点可以被删除，所以 dummy 节点是必须的
      *
      * @param head 链表头节点
-     * @param k 倒数第k个
+     * @param k    倒数第k个
      * @return 删除节点后的链表头
      */
     public ListNode removeKthFromEnd2(ListNode head, int k) {
@@ -382,15 +435,15 @@ public class LinkedList {
 
     /**
      * 求两个链表的交点（假设链表无环）
-     * 
+     * <p>
      * 算法原理：
      * - 双指针法：指针A从链表A出发，指针B从链表B出发。
      * - 当指针A到达链表A末尾时，跳转到链表B头部；指针B同理。
      * - 如果两链表相交，指针A和指针B会在交点相遇；否则同时到达末尾（null）。
-     * 
+     * <p>
      * 时间复杂度：O(m + n)
      * 空间复杂度：O(1)
-     * 
+     *
      * @param headA 链表A的头节点
      * @param headB 链表B的头节点
      * @return 交点节点，若无交点则返回null
@@ -414,15 +467,15 @@ public class LinkedList {
 
     /**
      * 求两个链表的交点（通过修改链表结构形成环）
-     * 
+     * <p>
      * 算法原理：
      * - 将链表A的尾部连接到其头部，形成环。
      * - 使用快慢指针法从链表B的头节点出发，检测环并找到入环点（即交点）。
      * - 最后还原链表A的结构。
-     * 
+     * <p>
      * 时间复杂度：O(m + n)
      * 空间复杂度：O(1)
-     * 
+     *
      * @param headA 链表A的头节点
      * @param headB 链表B的头节点
      * @return 交点节点，若无交点则返回null
@@ -470,6 +523,139 @@ public class LinkedList {
         tailA.next = originalTailNext;
 
         return intersection;
+    }
+
+    // ==================== 辅助工具方法 ====================
+
+    /**
+     * 根据数组创建链表
+     * <p>
+     * 工具方法，便于测试和调试
+     *
+     * @param values 数组值
+     * @return 创建的链表头节点
+     */
+    public static ListNode createFromArray(int[] values) {
+        if (values == null || values.length == 0) {
+            return null;
+        }
+
+        ListNode dummy = new ListNode();
+        ListNode current = dummy;
+
+        for (int val : values) {
+            current.next = new ListNode(val);
+            current = current.next;
+        }
+
+        return dummy.next;
+    }
+
+    /**
+     * 将链表转换为数组
+     * <p>
+     * 工具方法，便于测试验证结果
+     * 注意：此方法假设链表无环，最多遍历1000个节点防止无限循环
+     *
+     * @param head 链表头节点
+     * @return 链表值组成的数组
+     */
+    public static int[] toArray(ListNode head) {
+        if (head == null) {
+            return new int[0];
+        }
+
+        java.util.List<Integer> result = new java.util.ArrayList<>();
+        ListNode current = head;
+        int count = 0;
+
+        // 防止无限循环，最多遍历1000个节点
+        while (current != null && count < 1000) {
+            result.add(current.val);
+            current = current.next;
+            count++;
+        }
+
+        return result.stream().mapToInt(i -> i).toArray();
+    }
+
+    /**
+     * 计算链表长度
+     * <p>
+     * 注意：此方法假设链表无环
+     *
+     * @param head 链表头节点
+     * @return 链表长度
+     */
+    public static int getLength(ListNode head) {
+        int length = 0;
+        ListNode current = head;
+
+        while (current != null) {
+            length++;
+            current = current.next;
+        }
+
+        return length;
+    }
+
+    /**
+     * 打印链表内容
+     * <p>
+     * 调试工具方法，格式：1 -> 2 -> 3 -> null
+     *
+     * @param head 链表头节点
+     * @return 链表的字符串表示
+     */
+    public static String printList(ListNode head) {
+        if (head == null) {
+            return "null";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        ListNode current = head;
+        int count = 0;
+
+        // 防止无限循环
+        while (current != null && count < 100) {
+            sb.append(current.val);
+            if (current.next != null) {
+                sb.append(" -> ");
+            }
+            current = current.next;
+            count++;
+        }
+
+        if (count >= 100) {
+            sb.append(" -> ... (可能有环或链表过长)");
+        } else {
+            sb.append(" -> null");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 检查两个链表是否相等（值相等且顺序相同）
+     *
+     * @param list1 第一个链表
+     * @param list2 第二个链表
+     * @return 是否相等
+     */
+    public static boolean areEqual(ListNode list1, ListNode list2) {
+        ListNode current1 = list1;
+        ListNode current2 = list2;
+
+        while (current1 != null && current2 != null) {
+            if (current1.val != current2.val) {
+                return false;
+            }
+            current1 = current1.next;
+            current2 = current2.next;
+        }
+
+        // 两个链表都应该同时到达末尾
+        return current1 == null && current2 == null;
     }
 
 }

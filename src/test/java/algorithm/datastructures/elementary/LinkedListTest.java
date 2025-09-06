@@ -24,18 +24,7 @@ public class LinkedListTest {
      * 创建测试用的链表：1->2->3->4->5
      */
     private LinkedList.ListNode createTestList() {
-        LinkedList.ListNode node1 = new LinkedList.ListNode(1);
-        LinkedList.ListNode node2 = new LinkedList.ListNode(2);
-        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
-        LinkedList.ListNode node4 = new LinkedList.ListNode(4);
-        LinkedList.ListNode node5 = new LinkedList.ListNode(5);
-        
-        node1.next = node2;
-        node2.next = node3;
-        node3.next = node4;
-        node4.next = node5;
-        
-        return node1;
+        return LinkedList.createFromArray(new int[]{1, 2, 3, 4, 5});
     }
     
     /**
@@ -61,20 +50,7 @@ public class LinkedListTest {
      * 将链表转换为数组，用于验证结果
      */
     private int[] listToArray(LinkedList.ListNode head) {
-        if (head == null) return new int[0];
-        
-        java.util.List<Integer> result = new java.util.ArrayList<>();
-        LinkedList.ListNode current = head;
-        
-        // 防止无限循环，最多遍历100个节点
-        int count = 0;
-        while (current != null && count < 100) {
-            result.add(current.val);
-            current = current.next;
-            count++;
-        }
-        
-        return result.stream().mapToInt(i -> i).toArray();
+        return LinkedList.toArray(head);
     }
     
     // ==================== 反转链表测试 ====================
@@ -158,6 +134,74 @@ public class LinkedListTest {
         
         assertEquals(1, result.val, "反转单个节点值应该不变");
         assertNull(result.next, "反转单个节点next应该为null");
+    }
+    
+    @Test
+    void testReverseFirstN_dummyHeadVersion() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = createTestList();
+        
+        // 反转前3个节点：1->2->3->4->5 变成 3->2->1->4->5
+        LinkedList.ListNode result = reverser.reverse3(head, 3);
+        
+        int[] expected = {3, 2, 1, 4, 5};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "dummy头节点版本反转前3个节点结果不正确");
+    }
+    
+    @Test
+    void testReverseFirstN_dummyHeadVersion_reverseAll() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = createTestList();
+        
+        // 反转所有5个节点
+        LinkedList.ListNode result = reverser.reverse3(head, 5);
+        
+        int[] expected = {5, 4, 3, 2, 1};
+        int[] actual = listToArray(result);
+        
+        assertArrayEquals(expected, actual, "dummy头节点版本反转所有节点结果不正确");
+    }
+    
+    @Test
+    void testReverseFirstN_dummyHeadVersion_singleNode() {
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        LinkedList.ListNode head = new LinkedList.ListNode(42);
+        
+        LinkedList.ListNode result = reverser.reverse3(head, 1);
+        
+        assertEquals(42, result.val, "dummy头节点版本反转单个节点值应该不变");
+        assertNull(result.next, "dummy头节点版本反转单个节点next应该为null");
+    }
+    
+    @Test
+    void testReverseFirstN_compareAllVersions() {
+        // 比较三种实现的结果是否一致
+        LinkedList.Reverser reverser = linkedList.new Reverser();
+        
+        // 创建三个相同的测试链表
+        LinkedList.ListNode head1 = createTestList();
+        LinkedList.ListNode head2 = createTestList();
+        LinkedList.ListNode head3 = createTestList();
+        
+        // 使用三种不同的方法反转前3个节点
+        LinkedList.ListNode result1 = reverser.reverse(head1, 3);   // 递归版本
+        LinkedList.ListNode result2 = reverser.reverse2(head2, 3);  // 迭代版本
+        LinkedList.ListNode result3 = reverser.reverse3(head3, 3);  // dummy头节点版本
+        
+        // 验证三种方法的结果是否一致
+        int[] array1 = listToArray(result1);
+        int[] array2 = listToArray(result2);
+        int[] array3 = listToArray(result3);
+        
+        assertArrayEquals(array1, array2, "递归版本和迭代版本结果应该一致");
+        assertArrayEquals(array2, array3, "迭代版本和dummy头节点版本结果应该一致");
+        assertArrayEquals(array1, array3, "递归版本和dummy头节点版本结果应该一致");
+        
+        // 验证具体结果
+        int[] expected = {3, 2, 1, 4, 5};
+        assertArrayEquals(expected, array1, "所有版本的结果都应该正确");
     }
     
     // ==================== 环检测测试 ====================
@@ -431,5 +475,78 @@ public class LinkedListTest {
         LinkedList.ListNode node3 = new LinkedList.ListNode(99, node2);
         assertEquals(99, node3.val, "双参数构造函数应该正确设置val");
         assertSame(node2, node3.next, "双参数构造函数应该正确设置next");
+    }
+    
+    // ==================== 工具方法测试 ====================
+    
+    @Test
+    void testCreateFromArray() {
+        int[] values = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head = LinkedList.createFromArray(values);
+        
+        int[] result = LinkedList.toArray(head);
+        assertArrayEquals(values, result, "从数组创建的链表应该与原数组相同");
+    }
+    
+    @Test
+    void testCreateFromArray_emptyArray() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{});
+        assertNull(head, "空数组应该创建null链表");
+        
+        head = LinkedList.createFromArray(null);
+        assertNull(head, "null数组应该创建null链表");
+    }
+    
+    @Test
+    void testToArray() {
+        LinkedList.ListNode head = createTestList();
+        int[] result = LinkedList.toArray(head);
+        
+        int[] expected = {1, 2, 3, 4, 5};
+        assertArrayEquals(expected, result, "toArray应该正确转换链表");
+    }
+    
+    @Test
+    void testGetLength() {
+        LinkedList.ListNode head = createTestList();
+        assertEquals(5, LinkedList.getLength(head), "链表长度应该是5");
+        
+        assertEquals(0, LinkedList.getLength(null), "空链表长度应该是0");
+        
+        LinkedList.ListNode singleNode = new LinkedList.ListNode(1);
+        assertEquals(1, LinkedList.getLength(singleNode), "单节点链表长度应该是1");
+    }
+    
+    @Test
+    void testPrintList() {
+        LinkedList.ListNode head = createTestList();
+        String result = LinkedList.printList(head);
+        
+        assertEquals("1 -> 2 -> 3 -> 4 -> 5 -> null", result, "打印结果应该正确");
+        
+        assertEquals("null", LinkedList.printList(null), "空链表打印应该是null");
+        
+        LinkedList.ListNode singleNode = new LinkedList.ListNode(42);
+        assertEquals("42 -> null", LinkedList.printList(singleNode), "单节点打印应该正确");
+    }
+    
+    @Test
+    void testAreEqual() {
+        LinkedList.ListNode list1 = LinkedList.createFromArray(new int[]{1, 2, 3});
+        LinkedList.ListNode list2 = LinkedList.createFromArray(new int[]{1, 2, 3});
+        LinkedList.ListNode list3 = LinkedList.createFromArray(new int[]{1, 2, 4});
+        
+        assertTrue(LinkedList.areEqual(list1, list2), "相同内容的链表应该相等");
+        assertFalse(LinkedList.areEqual(list1, list3), "不同内容的链表应该不相等");
+        
+        assertTrue(LinkedList.areEqual(null, null), "两个null链表应该相等");
+        assertFalse(LinkedList.areEqual(list1, null), "非null和null链表应该不相等");
+        assertFalse(LinkedList.areEqual(null, list1), "null和非null链表应该不相等");
+    }
+    
+    @Test
+    void testListNodeToString() {
+        LinkedList.ListNode node = new LinkedList.ListNode(42);
+        assertEquals("ListNode{val=42}", node.toString(), "toString方法应该正确格式化");
     }
 }
