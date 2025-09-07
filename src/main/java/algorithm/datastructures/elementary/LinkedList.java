@@ -660,4 +660,57 @@ public class LinkedList {
         return current1 == null && current2 == null;
     }
 
+    /**
+     * 删除排序链表中的重复元素
+     * <p>
+     * 给定一个已排序的链表，删除所有重复的元素，使得每个元素只出现一次。
+     * <p>
+     * 算法原理：快慢指针
+     * - `slow` 指针：指向当前不重复部分的最后一个节点。
+     * - `fast` 指针：向前探索，寻找与 `slow` 指针值不同的新节点。
+     * <p>
+     * 过程：
+     * 1. 初始化 `slow` 和 `fast` 都指向头节点 `head`。
+     * 2. `fast` 指针遍历整个链表。
+     * 3. 如果 `fast` 指向的节点值与 `slow` 不同，说明遇到了一个新的不重复元素。
+     *    - 将 `slow` 的 `next` 指向 `fast`，将这个新元素连接到不重复部分的末尾。
+     *    - `slow` 指针前进一步，指向这个新的末尾节点。
+     * 4. 循环结束后，`fast` 指向 `null`。此时 `slow` 是不重复部分的最后一个节点。
+     * 5. **关键步骤**：将 `slow.next` 设置为 `null`。这是为了处理链表末尾有重复元素的情况（例如 1->2->3->3->3）。
+     *    如果不执行此步，`slow` 会指向第一个3，但它后面的 `3->3` 链依然存在。
+     * <p>
+     * 时间复杂度：O(n)，因为 `fast` 指针遍历链表一次。
+     * 空间复杂度：O(1)，只使用了常数个额外指针。
+     *
+     * @param head 已排序链表的头节点
+     * @return 删除重复元素后的链表头节点
+     */
+    public ListNode deleteDuplicates(ListNode head) {
+        // 如果链表为空，直接返回
+        if (head == null) {
+            return null;
+        }
+
+        // 初始化快慢指针
+        ListNode slow = head, fast = head;
+        while (fast != null) {
+            // 当快指针找到一个与慢指针值不同的新节点时
+            if (slow.val != fast.val) {
+                // 将慢指针的 next 指向这个新节点，实际上是跳过了中间所有重复的节点
+                slow.next = fast;
+                // 慢指针前进到这个新的不重复节点上
+                slow = slow.next;
+            }
+            // 快指针持续前进
+            fast = fast.next;
+        }
+
+        // 易错点：循环结束后，slow 指向最后一个不重复元素。
+        // 必须将它的 next 指针设为 null，以断开与后续可能存在的重复元素的连接。
+        // 例如，对于 1->2->2，循环结束后 slow 指向第一个 2，fast 为 null。
+        // 此时 slow.next 仍然指向第二个 2，需要断开它。
+        slow.next = null;
+
+        return head;
+    }
 }

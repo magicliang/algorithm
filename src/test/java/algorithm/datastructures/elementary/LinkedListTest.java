@@ -549,4 +549,68 @@ public class LinkedListTest {
         LinkedList.ListNode node = new LinkedList.ListNode(42);
         assertEquals("ListNode{val=42}", node.toString(), "toString方法应该正确格式化");
     }
+
+    // ==================== 删除重复元素测试 ====================
+
+    @Test
+    void testDeleteDuplicates_normalCase() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{1, 1, 2, 3, 3});
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1, 2, 3};
+        assertArrayEquals(expected, listToArray(result), "常规情况：1->1->2->3->3 应该变为 1->2->3");
+    }
+
+    @Test
+    void testDeleteDuplicates_noDuplicates() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{1, 2, 3, 4, 5});
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1, 2, 3, 4, 5};
+        assertArrayEquals(expected, listToArray(result), "无重复元素的链表应该保持不变");
+    }
+
+    @Test
+    void testDeleteDuplicates_allDuplicates() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{1, 1, 1, 1});
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1};
+        assertArrayEquals(expected, listToArray(result), "所有元素都重复的链表应该只剩一个元素");
+    }
+
+    @Test
+    void testDeleteDuplicates_duplicatesAtEnd() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{1, 2, 3, 3, 3});
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1, 2, 3};
+        assertArrayEquals(expected, listToArray(result), "末尾有重复元素的链表应该正确处理");
+    }
+
+    @Test
+    void testDeleteDuplicates_duplicatesAtBeginning() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{1, 1, 1, 2, 3});
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1, 2, 3};
+        assertArrayEquals(expected, listToArray(result), "开头有重复元素的链表应该正确处理");
+    }
+
+    @Test
+    void testDeleteDuplicates_singleNode() {
+        LinkedList.ListNode head = new LinkedList.ListNode(1);
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1};
+        assertArrayEquals(expected, listToArray(result), "单节点链表应该保持不变");
+    }
+
+    @Test
+    void testDeleteDuplicates_emptyList() {
+        LinkedList.ListNode result = linkedList.deleteDuplicates(null);
+        assertNull(result, "空链表应该返回null");
+    }
+
+    @Test
+    void testDeleteDuplicates_multipleGroupsOfDuplicates() {
+        LinkedList.ListNode head = LinkedList.createFromArray(new int[]{1, 1, 2, 2, 3, 3, 4, 5, 5});
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        int[] expected = {1, 2, 3, 4, 5};
+        assertArrayEquals(expected, listToArray(result), "多组重复元素应该都能正确处理");
+    }
 }
