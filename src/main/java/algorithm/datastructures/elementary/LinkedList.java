@@ -532,6 +532,241 @@ public class LinkedList {
         return intersection;
     }
 
+    /**
+     * 检测链表中环的起始节点（Floyd判圈算法 + 数学推导）
+     * <p>
+     * 算法原理：
+     * 1. 第一阶段：使用快慢指针检测是否有环
+     * 2. 第二阶段：如果有环，找到环的起始节点
+     * <p>
+     * 数学推导：
+     * - 设链表头到环起点距离为 a
+     * - 环起点到快慢指针相遇点距离为 b  
+     * - 相遇点到环起点距离为 c
+     * - 环长为 b + c
+     * <p>
+     * 当快慢指针相遇时：
+     * - 慢指针走过距离：a + b
+     * - 快指针走过距离：a + b + n(b + c)，其中n为快指针多走的圈数
+     * - 由于快指针速度是慢指针2倍：2(a + b) = a + b + n(b + c)
+     * - 化简得：a = n(b + c) - b = (n-1)(b + c) + c
+     * <p>
+     * 这意味着：从链表头走 a 步 = 从相遇点走 c 步（都到达环起点）
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @return 环的起始节点，如果无环则返回null
+     */
+    public ListNode detectCycle(ListNode head) {
+        if (head == null || head.next == null) {
+            return null;
+        }
+
+        // 第一阶段：检测是否有环
+        ListNode slow = head;
+        ListNode fast = head;
+        boolean hasCycle = false;
+
+        while (fast != null && fast.next != null) {
+            slow = slow.next;        // 慢指针每次移动1步
+            fast = fast.next.next;   // 快指针每次移动2步
+            
+            if (slow == fast) {      // 快慢指针相遇，说明有环
+                hasCycle = true;
+                break;
+            }
+        }
+
+        // 如果无环，直接返回null
+        if (!hasCycle) {
+            return null;
+        }
+
+        // 第二阶段：找到环的起始节点
+        // 将慢指针重置到链表头，快指针保持在相遇点
+        slow = head;
+        
+        // 两指针以相同速度移动，相遇点即为环的起始节点
+        while (slow != fast) {
+            slow = slow.next;
+            fast = fast.next;
+        }
+
+        return slow; // 返回环的起始节点
+    }
+
+    /**
+     * 删除排序链表中的所有重复元素（完全删除）
+     * <p>
+     * 与 deleteDuplicates 不同，此方法会完全删除所有重复的元素，
+     * 而不是保留一个。
+     * <p>
+     * 例如：1->2->3->3->4->4->5 变为 1->2->5
+     * <p>
+     * 算法思路：
+     * 1. 使用dummy头节点简化边界处理
+     * 2. 使用prev指针跟踪前一个不重复的节点
+     * 3. 使用current指针遍历链表
+     * 4. 当发现重复时，跳过所有相同值的节点
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 已排序链表的头节点
+     * @return 删除所有重复元素后的链表头节点
+     */
+    public ListNode deleteDuplicates2(ListNode head) {
+        if (head == null || head.next == null) {
+            return head;
+        }
+
+        // 使用dummy头节点简化边界处理
+        ListNode dummy = new ListNode(0);
+        dummy.next = head;
+        ListNode prev = dummy;    // 指向前一个不重复的节点
+        ListNode current = head;  // 当前遍历的节点
+
+        while (current != null) {
+            // 检查当前节点是否有重复
+            if (current.next != null && current.val == current.next.val) {
+                int duplicateVal = current.val;
+                
+                // 跳过所有值为duplicateVal的节点
+                while (current != null && current.val == duplicateVal) {
+                    current = current.next;
+                }
+                
+                // 将prev连接到跳过重复节点后的位置
+                prev.next = current;
+            } else {
+                // 当前节点不重复，prev指针前移
+                prev = current;
+                current = current.next;
+            }
+        }
+
+        return dummy.next;
+    }
+
+    /**
+     * 合并两个有序链表
+     * <p>
+     * 将两个升序链表合并为一个新的升序链表并返回。
+     * 新链表是通过拼接给定的两个链表的所有节点组成的。
+     * <p>
+     * 算法思路：
+     * 1. 使用dummy头节点简化处理
+     * 2. 使用双指针分别遍历两个链表
+     * 3. 每次选择较小的节点连接到结果链表
+     * 4. 处理剩余节点
+     * <p>
+     * 时间复杂度：O(m + n)，其中m和n分别是两个链表的长度
+     * 空间复杂度：O(1)
+     *
+     * @param list1 第一个有序链表
+     * @param list2 第二个有序链表
+     * @return 合并后的有序链表
+     */
+    public ListNode mergeTwoLists(ListNode list1, ListNode list2) {
+        // 使用dummy头节点简化边界处理
+        ListNode dummy = new ListNode(0);
+        ListNode current = dummy;
+
+        // 双指针遍历两个链表
+        while (list1 != null && list2 != null) {
+            if (list1.val <= list2.val) {
+                current.next = list1;
+                list1 = list1.next;
+            } else {
+                current.next = list2;
+                list2 = list2.next;
+            }
+            current = current.next;
+        }
+
+        // 连接剩余的节点
+        if (list1 != null) {
+            current.next = list1;
+        } else {
+            current.next = list2;
+        }
+
+        return dummy.next;
+    }
+
+    /**
+     * 判断链表是否为回文链表
+     * <p>
+     * 算法思路：
+     * 1. 使用快慢指针找到链表中点
+     * 2. 翻转后半部分链表
+     * 3. 比较前半部分和翻转后的后半部分
+     * 4. 恢复链表结构（可选）
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @return 是否为回文链表
+     */
+    public boolean isPalindrome(ListNode head) {
+        if (head == null || head.next == null) {
+            return true;
+        }
+
+        // 第一步：找到链表中点
+        ListNode slow = head;
+        ListNode fast = head;
+        
+        while (fast.next != null && fast.next.next != null) {
+            slow = slow.next;
+            fast = fast.next.next;
+        }
+
+        // 第二步：翻转后半部分链表
+        ListNode secondHalf = reverseList(slow.next);
+        slow.next = null; // 断开前后两部分
+
+        // 第三步：比较前半部分和后半部分
+        ListNode firstHalf = head;
+        boolean isPalindrome = true;
+        
+        while (secondHalf != null) {
+            if (firstHalf.val != secondHalf.val) {
+                isPalindrome = false;
+                break;
+            }
+            firstHalf = firstHalf.next;
+            secondHalf = secondHalf.next;
+        }
+
+        return isPalindrome;
+    }
+
+    /**
+     * 翻转整个链表（辅助方法）
+     * <p>
+     * 用于 isPalindrome 方法中翻转后半部分链表
+     *
+     * @param head 链表头节点
+     * @return 翻转后的链表头节点
+     */
+    private ListNode reverseList(ListNode head) {
+        ListNode prev = null;
+        ListNode current = head;
+        
+        while (current != null) {
+            ListNode next = current.next;
+            current.next = prev;
+            prev = current;
+            current = next;
+        }
+        
+        return prev;
+    }
+
     // ==================== 辅助工具方法 ====================
 
     /**
@@ -719,50 +954,111 @@ public class LinkedList {
         return head;
     }
 
+    /**
+     * 向右旋转链表 k 个位置
+     * <p>
+     * 算法思路：三次翻转法
+     * 1. 翻转整个链表
+     * 2. 翻转前 n 个节点（n = k % length）
+     * 3. 翻转后 (length - n) 个节点
+     * 4. 连接翻转后的两部分
+     * <p>
+     * 例如：[1,2,3,4,5] 向右旋转 2 位
+     * 1. 翻转整个链表：[5,4,3,2,1]
+     * 2. 翻转前2个：[4,5,3,2,1]
+     * 3. 翻转后3个：[4,5,1,2,3]
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @param k    向右旋转的位置数
+     * @return 旋转后的链表头节点
+     */
     public ListNode rotateRight(ListNode head, int k) {
+        // 边界情况：空链表或不需要旋转
         if (head == null || k == 0) {
             return head;
         }
 
+        // 计算链表长度，优化旋转次数
         int length = getLength(head);
-        int n = k % length;
+        int n = k % length; // 实际需要旋转的位置数
 
         if (n == 0) {
+            // 关键边界检查：当 n = 0 时直接返回，避免不必要的翻转操作
+            // 在不需要翻转的时候翻转，则下面 newHead1 是原数组的尾巴，newHead3 是原数组的头，newHead1.next = newHead3;会造成尾头相连的环
             return head;
         }
 
+        // 第一步：翻转整个链表
         ListNode newHead1 = reverseFirstN(head, length);
-        ListNode p = newHead1;
+        ListNode p = newHead1; // p 用于定位分割点
 
+        // 第二步：找到分割点（前 n 个节点的下一个位置）
         // 易错的点：要越过的是前n个点，不是m个点
         for (int i = 0; i < n; i++) {
             p = p.next;
         }
 
-        ListNode newHead2 = reverseFirstN(newHead1, n);
-        ListNode newHead3 = reverseFirstN(p, length - n);
+        // 第三步：分别翻转前 n 个节点和后 (length - n) 个节点
+        ListNode newHead2 = reverseFirstN(newHead1, n);        // 翻转前 n 个节点
+        ListNode newHead3 = reverseFirstN(p, length - n);      // 翻转后 (length - n) 个节点
+        
+        // 第四步：连接两部分（newHead1 现在是前半部分的尾节点）
         newHead1.next = newHead3;
 
+        // 返回新的头节点（前半部分翻转后的头节点）
         return newHead2;
     }
 
+    /**
+     * 翻转链表的前 n 个节点（迭代实现）
+     * <p>
+     * 算法思路：
+     * 1. 使用三指针技术：prev（前驱）、current（当前）、tmp（临时保存下一个）
+     * 2. 逐个翻转前 n 个节点的指针方向
+     * 3. 翻转完成后，原头节点变成尾节点，连接剩余未翻转部分
+     * <p>
+     * 边界处理：
+     * - n <= 1：不需要翻转或翻转1个节点等于不翻转，直接返回原链表
+     * - n > 链表长度：只翻转实际存在的节点
+     * <p>
+     * 时间复杂度：O(min(n, 链表长度))
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @param n    需要翻转的节点数
+     * @return 翻转后的链表头节点
+     */
     ListNode reverseFirstN(ListNode head, int n) {
+        // 边界情况：空链表或不需要翻转
         if (head == null || n <= 1) {
             return head;
         }
-        ListNode prev = null;
-        ListNode current = head;
+        
+        // 初始化三个指针
+        ListNode prev = null;    // 前驱节点，初始为null
+        ListNode current = head; // 当前处理的节点
+        
+        // 翻转前 n 个节点
         while (current != null && n > 0) {
-            ListNode tmp = current.next;
-            current.next = prev;
-            prev = current;
-            current = tmp;
-            n--;
+            ListNode tmp = current.next; // 临时保存下一个节点
+            current.next = prev;         // 翻转当前节点的指针
+            prev = current;              // 前驱指针前移
+            current = tmp;               // 当前指针前移
+            n--;                         // 计数器递减
         }
-        // head是新的尾巴，current是未被翻转链表开头
-        // 如果 n <= 0，这一步会导致出错
+        
+        // 翻转完成后的状态：
+        // head 现在是翻转部分的尾节点
+        // current 是未翻转部分的头节点  
+        // prev 是翻转部分的新头节点
+        
+        // 连接翻转部分和未翻转部分
         head.next = current;
-        // current 是新的头
+        
+        // 返回翻转部分的新头节点
         return prev;
     }
 }

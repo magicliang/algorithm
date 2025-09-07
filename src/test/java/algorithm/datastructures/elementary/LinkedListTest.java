@@ -338,4 +338,214 @@ public class LinkedListTest {
         assertNull(linkedList.getIntersectionNode(null, headA));
         assertNull(linkedList.getIntersectionNode(headA, null));
     }
+    
+    @Test
+    void testDetectCycle() {
+        // 测试无环链表
+        LinkedList.ListNode head = createList(1, 2, 3, 4);
+        assertNull(linkedList.detectCycle(head));
+        
+        // 测试有环链表
+        LinkedList.ListNode node1 = new LinkedList.ListNode(1);
+        LinkedList.ListNode node2 = new LinkedList.ListNode(2);
+        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
+        LinkedList.ListNode node4 = new LinkedList.ListNode(4);
+        
+        node1.next = node2;
+        node2.next = node3;
+        node3.next = node4;
+        node4.next = node2; // 形成环，环的起点是 node2
+        
+        assertEquals(node2, linkedList.detectCycle(node1));
+        
+        // 测试单节点自环
+        LinkedList.ListNode selfLoop = new LinkedList.ListNode(1);
+        selfLoop.next = selfLoop;
+        assertEquals(selfLoop, linkedList.detectCycle(selfLoop));
+        
+        // 测试空链表
+        assertNull(linkedList.detectCycle(null));
+        
+        // 测试单节点无环
+        LinkedList.ListNode single = new LinkedList.ListNode(1);
+        assertNull(linkedList.detectCycle(single));
+    }
+    
+    @Test
+    void testDeleteDuplicates2() {
+        // 测试有重复的链表 - 完全删除重复节点
+        LinkedList.ListNode head = createList(1, 2, 2, 3);
+        LinkedList.ListNode result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{1, 3}, listToArray(result));
+        
+        // 测试连续重复
+        head = createList(1, 1, 1, 2, 3);
+        result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{2, 3}, listToArray(result));
+        
+        // 测试全部重复
+        head = createList(1, 1, 2, 2);
+        result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{}, listToArray(result));
+        
+        // 测试无重复
+        head = createList(1, 2, 3);
+        result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{1, 2, 3}, listToArray(result));
+        
+        // 测试空链表
+        assertNull(linkedList.deleteDuplicates2(null));
+        
+        // 测试单节点
+        head = createList(1);
+        result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{1}, listToArray(result));
+        
+        // 测试头部重复
+        head = createList(1, 1, 2, 3);
+        result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{2, 3}, listToArray(result));
+        
+        // 测试尾部重复
+        head = createList(1, 2, 3, 3);
+        result = linkedList.deleteDuplicates2(head);
+        assertArrayEquals(new int[]{1, 2}, listToArray(result));
+    }
+    
+    @Test
+    void testMergeTwoLists() {
+        // 测试正常合并
+        LinkedList.ListNode list1 = createList(1, 2, 4);
+        LinkedList.ListNode list2 = createList(1, 3, 4);
+        LinkedList.ListNode result = linkedList.mergeTwoLists(list1, list2);
+        assertArrayEquals(new int[]{1, 1, 2, 3, 4, 4}, listToArray(result));
+        
+        // 测试一个空链表
+        list1 = null;
+        list2 = createList(0);
+        result = linkedList.mergeTwoLists(list1, list2);
+        assertArrayEquals(new int[]{0}, listToArray(result));
+        
+        // 测试两个空链表
+        result = linkedList.mergeTwoLists(null, null);
+        assertNull(result);
+        
+        // 测试长度不同的链表
+        list1 = createList(1, 5, 6);
+        list2 = createList(2, 3, 4, 7, 8, 9);
+        result = linkedList.mergeTwoLists(list1, list2);
+        assertArrayEquals(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, listToArray(result));
+        
+        // 测试单节点链表
+        list1 = createList(1);
+        list2 = createList(2);
+        result = linkedList.mergeTwoLists(list1, list2);
+        assertArrayEquals(new int[]{1, 2}, listToArray(result));
+    }
+    
+    @Test
+    void testIsPalindrome() {
+        // 测试回文链表（奇数长度）
+        LinkedList.ListNode head = createList(1, 2, 3, 2, 1);
+        assertTrue(linkedList.isPalindrome(head));
+        
+        // 测试回文链表（偶数长度）
+        head = createList(1, 2, 2, 1);
+        assertTrue(linkedList.isPalindrome(head));
+        
+        // 测试非回文链表
+        head = createList(1, 2, 3, 4, 5);
+        assertFalse(linkedList.isPalindrome(head));
+        
+        // 测试单节点
+        head = createList(1);
+        assertTrue(linkedList.isPalindrome(head));
+        
+        // 测试双节点回文
+        head = createList(1, 1);
+        assertTrue(linkedList.isPalindrome(head));
+        
+        // 测试双节点非回文
+        head = createList(1, 2);
+        assertFalse(linkedList.isPalindrome(head));
+        
+        // 测试空链表
+        assertTrue(linkedList.isPalindrome(null));
+        
+        // 测试三节点回文
+        head = createList(1, 2, 1);
+        assertTrue(linkedList.isPalindrome(head));
+        
+        // 测试三节点非回文
+        head = createList(1, 2, 3);
+        assertFalse(linkedList.isPalindrome(head));
+    }
+    
+    @Test
+    void testGetIntersectionNodeByCycle() {
+        // 创建两个相交的链表
+        LinkedList.ListNode common = createList(8, 4, 5);
+        
+        LinkedList.ListNode headA = createList(4, 1);
+        LinkedList.ListNode tailA = headA.next;
+        tailA.next = common;
+        
+        LinkedList.ListNode headB = createList(5, 6, 1);
+        LinkedList.ListNode tailB = headB.next.next;
+        tailB.next = common;
+        
+        LinkedList.ListNode intersection = linkedList.getIntersectionNodeByCycle(headA, headB);
+        assertEquals(common, intersection);
+        
+        // 测试不相交的链表
+        LinkedList.ListNode headC = createList(1, 2, 3);
+        LinkedList.ListNode headD = createList(4, 5, 6);
+        assertNull(linkedList.getIntersectionNodeByCycle(headC, headD));
+        
+        // 测试空链表
+        assertNull(linkedList.getIntersectionNodeByCycle(null, headA));
+        assertNull(linkedList.getIntersectionNodeByCycle(headA, null));
+        
+        // 测试单节点相交
+        LinkedList.ListNode single = createList(1);
+        headA = single;
+        headB = single;
+        assertEquals(single, linkedList.getIntersectionNodeByCycle(headA, headB));
+    }
+    
+    @Test
+    void testStaticUtilityMethods() {
+        // 测试 createFromArray
+        int[] values = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head = LinkedList.createFromArray(values);
+        assertArrayEquals(values, LinkedList.toArray(head));
+        
+        // 测试空数组
+        assertNull(LinkedList.createFromArray(new int[]{}));
+        assertNull(LinkedList.createFromArray(null));
+        
+        // 测试 getLength
+        head = createList(1, 2, 3, 4, 5);
+        assertEquals(5, LinkedList.getLength(head));
+        assertEquals(0, LinkedList.getLength(null));
+        
+        // 测试 printList
+        head = createList(1, 2, 3);
+        String result = LinkedList.printList(head);
+        assertTrue(result.contains("1 -> 2 -> 3 -> null"));
+        
+        assertEquals("null", LinkedList.printList(null));
+        
+        // 测试 areEqual
+        LinkedList.ListNode list1 = createList(1, 2, 3);
+        LinkedList.ListNode list2 = createList(1, 2, 3);
+        assertTrue(LinkedList.areEqual(list1, list2));
+        
+        LinkedList.ListNode list3 = createList(1, 2, 4);
+        assertFalse(LinkedList.areEqual(list1, list3));
+        
+        assertTrue(LinkedList.areEqual(null, null));
+        assertFalse(LinkedList.areEqual(list1, null));
+        assertFalse(LinkedList.areEqual(null, list1));
+    }
 }
