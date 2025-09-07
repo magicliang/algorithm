@@ -727,9 +727,9 @@ public class LinkedList {
         int length = getLength(head);
         int n = k % length;
 
-        // if (n == 0) {
-        //     return head;
-        // }
+        if (n == 0) {
+            return head;
+        }
 
         ListNode newHead1 = reverseFirstN(head, length);
         ListNode p = newHead1;
@@ -747,7 +747,7 @@ public class LinkedList {
     }
 
     ListNode reverseFirstN(ListNode head, int n) {
-        if (head == null || n <= 0) {
+        if (head == null || n <= 1) {
             return head;
         }
         ListNode prev = null;
