@@ -420,8 +420,8 @@ public class LinkedList {
 
         ListNode fast = dummy;
         ListNode slow = dummy;
-        // 不管快慢节点是不是从 dummy 节点开始出发，他们之间的相对距离此时是 k，而且下面的循环仍然会让 fast 停在链表末尾的 null上，这也就意味着 slow会停在倒数 k 个节点上
-        for (int i = 0; i < k; i++) {
+        // fast 先走 k+1 步，这样当 fast 到达 null 时，slow 指向要删除节点的前一个节点
+        for (int i = 0; i <= k; i++) {
             if (fast == null) {
                 return null;
             }
@@ -433,8 +433,11 @@ public class LinkedList {
             fast = fast.next;
         }
 
-        slow.val = slow.next.val;
-        slow.next = slow.next.next;
+        // slow 现在指向要删除节点的前一个节点
+        // 删除 slow.next 节点
+        if (slow.next != null) {
+            slow.next = slow.next.next;
+        }
 
         // 仍然使用 dummy 来解决这个问题
         return dummy.next;
