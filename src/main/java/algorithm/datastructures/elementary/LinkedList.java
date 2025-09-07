@@ -166,8 +166,8 @@ public class LinkedList {
             ListNode current = head;
             ListNode prev = null;
 
-            // 边界情况处理
-            if (head == null || n == 1) {
+            // 边界情况处理，对于不需要翻转的场景， head.next = current; 会导致错误
+            if (head == null || n <= 1) {
                 return head;
             }
 
@@ -721,9 +721,9 @@ public class LinkedList {
 
         int length = getLength(head);
         int n = k % length;
-        if (n == 0) {
-            return head;
-        }
+        // if (n == 0) {
+        //     return head;
+        // }
 
         ListNode newHead1 = reverseFirstN(head, length);
         ListNode p = newHead1;
