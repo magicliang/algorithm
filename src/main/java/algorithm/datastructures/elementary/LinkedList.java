@@ -163,13 +163,14 @@ public class LinkedList {
          * @return 反转后的链表头节点
          */
         public ListNode reverse2(ListNode head, int n) {
-            ListNode current = head;
-            ListNode prev = null;
 
             // 边界情况处理，对于不需要翻转的场景， head.next = current; 会导致错误
-            if (head == null || n <= 1) {
+            if (head == null || n <= 0) {
                 return head;
             }
+
+            ListNode current = head;
+            ListNode prev = null;
 
             // 反转前n个节点
             while (n > 0) {
@@ -213,6 +214,10 @@ public class LinkedList {
          * @return 反转后的链表头节点
          */
         public ListNode reverse3(ListNode head, int n) {
+            if (head == null || n <= 0) {
+                return head;
+            }
+
             // 创建dummy头节点，简化边界处理
             ListNode dummyHead = new ListNode();
             dummyHead.next = head;
@@ -721,6 +726,7 @@ public class LinkedList {
 
         int length = getLength(head);
         int n = k % length;
+
         // if (n == 0) {
         //     return head;
         // }
@@ -741,7 +747,7 @@ public class LinkedList {
     }
 
     ListNode reverseFirstN(ListNode head, int n) {
-        if (head == null) {
+        if (head == null || n <= 0) {
             return head;
         }
         ListNode prev = null;
@@ -754,6 +760,7 @@ public class LinkedList {
             n--;
         }
         // head是新的尾巴，current是未被翻转链表开头
+        // 如果 n <= 0，这一步会导致出错
         head.next = current;
         // current 是新的头
         return prev;
