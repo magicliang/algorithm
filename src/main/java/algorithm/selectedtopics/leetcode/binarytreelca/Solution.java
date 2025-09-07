@@ -9,8 +9,8 @@ public class Solution {
             return null;
         }
 
-        // p 或者 q 如果是根节点，则可以直接返回
-        if (root.getVal() == p.getVal() || root.getVal() == q.getVal()) {
+        // p 或 q 如果就是当前根节点（按节点引用比较），直接返回
+        if (root == p || root == q) {
             return root;
         }
 
@@ -18,7 +18,7 @@ public class Solution {
         // 尝试在左子树寻找p和q的最近公共祖先
 		TreeNode leftCommonAncestor = lowestCommonAncestor(root.getLeft(), p, q);
 
-        // 尝试在右子树寻找q和q的最近公共祖先
+        // 尝试在右子树寻找p和q的最近公共祖先
 		TreeNode rightCommonAncestor = lowestCommonAncestor(root.getRight(), p, q);
 
         // 如果 p 和 q 分别位于他们最近公共结点的两侧，则根节点为最近公共祖先
@@ -27,6 +27,7 @@ public class Solution {
         }
 
         // 如果左子树有值，则最近公共祖先在左子树，否则，在右子树
+        
         // p或q中有一个为空，返回非空的那个
         if (leftCommonAncestor == null) {
             return rightCommonAncestor;
