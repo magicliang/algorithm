@@ -713,4 +713,49 @@ public class LinkedList {
 
         return head;
     }
+
+    public ListNode rotateRight(ListNode head, int k) {
+        if (head == null || k == 0) {
+            return head;
+        }
+
+        int length = getLength(head);
+        int n = k % length;
+        if (n == 0) {
+            return head;
+        }
+
+        ListNode newHead1 = reverseFirstN(head, length);
+        ListNode p = newHead1;
+
+        // 易错的点：要越过的是前n个点，不是m个点
+        for (int i = 0; i < n; i++) {
+            p = p.next;
+        }
+
+        ListNode newHead2 = reverseFirstN(newHead1, n);
+        ListNode newHead3 = reverseFirstN(p, length - n);
+        newHead1.next = newHead3;
+
+        return newHead2;
+    }
+
+    ListNode reverseFirstN(ListNode head, int n) {
+        if (head == null) {
+            return head;
+        }
+        ListNode prev = null;
+        ListNode current = head;
+        while (current != null && n > 0) {
+            ListNode tmp = current.next;
+            current.next = prev;
+            prev = current;
+            current = tmp;
+            n--;
+        }
+        // head是新的尾巴，current是未被翻转链表开头
+        head.next = current;
+        // current 是新的头
+        return prev;
+    }
 }
