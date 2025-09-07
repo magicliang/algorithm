@@ -154,24 +154,33 @@ public class SnakeGame {
      * - 空蛇身：不会碰撞
      * - 单节点蛇身：新头不能与当前头重合
      * 
+     * 关键逻辑：
+     * - 需要排除即将被移除的尾部节点（如果没吃到食物的话）
+     * - 这里为了简化，我们检查除了尾部以外的所有节点
+     * 
      * @param snake 当前蛇身
      * @param newHead 新的头部位置
      * @return 是否碰撞
      */
     private boolean isColliding(LinkedList<Position> snake, Position newHead) {
-        // 从头部开始检查，直到倒数第二个节点（因为如果吃到食物，尾部不移除）
-        // 这里简化处理，检查整个链表。更精确的逻辑需要游戏引擎配合。
-        // 在实际高性能游戏中，通常会维护一个 HashSet<Position> 来快速检查碰撞。
+        // 检查是否与蛇身碰撞，但排除尾部（因为尾部可能会被移除）
+        // 如果蛇身长度为1，则不会碰撞（因为唯一的节点是尾部，会被移除）
+        if (snake.size() <= 1) {
+            return false;
+        }
         
-        // 使用迭代器遍历，避免索引访问的开销
+        // 检查除了尾部以外的所有节点
         Iterator<Position> iter = snake.iterator();
+        int index = 0;
+        int lastIndex = snake.size() - 1;
+        
         while (iter.hasNext()) {
             Position segment = iter.next();
-            // 不检查尾部是否会被移除的情况，直接检查所有身体
-            // 更严格的实现需要知道是否将要吃食物
-            if (newHead.equals(segment)) {
+            // 跳过尾部节点（最后一个节点），因为它可能会被移除
+            if (index < lastIndex && newHead.equals(segment)) {
                 return true;  // 发现碰撞，立即返回
             }
+            index++;
         }
         return false;  // 未发现碰撞
     }
