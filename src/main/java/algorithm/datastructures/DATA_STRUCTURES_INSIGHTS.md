@@ -222,7 +222,221 @@ public class SlidingWindowMax {
 
 ---
 
-## 第二部分：MaxHeap删除操作测试总结
+## 第二部分：数据结构删除模式的深度分析
+
+### 2.1 "按值删除"的实现模式差异
+
+#### 核心问题：值的删除都需要先找到索引再基于索引删除吗？
+
+**答案：并不是所有数据结构都需要这种模式**。这取决于数据结构的特性和实现策略。
+
+#### 需要"查找索引→按索引删除"的数据结构
+
+**1. 堆（Heap）**
+```java
+public boolean remove(int val) {
+    // 1. 查找元素位置（O(n)时间复杂度）
+    int index = -1;
+    for (int i = 0; i < heap.size(); i++) {
+        if (heap.get(i) == val) {
+            index = i;
+            break;
+        }
+    }
+    
+    if (index == -1) {
+        return false; // 元素不存在
+    }
+    
+    // 2. 使用removeAt方法删除（展示技巧的复用性）
+    return removeAt(index);
+}
+```
+
+**为什么需要这种模式？**
+- 堆的删除核心算法是**值替换删除技巧**
+- 这个技巧需要知道**精确的索引位置**才能工作
+- 按索引删除包含了堆调整的复杂逻辑（siftUp + siftDown）
+
+**2. 数组列表（ArrayList）**
+```java
+// Java ArrayList的实现模式
+public boolean remove(Object o) {
+    // 查找元素索引
+    int index = indexOf(o);
+    if (index >= 0) {
+        fastRemove(index);  // 调用按索引删除的辅助方法
+        return true;
+    }
+    return false;
+}
+
+public E remove(int index) {
+    // 按索引删除的核心实现
+    rangeCheck(index);
+    E oldValue = elementData[index];
+    fastRemove(index);  // 核心删除逻辑：数组元素移动
+    return oldValue;
+}
+```
+
+#### 不需要"查找索引→按索引删除"的数据结构
+
+**1. 链表（LinkedList）**
+```java
+public boolean remove(Object o) {
+    // 直接遍历链表，找到节点就删除
+    for (Node<E> x = first; x != null; x = x.next) {
+        if (Objects.equals(o, x.item)) {
+            unlink(x);  // 直接删除节点，不需要索引
+            return true;
+        }
+    }
+    return false;
+}
+
+E unlink(Node<E> x) {
+    // 直接操作节点指针，不需要索引概念
+    final Node<E> next = x.next;
+    final Node<E> prev = x.prev;
+    
+    if (prev == null) {
+        first = next;
+    } else {
+        prev.next = next;
+        x.prev = null;
+    }
+    
+    if (next == null) {
+        last = prev;
+    } else {
+        next.prev = prev;
+        x.next = null;
+    }
+    
+    x.item = null;
+    size--;
+    return element;
+}
+```
+
+**2. 二叉搜索树（BST）**
+```java
+// 递归删除 - 不需要索引概念
+static Node removeRecursive(Node root, int val) {
+    if (root == null) {
+        return root;
+    }
+    
+    // 直接根据值进行递归搜索和删除
+    if (root.val < val) {
+        root.right = removeRecursive(root.right, val);
+        return root;
+    } else if (root.val > val) {
+        root.left = removeRecursive(root.left, val);
+        return root;
+    }
+    
+    // 找到目标节点，直接处理删除逻辑
+    // 不需要索引，直接操作节点引用
+    if (root.left == null) {
+        return root.right;
+    } else if (root.right == null) {
+        return root.left;
+    }
+    
+    // 度为2的情况：用后继节点替换
+    Node successor = findMin(root.right);
+    root.val = successor.val;
+    root.right = removeRecursive(root.right, successor.val);
+    return root;
+}
+```
+
+**3. 哈希表（HashMap）**
+```java
+public V remove(Object key) {
+    Node<K,V> e = removeNode(hash(key), key, null, false, true);
+    return (e == null) ? null : e.value;
+}
+
+// 直接根据哈希值和键进行删除，不需要索引
+final Node<K,V> removeNode(int hash, Object key, Object value,
+                           boolean matchValue, boolean movable) {
+    // 直接定位到哈希桶，然后在链表/红黑树中删除
+    // 不需要索引概念
+}
+```
+
+#### 为什么会有这种差异？
+
+**1. 数据结构的访问特性**
+
+| 数据结构 | 访问方式 | 删除模式 | 原因 |
+|---------|---------|---------|------|
+| **堆** | 基于索引的数组 | 查找索引→按索引删除 | 删除算法需要精确的数组位置 |
+| **ArrayList** | 基于索引的数组 | 查找索引→按索引删除 | 需要移动后续元素，需要索引 |
+| **LinkedList** | 基于节点的链表 | 直接节点操作 | 操作节点指针，不需要索引 |
+| **BST** | 基于值的树结构 | 直接值比较 | 根据值的大小关系导航 |
+| **HashMap** | 基于哈希的桶结构 | 直接哈希定位 | 通过哈希函数直接定位 |
+
+**2. 核心删除算法的需求**
+
+**需要索引的情况**
+- **数组元素移动**：ArrayList删除中间元素需要移动后续所有元素
+- **值替换技巧**：堆的删除需要用最后一个元素替换指定位置
+- **边界控制**：需要精确控制数组边界和元素位置
+
+**不需要索引的情况**
+- **指针操作**：链表通过调整指针完成删除
+- **树结构重组**：BST通过子树替换完成删除
+- **哈希定位**：HashMap通过哈希值直接定位到桶
+
+**3. 设计哲学的体现**
+
+**基于位置的设计**（需要索引）
+```java
+// 强调"位置"概念
+heap.removeAt(index);     // 删除指定位置的元素
+array.remove(index);      // 删除指定位置的元素
+```
+
+**基于值/引用的设计**（不需要索引）
+```java
+// 强调"内容"或"引用"概念
+tree.remove(value);       // 删除指定值的节点
+list.remove(node);        // 删除指定节点
+map.remove(key);          // 删除指定键的条目
+```
+
+#### 实际应用中的选择策略
+
+**什么时候使用"查找索引→按索引删除"模式？**
+
+1. **数据结构基于数组实现**
+2. **删除算法需要精确的位置信息**
+3. **需要复用复杂的按索引删除逻辑**
+4. **位置信息对算法效率有重要影响**
+
+**什么时候直接按值删除？**
+
+1. **数据结构基于指针/引用实现**
+2. **可以通过值的特性直接导航到目标**
+3. **删除操作不依赖于位置信息**
+4. **直接操作更符合数据结构的本质特性**
+
+#### 总结
+
+**堆需要"查找索引→按索引删除"的根本原因**：
+1. **堆是基于数组的完全二叉树**，删除操作需要精确的数组索引
+2. **值替换删除技巧**是堆删除的核心算法，必须知道确切位置
+3. **堆调整算法**（siftUp/siftDown）都是基于索引的操作
+
+**这种模式并非普遍适用**，而是**特定于基于数组实现且删除算法依赖位置信息的数据结构**。每种数据结构都会选择最符合其内在特性和算法需求的删除实现方式。
+
+---
+
+## 第三部分：MaxHeap删除操作测试总结
 
 ### 2.1 测试覆盖的删除方法
 
@@ -238,7 +452,7 @@ public class SlidingWindowMax {
 - **功能**: 参考Java PriorityQueue实现的优化版删除
 - **优化**: 先尝试下沉，只有当元素未移动时才尝试上浮
 
-### 2.2 测试用例分类
+### 3.2 测试用例分类
 
 #### 基本功能测试
 - ✅ `testRemoveAt_RemoveRoot` - 删除堆顶元素
@@ -267,7 +481,7 @@ public class SlidingWindowMax {
 - ✅ `testDeletionPerformance` - 删除操作性能测试
 - ✅ 大规模数据删除验证
 
-### 2.3 核心验证点
+### 3.3 核心验证点
 
 #### 1. 堆性质维护
 每个测试都通过`verifyMaxHeapProperty()`方法验证：
@@ -285,7 +499,7 @@ public class SlidingWindowMax {
 - 删除前后堆大小的正确变化
 - 删除操作的幂等性验证
 
-### 2.4 测试结果
+### 3.4 测试结果
 
 ```
 Tests run: 58, Failures: 0, Errors: 0, Skipped: 0
@@ -297,9 +511,9 @@ Tests run: 58, Failures: 0, Errors: 0, Skipped: 0
 
 ---
 
-## 第三部分：二叉搜索树(BST)插入约束分析
+## 第四部分：二叉搜索树(BST)插入约束分析
 
-### 3.1 BST插入的根本约束
+### 4.1 BST插入的根本约束
 
 **核心约束：不能破坏原树结构**
 
@@ -308,7 +522,7 @@ BST的有序性不变式要求：对于任意节点N，必须满足：
 左子树所有值 < N.val < 右子树所有值
 ```
 
-### 3.2 为什么BST只能在叶子节点插入？
+### 4.2 为什么BST只能在叶子节点插入？
 
 #### 结构限制分析
 ```java
@@ -379,9 +593,9 @@ class TreeNode {
 
 ---
 
-## 第四部分：设计哲学思考
+## 第五部分：设计哲学思考
 
-### 4.1 外部接口 vs 内部实现的分离
+### 5.1 外部接口 vs 内部实现的分离
 
 #### 外部接口设计原则
 对于外部用户而言，任何树形结构都应该：
@@ -425,7 +639,7 @@ public TreeNode search(TreeNode node, int val) {
 - 原地修改节省内存分配
 - 避免垃圾回收压力
 
-### 4.2 现代设计趋势
+### 5.2 现代设计趋势
 
 #### 从实现导向到需求导向
 ```java
@@ -456,7 +670,7 @@ public interface PersistentSet<E> {
 }
 ```
 
-### 4.3 实际应用案例
+### 5.3 实际应用案例
 
 #### Java集合框架的设计
 ```java
@@ -478,9 +692,9 @@ SELECT * FROM table_name WHERE column_name = 'value';
 
 ---
 
-## 第五部分：技巧亮点总结
+## 第六部分：技巧亮点总结
 
-### 5.1 值替换删除的优雅性
+### 6.1 值替换删除的优雅性
 
 ```java
 // 核心技巧：用最后一个元素替换要删除的元素
@@ -493,36 +707,36 @@ siftUp(index);    // 先尝试上浮（更高效）
 siftDown(index);  // 再尝试下沉
 ```
 
-### 5.2 问题分解的思想
+### 6.2 问题分解的思想
 - **复杂问题**: 删除任意位置的元素，需要重新组织整个子树
 - **简单问题**: 删除最后一个元素，直接移除即可
 - **转化策略**: 用值替换将复杂问题转化为简单问题
 
-### 5.3 双向调整的必要性
+### 6.3 双向调整的必要性
 - 替换元素可能比原元素大 → 需要上浮
 - 替换元素可能比原元素小 → 需要下沉  
 - 替换元素可能正好合适 → 两个操作都会立即返回
 
 ---
 
-## 第六部分：设计原则与实践建议
+## 第七部分：设计原则与实践建议
 
-### 6.1 功能完整性 vs 实现复杂度
+### 7.1 功能完整性 vs 实现复杂度
 - **生产环境**：建议使用Java的`PriorityQueue`，功能完整且经过优化
 - **学习目的**：实现完整的删除功能有助于理解堆的内部机制
 - **特定场景**：根据实际需求选择合适的功能子集
 
-### 6.2 内存管理策略
+### 7.2 内存管理策略
 - **固定大小堆**：适用于内存受限或Top-K场景
 - **动态扩容堆**：适用于通用场景，但需要考虑内存碎片
 - **替换策略堆**：适用于流数据处理和实时系统
 
-### 6.3 性能优化考虑
+### 7.3 性能优化考虑
 - **删除操作**：优先使用`pop()`而非`remove(val)`
 - **批量操作**：考虑使用`heapify`而非逐个插入
 - **内存局部性**：数组实现通常比链表实现更高效
 
-### 6.4 实际应用建议
+### 7.4 实际应用建议
 
 ```java
 // 场景1：通用优先队列
