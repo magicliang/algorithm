@@ -522,7 +522,7 @@ public class BinarySearchTree {
         while (current != null) {
             if (current.val == val) {
                 toRemove = current;
-                // 易错的点：忘记退出循环这里相当于一个小 return
+                // 易错的点：忘记退出循环这里会造成 toRemove 始终为 null
                 break;
             }
             // 发生进一步探索才赋值
