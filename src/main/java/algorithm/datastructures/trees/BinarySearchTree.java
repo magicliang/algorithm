@@ -598,12 +598,12 @@ public class BinarySearchTree {
              *
              * 最终：minParent=55, minChild=52 (52就是最小值)
              */
-            while (minChild.left != null) {
+            while (minChild.left != null) { // 让 minChild 是以非空结尾，所以这里不能用 minChild != null
                 minParent = minChild;
                 minChild = minChild.left;
             }
 
-            // 关键：删除最小值节点，需要判断它是父节点的左子节点还是右子节点
+            // 关键：删除最小值节点，需要判断它是父节点的左子节点还是右子节点。先确定它是右折还是左折
             if (minParent.right == minChild) {
                 // 情况1：右子树的根节点就是最小值（while循环没有执行）
                 // 此时 minChild 是minParent的右子节点
@@ -689,7 +689,7 @@ public class BinarySearchTree {
             // 如果要删除节点是 root，则 prev 是没用的
             if (toRemove == root) {
                 // 直接更新根节点
-                root = newChild;
+                root = newChild; // 易错的点：这里如果没有明确写替代 root，就要区分 prev 为 null 的场景
                 return; // 易错的点：忘记 return，可能触发多次删除
             }
 
