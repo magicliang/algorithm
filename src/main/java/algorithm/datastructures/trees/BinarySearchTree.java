@@ -227,8 +227,11 @@ public class BinarySearchTree {
 
     /**
      * 实现一个返回值的删除
+     * 1. 先搜索再删除。二叉搜索树的特性，让我们看到的前驱总是它的父节点。
+     * 2. 如果搜索不到，则不删除
+     * 3. 要先区分是不是有不同的度，度为2的树就直接用右孩子最大节点来替代自己
      *
-     * @param val
+     * @param val 要删除的值
      */
     void remove(int val) {
         // 无法开始搜索的算法就不删除
@@ -262,6 +265,31 @@ public class BinarySearchTree {
 
         // 第二阶段：根据删除节点的子节点数量分情况处理
         // 全子树的节点（度为2的节点）
+        /*
+         * 删除度为2的节点示例：
+         * 
+         * 原始树结构：
+         *       50 (要删除的节点)
+         *      /  \
+         *     30   70
+         *    /    /  \
+         *   20   60   80
+         *           /
+         *          55
+         * 
+         * 删除步骤：
+         * 1. 找到右子树的最小值：55
+         * 2. 用55替换50的值
+         * 3. 删除原来的55节点
+         * 
+         * 结果树结构：
+         *       55 (原50位置，值被替换)
+         *      /  \
+         *     30   70
+         *    /    /  \
+         *   20   60   80
+         *         (55节点被删除)
+         */
         if (toRemove.left != null && toRemove.right != null) {
             // int newVal = findMin(toRemove.right);
             // remove(newVal); // 这是一种做法，但是会有很复杂的递归
@@ -273,6 +301,28 @@ public class BinarySearchTree {
 
             // 右子树的最小值在左直线上
             // 一直向左走，直到找到没有左子树的节点
+            /*
+             * 寻找右子树最小值的过程示例：
+             * 
+             * 初始状态：
+             *      50 (toRemove)
+             *     /  \
+             *    30   70 (minParent=50, minChild=70)
+             *        /  \
+             *       60   80
+             *      /  \
+             *     55   65
+             *    /
+             *   52
+             * 
+             * while循环执行过程：
+             * 第1次：minParent=70, minChild=60 (70.left != null)
+             * 第2次：minParent=60, minChild=55 (60.left != null)  
+             * 第3次：minParent=55, minChild=52 (55.left != null)
+             * 第4次：52.left == null，循环结束
+             * 
+             * 最终：minParent=55, minChild=52 (52就是最小值)
+             */
             while (minChild.left != null) {
                 minParent = minChild;
                 minChild = minChild.left;
@@ -280,13 +330,46 @@ public class BinarySearchTree {
 
             // 关键：删除最小值节点，需要判断它是父节点的左子节点还是右子节点
             if (minParent.right == minChild) {
-                // 极容易被遗忘的解法，这个结构是一个先右再左的折回，所以right的替代品肯定是右子树，可是到底赋给父的右还是左呢？
                 // 情况1：右子树的根节点就是最小值（while循环没有执行）
-                // 此时minChild是minParent的右子节点
+                // 此时 minChild 是minParent的右子节点
+                /*
+                 * 例子：删除节点50
+                 *      50 (toRemove/minParent)
+                 *     /  \
+                 *    30   60 (minChild，这就是最小值！因为它没有左子树)
+                 *          \
+                 *           70
+                 * 
+                 * 执行过程：
+                 * 1. minParent = toRemove (指向50)
+                 * 2. minChild = minParent.right (指向60)
+                 * 3. while循环：60.left == null，循环不执行
+                 * 4. 判断：minParent.right == minChild → 50.right == 60 → true
+                 * 5. 执行：minParent.right = minChild.right → 50.right = 70
+                 */
                 minParent.right = minChild.right;
             } else {
                 // 情况2：最小值节点在更深的左子树中（while循环执行了）
                 // 此时minChild是minParent的左子节点
+                /*
+                 * 例子：删除节点50
+                 *      50 (toRemove)
+                 *     /  \
+                 *    30   70
+                 *        /  \
+                 *       60   80
+                 *      /
+                 *     55 (minChild，最小值)
+                 * 
+                 * 执行过程：
+                 * 1. minParent = toRemove (指向50)
+                 * 2. minChild = minParent.right (指向70)
+                 * 3. 第一次循环：minParent = 70, minChild = 60
+                 * 4. 第二次循环：minParent = 60, minChild = 55
+                 * 5. 第三次循环检查：55.left == null，循环结束
+                 * 6. 判断：minParent.right == minChild → 60.right == 55 → false
+                 * 7. 执行：minParent.left = minChild.right → 60.left = null
+                 */
                 minParent.left = minChild.right;
             }
 
@@ -295,6 +378,35 @@ public class BinarySearchTree {
             toRemove.val = minChild.val;
         } else {
             // 第三阶段：处理度为0或1的节点（简单情况）
+            /*
+             * 删除度为0的节点（叶子节点）示例：
+             *       50
+             *      /  \
+             *     30   70
+             *    /      \
+             *   20       80 (要删除的叶子节点)
+             * 
+             * 删除后：
+             *       50
+             *      /  \
+             *     30   70
+             *    /
+             *   20
+             * 
+             * 删除度为1的节点示例：
+             *       50
+             *      /  \
+             *     30   70 (要删除，只有右子节点)
+             *    /      \
+             *   20       80
+             * 
+             * 删除后：
+             *       50
+             *      /  \
+             *     30   80 (80直接替换70的位置)
+             *    /
+             *   20
+             */
             // 不全子树的节点处理比较简单，选一个子节点出来删除就行了
             // 选择存在的子节点作为替换节点（可能为null）
             Node newChild = toRemove.left != null ? toRemove.left : toRemove.right;
