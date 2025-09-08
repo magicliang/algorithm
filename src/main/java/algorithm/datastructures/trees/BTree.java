@@ -948,22 +948,22 @@ public class BTree {
     }
 
     /**
-     * 根据前序遍历和中序遍历构建二叉树
+     * 根据前序遍历和中序遍历构建二叉树（优化版本）
      *
      * 算法核心认知：
      * 1. 前序数组用来找根节点：
      *    - 前序遍历的特点是"根-左-右"，所以每个子树的第一个元素就是该子树的根节点
-     *    - 递归每次的参数i都是当前子树根节点在前序数组中的位置
-     *    - 通过preorder[i]可以直接获取当前子树的根节点值
+     *    - 递归每次的参数preOrderIndex都是当前子树根节点在前序数组中的位置
+     *    - 通过preorder[preOrderIndex]可以直接获取当前子树的根节点值
      *
      * 2. 中序数组确定左右子树的大小：
      *    - 中序遍历的特点是"左-根-右"，根节点将中序数组分为两部分
-     *    - 在中序数组中找到根节点位置m后：
-     *      * 左子树大小 = m - l（根节点位置 - 左边界）
-     *      * 右子树大小 = r - m（右边界 - 根节点位置）
+     *    - 在中序数组中找到根节点位置rootIndex后：
+     *      * 左子树大小 = rootIndex - inStart（根节点位置 - 左边界）
+     *      * 右子树大小 = inEnd - rootIndex（右边界 - 根节点位置）
      *    - 根据左子树大小可以反推前序数组中左右子树根节点的位置：
-     *      * 左子树根节点位置 = i + 1（当前根节点的下一个位置）
-     *      * 右子树根节点位置 = i + 1 + leftSize（跳过当前根节点和整个左子树）
+     *      * 左子树根节点位置 = preOrderIndex + 1（当前根节点的下一个位置）
+     *      * 右子树根节点位置 = preOrderIndex + 1 + leftSize（跳过当前根节点和整个左子树）
      *
      * 3. 递归构建过程：
      *    - 每次创建当前子树的根节点
@@ -975,14 +975,14 @@ public class BTree {
      * 分治法的经典应用：
      * 这种构建方式是分治法的典型体现，包含分治法的三个核心步骤：
      * 1. 分解（Divide）：将原问题（构建整棵树）分解为构建左子树和右子树两个子问题
-     *    - 原问题：根据前序[i...end]和中序[l...r]构建整棵树
-     *    - 子问题1：根据前序[i+1...i+leftSize]和中序[l...m-1]构建左子树
-     *    - 子问题2：根据前序[i+1+leftSize...end]和中序[m+1...r]构建右子树
+     *    - 原问题：根据前序[preOrderIndex...end]和中序[inStart...inEnd]构建整棵树
+     *    - 子问题1：根据前序[preOrderIndex+1...preOrderIndex+leftSize]和中序[inStart...rootIndex-1]构建左子树
+     *    - 子问题2：根据前序[preOrderIndex+1+leftSize...end]和中序[rootIndex+1...inEnd]构建右子树
      * 2. 解决（Conquer）：递归地解决每个子问题
-     *    - 递归构建左子树：dfsConstructTree(preorder, inorderMap, i+1, l, m-1)
-     *    - 递归构建右子树：dfsConstructTree(preorder, inorderMap, i+1+leftSize, m+1, r)
+     *    - 递归构建左子树：dfsConstructTree2(preorder, inorderMap, preOrderIndex+1, inStart, rootIndex-1)
+     *    - 递归构建右子树：dfsConstructTree2(preorder, inorderMap, preOrderIndex+1+leftSize, rootIndex+1, inEnd)
      * 3. 合并（Combine）：将子问题的解合并为原问题的解
-     *    - 创建根节点：new Node(preorder[i])
+     *    - 创建根节点：new Node(preorder[preOrderIndex])
      *    - 连接左子树：root.left = leftSubtree
      *    - 连接右子树：root.right = rightSubtree
      *    - 返回完整的树：return root
@@ -1000,74 +1000,72 @@ public class BTree {
      * @throws IllegalArgumentException 如果输入数组无效或包含重复值
      */
     public Node buildTree(int[] preorder, int[] inorder) {
-        // 参数校验
         if (preorder == null || inorder == null || preorder.length != inorder.length) {
             return null;
         }
 
-        if (preorder.length == 0) {
+        final int n = inorder.length;
+        if (n == 0) {
             return null;
         }
 
-        // 检查是否有重复值
-        Map<Integer, Integer> valueCount = new HashMap<>();
-        for (int val : inorder) {
-            valueCount.put(val, valueCount.getOrDefault(val, 0) + 1);
-            if (valueCount.get(val) > 1) {
-                throw new IllegalArgumentException(
-                        "buildTree方法不支持重复值，请使用buildTreeWithDuplicates方法处理包含重复值的情况");
-            }
-        }
-
+        // 可以认为数组本身是 i -> v 的映射，新的 map 恰好翻转了这种 kv 关系
         Map<Integer, Integer> inorderMap = new HashMap<>();
-        for (int i = 0; i < inorder.length; i++) {
-            // 倒序 v k 到 k v
+        for (int i = 0; i < n; i++) {
+            if (inorderMap.containsKey(inorder[i])) {
+                throw new IllegalArgumentException("有重复的项");
+            }
             inorderMap.put(inorder[i], i);
         }
 
-        // 从根节点开始处理，i为0意味着当前子树的根节点是preorder[0]，l和r的当前值意味着当前涉及的子树范围在全部 inorderMap 范围内
-        Node root = dfsConstructTree(preorder, inorderMap, 0, 0, inorder.length - 1);
-        return root;
+        // 从根节点开始处理，preOrderIndex 为0意味着当前子树的根节点是preorder[0]，inStart 和 inEnd 的当前值意味着当前涉及的子树范围在全部 inorderMap 范围内
+        // inStart 和 inEnd 实际上和 rootIndex 在同一个序列比较的，但是 rootIndex 依赖的 inorder 数组却不在函数参数里，让人很费解
+        return dfsConstructTree(preorder, inorderMap, 0, 0, n - 1);
     }
 
     /**
-     * 深度优先搜索构建二叉树的递归辅助方法
+     * 深度优先搜索构建二叉树的递归辅助方法（优化版本）
      *
      * 核心认知详解：
      * 1. 前序数组负责找根节点：
-     *    - preorder[i] 就是当前子树的根节点值
-     *    - 参数i是当前子树根节点在前序数组中的位置
-     *    - 每次递归调用时，i指向的都是某个子树的根节点
+     *    - preorder[preOrderIndex] 就是当前子树的根节点值
+     *    - 参数preOrderIndex是当前子树根节点在前序数组中的位置
+     *    - 每次递归调用时，preOrderIndex指向的都是某个子树的根节点
      *
      * 2. 中序数组确定子树大小和边界：
-     *    - 通过inorderMap快速找到根节点在中序数组中的位置m
-     *    - 中序数组的[l, r]区间表示当前子树的范围
-     *    - 根节点位置m将中序数组分割为：
-     *      * 左子树区间：[l, m-1]，大小为 leftSize = m - l
-     *      * 右子树区间：[m+1, r]，大小为 rightSize = r - m
+     *    - 通过inorderMap快速找到根节点在中序数组中的位置rootIndex
+     *    - 中序数组的[inStart, inEnd]区间表示当前子树的范围
+     *    - 根节点位置rootIndex将中序数组分割为：
+     *      * 左子树区间：[inStart, rootIndex-1]，大小为 leftSize = rootIndex - inStart
+     *      * 右子树区间：[rootIndex+1, inEnd]，大小为 rightSize = inEnd - rootIndex
      *
      * 3. 计算公式推导逻辑：
-     *    - 已知：当前根节点在前序数组的位置是i
-     *    - 已知：左子树大小为 leftSize = m - l
-     *    - 推导：左子树根节点位置 = i + 1（紧跟当前根节点）
-     *    - 推导：右子树根节点位置 = i + 1 + leftSize（跳过当前根节点和整个左子树）
+     *    - 已知：当前根节点在前序数组的位置是preOrderIndex
+     *    - 已知：左子树大小为 leftSize = rootIndex - inStart
+     *    - 推导：左子树根节点位置 = preOrderIndex + 1（紧跟当前根节点）
+     *    - 推导：右子树根节点位置 = preOrderIndex + 1 + leftSize（跳过当前根节点和整个左子树）
      *    - 公式解释：前序遍历顺序是"根-左子树-右子树"，所以：
-     *      * 位置i：当前根节点
-     *      * 位置i+1到i+leftSize：左子树的所有节点
-     *      * 位置i+1+leftSize：右子树的根节点
+     *      * 位置preOrderIndex：当前根节点
+     *      * 位置preOrderIndex+1到preOrderIndex+leftSize：左子树的所有节点
+     *      * 位置preOrderIndex+1+leftSize：右子树的根节点
      *
      * 4. 递归构建和返回过程：
-     *    - 创建当前子树的根节点：new Node(preorder[i])
+     *    - 创建当前子树的根节点：new Node(preorder[preOrderIndex])
      *    - 递归构建左子树，返回左子树根节点，赋值给root.left
      *    - 递归构建右子树，返回右子树根节点，赋值给root.right
      *    - 将构建好的根节点返回给父节点，完成子树的拼接
      *
+     * 参数设计理念：
+     * - inorderMap、inStart、inEnd：用于在中序遍历数据中定位和移动，提供子树边界信息
+     * - preOrderIndex：用于在前序遍历数组中定位，提供根节点信息
+     * - 核心思想：前序遍历提供根节点，中序遍历提供子树边界
+     *
      * 参数说明：
      * @param preorder 前序遍历数组（提供根节点）
      * @param inorderMap 中序遍历值到索引的映射（快速定位，确定子树大小）
-     * @param i 当前子树根节点在前序遍历中的索引
-     * @param l 当前子树在中序遍历中的左边界（包含）
-     * @param r 当前子树在中序遍历中的右边界（包含）
+     * @param preOrderIndex 当前子树根节点在前序遍历中的索引
+     * @param inStart 当前子树在中序遍历中的左边界（包含）
+     * @param inEnd 当前子树在中序遍历中的右边界（包含）
      * @return 构建好的子树根节点，返回给父节点进行拼接
      *
      * 时间复杂度：O(n) - 每个节点只处理一次
@@ -1075,75 +1073,94 @@ public class BTree {
      *
      * 递归过程详解：
      * 1. 终止条件：当右边界小于左边界时，表示子树为空
-     * 2. 创建根节点：使用前序遍历中索引i处的值
-     * 3. 找到根节点在中序遍历中的位置m
-     * 4. 计算左子树的大小：leftSize = m - l
-     * 5. 递归构建左子树：前序索引i+1，中序区间[l, m-1]
-     * 6. 递归构建右子树：前序索引i+1+leftSize，中序区间[m+1, r]
+     * 2. 创建根节点：使用前序遍历中索引preOrderIndex处的值
+     * 3. 找到根节点在中序遍历中的位置rootIndex
+     * 4. 计算左子树的大小：leftSize = rootIndex - inStart
+     * 5. 递归构建左子树：前序索引preOrderIndex+1，中序区间[inStart, rootIndex-1]
+     * 6. 递归构建右子树：前序索引preOrderIndex+1+leftSize，中序区间[rootIndex+1, inEnd]
      * 7. 返回根节点给上层调用者
      */
-    private Node dfsConstructTree(int[] preorder, Map<Integer, Integer> inorderMap, int i, int l, int r) {
-        // 可以认为 inorderMap、l、r 都是为了在 inorder 的数据里移动而存在的，i是 preorder 的索引。
-        // 所以前序遍历提供根节点，后序遍历提供子树
+    private Node dfsConstructTree(int[]preorder, Map<Integer, Integer> inorderMap, int preOrderIndex, int inStart,
+            int inEnd) {
 
-        // 子树区间为空时终止
-        if (r - l < 0) {
+        /*
+         * 边界检查设计原则：
+         * 1. 信任调用者原则：假设初始调用参数正确，递归过程中的边界计算也是安全的
+         * 2. 防御计算结果：对通过计算得出的索引进行边界检查，防止访问越界
+         * 3. 算法逻辑检查：验证算法逻辑的正确性，如根节点是否在正确的子树范围内
+         *
+         * 为什么不检查 inStart/inEnd 的绝对边界：
+         * - 假设初始调用是正确的：dfsConstructTree2(preorder, inorderMap, 0, 0, inorder.length - 1)
+         * - 递归过程中的边界计算是安全的：[inStart, rootIndex-1] 和 [rootIndex+1, inEnd]
+         * - 如果初始调用错误（如inStart=-1），那是调用者的责任，不是算法内部的责任
+         *
+         * 为什么要检查 preOrderIndex：
+         * - preOrderIndex 是通过计算得出的：preOrderIndex + 1 + (rootIndex - inStart)
+         * - 当树结构异常或数据不一致时，计算结果可能越界
+         * - 这是算法内部的保护，防止访问数组时程序崩溃
+         */
+
+        // 子树区间为空时终止递归
+        if (inEnd < inStart || inStart < 0 || inEnd >= preorder.length) {
             return null;
         }
 
-        // 检查索引边界
-        if (i < 0 || i >= preorder.length) {
+        // 检查前序遍历索引边界 - 防御计算结果，避免数组访问越界
+        if (preOrderIndex < 0 || preOrderIndex >= preorder.length) {
             return null;
         }
 
-        Node root = new Node(preorder[i]);
-        Integer m = inorderMap.get(preorder[i]);
+        int rootVal = preorder[preOrderIndex];
+        Integer rootIndexObj = inorderMap.get(rootVal);
 
-        // 如果找不到对应的索引，返回null
-        if (m == null) {
+        // 如果找不到对应的索引，说明数据不一致
+        if (rootIndexObj == null) {
             return null;
         }
 
-        // 检查中序索引是否在有效范围内
-        if (m < l || m > r) {
+        int rootIndex = rootIndexObj;
+
+        // 算法逻辑检查：确保根节点在当前子树的有效范围内
+        // 这不是边界保护，而是算法正确性验证
+        if (rootIndex < inStart || rootIndex > inEnd) {
             return null;
         }
 
-        // 计算左子树的大小
-        int leftSize = m - l;
+        // 本算法的核心是分治 inOrderMap。
+        // 用 preorder 找到第一个根，用第一个根的 inorder index 得到左区间大小和右区间大小
+        // 则左子树的根在 preorder 的 preOrderIndex + 1 处，第二个子树的根在 preorder 里左子树之后第一个后继，左子树大小 rootIndex - inStart
+        // 左右区间是用来类似 dc 分治的方法来帮助界定下一个子问题的参数的，实行逐渐收窄 inorder 左右区间边界的逻辑
 
-        // 检查右子树的起始索引是否越界
-        int rightStartIndex = i + 1 + leftSize;
-        if (rightStartIndex >= preorder.length && m + 1 <= r) {
-            // 如果右子树应该存在但索引越界，返回null
-            return null;
-        }
+        Node root = new Node(rootVal);
+        int leftRootPreorderIndex = preOrderIndex + 1;
+        int rightRootPreorderIndex = preOrderIndex + 1 + (rootIndex - inStart); // 越过整个左子树在前序遍历里的位置
 
-        root.left = dfsConstructTree(preorder, inorderMap, i + 1, l, m - 1);
-        root.right = dfsConstructTree(preorder, inorderMap, rightStartIndex, m + 1, r);
+
+        root.left = dfsConstructTree(preorder, inorderMap, leftRootPreorderIndex, inStart, rootIndex - 1);
+        root.right = dfsConstructTree(preorder, inorderMap, rightRootPreorderIndex, rootIndex + 1, inEnd);
 
         return root;
     }
 
-    /**
-     * 根据前序遍历和中序遍历构建二叉树（支持重复值版本）
-     *
-     * 算法原理：
-     * 前序遍历的第一个元素是根节点，中序遍历中根节点左侧是左子树，右侧是右子树
-     * 由于允许重复值，不能使用HashMap进行快速查找，需要使用线性搜索
-     *
-     * 为什么需要这个方法：
-     * 1. 原有的buildTree方法使用HashMap存储值到索引的映射，当存在重复值时，后面的值会覆盖前面的值
-     * 2. 这会导致无法正确识别根节点在中序遍历中的位置，从而构建错误的树结构
-     * 3. 线性搜索虽然时间复杂度较高(O(n²))，但能正确处理重复值的情况
-     *
-     * @param preorder 前序遍历数组
-     * @param inorder 中序遍历数组
-     * @return 构建好的二叉树根节点
-     *
-     *         时间复杂度：O(n²) - 每个节点需要线性搜索根节点位置
-     *         空间复杂度：O(h) - 递归栈深度，h为树高
-     */
+        /**
+         * 根据前序遍历和中序遍历构建二叉树（支持重复值版本）
+         *
+         * 算法原理：
+         * 前序遍历的第一个元素是根节点，中序遍历中根节点左侧是左子树，右侧是右子树
+         * 由于允许重复值，不能使用HashMap进行快速查找，需要使用线性搜索
+         *
+         * 为什么需要这个方法：
+         * 1. 原有的buildTree方法使用HashMap存储值到索引的映射，当存在重复值时，后面的值会覆盖前面的值
+         * 2. 这会导致无法正确识别根节点在中序遍历中的位置，从而构建错误的树结构
+         * 3. 线性搜索虽然时间复杂度较高(O(n²))，但能正确处理重复值的情况
+         *
+         * @param preorder 前序遍历数组
+         * @param inorder 中序遍历数组
+         * @return 构建好的二叉树根节点
+         *
+         *         时间复杂度：O(n²) - 每个节点需要线性搜索根节点位置
+         *         空间复杂度：O(h) - 递归栈深度，h为树高
+         */
     public Node buildTreeWithDuplicates(int[] preorder, int[] inorder) {
         // 参数校验
         if (preorder == null || inorder == null || preorder.length != inorder.length) {
