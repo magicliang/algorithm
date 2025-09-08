@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Queue;
+import java.util.Random;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -852,5 +853,203 @@ class MaxHeapTest {
                         list.get(i), i, list.get(right), right));
             }
         }
+    }
+
+    // ==================== 最优堆排序测试用例 ====================
+
+    /**
+     * 测试最优堆排序的基本功能
+     */
+    @Test
+    public void testHeapSortOptimalBasic() {
+        // 测试普通情况
+        List<Integer> list = new ArrayList<>(Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6));
+        MaxHeap.heapSortOptimal(list);
+        assertEquals(Arrays.asList(1, 1, 2, 3, 4, 5, 6, 9), list);
+        
+        // 测试已排序数组
+        List<Integer> sorted = new ArrayList<>(Arrays.asList(1, 2, 3, 4, 5));
+        MaxHeap.heapSortOptimal(sorted);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), sorted);
+        
+        // 测试逆序数组
+        List<Integer> reversed = new ArrayList<>(Arrays.asList(5, 4, 3, 2, 1));
+        MaxHeap.heapSortOptimal(reversed);
+        assertEquals(Arrays.asList(1, 2, 3, 4, 5), reversed);
+    }
+
+    /**
+     * 测试最优堆排序的边界情况
+     */
+    @Test
+    public void testHeapSortOptimalEdgeCases() {
+        // 测试空列表
+        List<Integer> empty = new ArrayList<>();
+        MaxHeap.heapSortOptimal(empty);
+        assertTrue(empty.isEmpty());
+        
+        // 测试单元素列表
+        List<Integer> single = new ArrayList<>(Arrays.asList(42));
+        MaxHeap.heapSortOptimal(single);
+        assertEquals(Arrays.asList(42), single);
+        
+        // 测试两元素列表
+        List<Integer> two = new ArrayList<>(Arrays.asList(2, 1));
+        MaxHeap.heapSortOptimal(two);
+        assertEquals(Arrays.asList(1, 2), two);
+        
+        // 测试null输入
+        assertThrows(IllegalArgumentException.class, () -> {
+            MaxHeap.heapSortOptimal(null);
+        });
+    }
+
+    /**
+     * 测试最优堆排序处理重复元素
+     */
+    @Test
+    public void testHeapSortOptimalDuplicates() {
+        // 测试大量重复元素
+        List<Integer> duplicates = new ArrayList<>(Arrays.asList(3, 1, 3, 1, 3, 1, 3));
+        MaxHeap.heapSortOptimal(duplicates);
+        assertEquals(Arrays.asList(1, 1, 1, 3, 3, 3, 3), duplicates);
+        
+        // 测试所有元素相同
+        List<Integer> allSame = new ArrayList<>(Arrays.asList(5, 5, 5, 5, 5));
+        MaxHeap.heapSortOptimal(allSame);
+        assertEquals(Arrays.asList(5, 5, 5, 5, 5), allSame);
+    }
+
+    /**
+     * 测试最优堆排序的大数据集
+     */
+    @Test
+    public void testHeapSortOptimalLargeDataset() {
+        // 创建大数据集
+        List<Integer> large = new ArrayList<>();
+        Random random = new Random(42); // 固定种子确保可重复性
+        for (int i = 0; i < 1000; i++) {
+            large.add(random.nextInt(1000));
+        }
+        
+        // 保存原始数据用于验证
+        List<Integer> expected = new ArrayList<>(large);
+        Collections.sort(expected);
+        
+        // 执行最优堆排序
+        MaxHeap.heapSortOptimal(large);
+        
+        // 验证结果
+        assertEquals(expected, large);
+        assertTrue(isSorted(large));
+    }
+
+    /**
+     * 比较两种堆排序方法的结果一致性
+     */
+    @Test
+    public void testHeapSortConsistency() {
+        List<Integer> testData = Arrays.asList(64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42);
+        
+        // 使用简单版本排序
+        MaxHeap heap = new MaxHeap();
+        List<Integer> result1 = heap.heapSort(new ArrayList<>(testData));
+        
+        // 使用最优版本排序
+        List<Integer> data2 = new ArrayList<>(testData);
+        MaxHeap.heapSortOptimal(data2);
+        
+        // 验证两种方法结果一致
+        assertEquals(result1, data2);
+        assertTrue(isSorted(result1));
+        assertTrue(isSorted(data2));
+    }
+
+    /**
+     * 测试最优堆排序的性能特征（原地排序验证）
+     */
+    @Test
+    public void testHeapSortOptimalInPlace() {
+        List<Integer> original = new ArrayList<>(Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6));
+        List<Integer> toSort = original; // 同一个引用
+        
+        MaxHeap.heapSortOptimal(toSort);
+        
+        // 验证是原地排序（同一个对象被修改）
+        assertSame(original, toSort);
+        assertEquals(Arrays.asList(1, 1, 2, 3, 4, 5, 6, 9), toSort);
+    }
+
+    /**
+     * 测试最优堆排序处理极端值
+     */
+    @Test
+    public void testHeapSortOptimalExtremeValues() {
+        List<Integer> extremes = new ArrayList<>(Arrays.asList(
+            Integer.MAX_VALUE, Integer.MIN_VALUE, 0, -1, 1, 
+            Integer.MAX_VALUE - 1, Integer.MIN_VALUE + 1
+        ));
+        
+        MaxHeap.heapSortOptimal(extremes);
+        
+        // 验证排序正确性
+        assertTrue(isSorted(extremes));
+        assertEquals(Integer.MIN_VALUE, extremes.get(0).intValue());
+        assertEquals(Integer.MAX_VALUE, extremes.get(extremes.size() - 1).intValue());
+    }
+
+    /**
+     * 测试最优堆排序的稳定性（虽然堆排序不是稳定排序，但要确保算法正确）
+     */
+    @Test
+    public void testHeapSortOptimalStability() {
+        // 创建包含相同值但不同"身份"的元素列表
+        List<Integer> data = new ArrayList<>(Arrays.asList(3, 1, 3, 2, 1, 2));
+        List<Integer> expected = Arrays.asList(1, 1, 2, 2, 3, 3);
+        
+        MaxHeap.heapSortOptimal(data);
+        
+        assertEquals(expected, data);
+        assertTrue(isSorted(data));
+    }
+
+    /**
+     * 压力测试：验证最优堆排序在各种情况下的正确性
+     */
+    @Test
+    public void testHeapSortOptimalStressTest() {
+        Random random = new Random(123);
+        
+        // 测试多种不同大小的数据集
+        int[] sizes = {0, 1, 2, 3, 5, 8, 13, 21, 34, 55, 89, 144, 233};
+        
+        for (int size : sizes) {
+            List<Integer> data = new ArrayList<>();
+            for (int i = 0; i < size; i++) {
+                data.add(random.nextInt(100) - 50); // 范围 [-50, 49]
+            }
+            
+            List<Integer> expected = new ArrayList<>(data);
+            Collections.sort(expected);
+            
+            MaxHeap.heapSortOptimal(data);
+            
+            assertEquals(expected, data, 
+                String.format("堆排序失败，数据大小: %d", size));
+            assertTrue(isSorted(data), 
+                String.format("排序结果不正确，数据大小: %d", size));
+        }
+    }
+
+    /**
+     * 辅助方法：检查列表是否已排序
+     */
+    private boolean isSorted(List<Integer> list) {
+        for (int i = 1; i < list.size(); i++) {
+            if (list.get(i - 1) > list.get(i)) {
+                return false;
+            }
+        }
+        return true;
     }
 }
