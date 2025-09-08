@@ -39,30 +39,33 @@ public class BinarySearchTree {
      *
      * @param val 要插入的值
      */
-    public void insertNoneRecursive(int val) {
+    void insertNoneRecursive(int val) {
         root = insertNoneRecursive(root, val);
     }
 
     /**
      * 递归插入的辅助方法
+     * 核心思想是，想办法在某个 null 值的地方插入一棵子树
      *
      * @param node 当前子树的根节点
      * @param val 要插入的值
      * @return 插入后的子树根节点
      */
-    private BTree.Node insertRecursive(BTree.Node node, int val) {
-        if (node == null) {
-            return new Node(val);
-        }
+    BTree.Node insertRecursive(BTree.Node node, int val) {
+       if (node == null) {
+           // 最差的情况是，连根都没有，这时候就直接生成一个根再直接返回
+           return new Node(val);
+       }
 
-        if (val < node.val) {
-            node.left = insertRecursive(node.left, val);
-        } else if (val > node.val) {
-            node.right = insertRecursive(node.right, val);
-        }
+       if (node.val > val) {
+           // 如果存在根，则尝试在左子树完成插入，最终还是调动到某个空叶子节点的子树
+           node.left = insertNoneRecursive(node.left, val);
+       } else if (node.val < val) {
+           node.right = insertNoneRecursive(node.right, val);
+       }
 
-        // 如果val == node.val，不插入重复值
-        return node;
+       // 二叉搜索树里不允许存在重复节点
+       return node;
     }
 
     /**
@@ -75,7 +78,7 @@ public class BinarySearchTree {
      * @param val 要插入的值
      * @return 插入后的子树根节点
      */
-    private BTree.Node insertNoneRecursive(BTree.Node node, int val) {
+    BTree.Node insertNoneRecursive(BTree.Node node, int val) {
         if (node == null) {
             return new Node(val);
         }
@@ -130,7 +133,7 @@ public class BinarySearchTree {
      * @param val 要搜索的值
      * @return 如果找到返回true，否则返回false
      */
-    private boolean searchRecursive(BTree.Node node, int val) {
+    boolean searchRecursive(BTree.Node node, int val) {
         if (node == null) {
             return false;
         }
@@ -153,7 +156,7 @@ public class BinarySearchTree {
      * @param val 要搜索的值
      * @return 如果找到返回true，否则返回false
      */
-    private boolean searchNoneRecursive(BTree.Node node, int val) {
+     boolean searchNoneRecursive(BTree.Node node, int val) {
         BTree.Node current = node;
         while (current != null) {
             if (current.val == val) {
@@ -189,7 +192,7 @@ public class BinarySearchTree {
      * @param val 要删除的值
      * @return 删除后的子树根节点
      */
-    private BTree.Node deleteRecursive(BTree.Node node, int val) {
+     BTree.Node deleteRecursive(BTree.Node node, int val) {
         if (node == null) {
             return null;
         }
@@ -333,7 +336,7 @@ public class BinarySearchTree {
      * @param node 当前子树的根节点
      * @return 最小值
      */
-    private int findMin(BTree.Node node) {
+    int findMin(BTree.Node node) {
         // 探索算法，不用 current，用 left 来处理
         while (node.left != null) {
             node = node.left;
@@ -473,7 +476,7 @@ public class BinarySearchTree {
      * @param node 当前子树的根节点
      * @return 子树的节点数
      */
-    private int size(BTree.Node node) {
+    int size(BTree.Node node) {
         if (node == null) {
             return 0;
         }

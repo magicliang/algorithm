@@ -21,7 +21,7 @@ public class Solution {
         // 尝试在右子树寻找p和q的最近公共祖先
 		TreeNode rightCommonAncestor = lowestCommonAncestor(root.getRight(), p, q);
 
-        // 如果 p 和 q 分别位于他们最近公共结点的两侧，则根节点为最近公共祖先
+        // 如果 p 和 q 分别位于他们最近公共节点的两侧，则根节点为最近公共祖先
         if (null != leftCommonAncestor && null != rightCommonAncestor) {
             return root;
         }

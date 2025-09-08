@@ -353,7 +353,7 @@ public class LinkedList {
     /**
      * 删除链表的倒数第k个节点
      * 这个算法的 k + 1 和 dummyHead 是必须匹配存在的
-     * 没有 dummyHead 不能处理头结点删除
+     * 没有 dummyHead 不能处理头节点删除
      * 如果有了 dummyHead，如果k等于链表长度，k+1 也能受得住，无从删除起
      * 所以查找节点不需要 dummyHead，删除节点需要
      * 定律：
@@ -403,7 +403,7 @@ public class LinkedList {
 
     /**
      * 删除链表的倒数第k个节点
-     * 这个算法是正确的，因为头结点可以被删除，所以 dummy 节点是必须的
+     * 这个算法是正确的，因为头节点可以被删除，所以 dummy 节点是必须的
      *
      * @param head 链表头节点
      * @param k    倒数第k个

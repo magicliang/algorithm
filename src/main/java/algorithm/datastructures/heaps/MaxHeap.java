@@ -55,7 +55,7 @@ public class MaxHeap {
     public MaxHeap(List<Integer> queue) {
         this();
         this.heap.addAll(queue);
-        // 这个算法时间复杂度是 O(n)。小技巧，最后一个叶子结点的父是第一个父亲，所有父亲之后的节点已经是一个最大堆的根节点了，我们要确定父节点和它们的孩子是不是最大堆
+        // 这个算法时间复杂度是 O(n)。小技巧，最后一个叶子节点的父是第一个父亲，所有父亲之后的节点已经是一个最大堆的根节点了，我们要确定父节点和它们的孩子是不是最大堆
         for (int i = parent(heap.size() - 1); i >= 0; i--) {
             siftDown(i);
         }
