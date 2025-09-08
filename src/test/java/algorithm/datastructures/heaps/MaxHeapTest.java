@@ -511,4 +511,346 @@ class MaxHeapTest {
         emptyHeap.pop();
         assertTrue(emptyHeap.isEmpty(), "移除所有元素后堆应该为空");
     }
+
+    // ==================== 删除操作测试 ====================
+
+    @Test
+    @DisplayName("测试removeAt - 删除堆顶元素")
+    void testRemoveAt_RemoveRoot() {
+        // 构建测试堆: [9, 6, 5, 3, 5, 4, 2, 1, 1, 3]
+        MaxHeap heap = new MaxHeap(Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6, 5, 3));
+        int originalSize = heap.size();
+        int maxValue = heap.peek();
+
+        // 删除堆顶元素（索引0）
+        assertTrue(heap.removeAt(0), "删除堆顶应该成功");
+        assertEquals(originalSize - 1, heap.size(), "删除后堆大小应该减1");
+        
+        // 验证新的堆顶不是原来的最大值
+        assertTrue(heap.peek() < maxValue, "新堆顶应该小于原来的最大值");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 删除叶子节点")
+    void testRemoveAt_RemoveLeaf() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 8, 9, 4, 7, 5, 6, 1, 2, 3));
+        int originalSize = heap.size();
+        
+        // 删除最后一个叶子节点（索引9）
+        assertTrue(heap.removeAt(9), "删除叶子节点应该成功");
+        assertEquals(originalSize - 1, heap.size(), "删除后堆大小应该减1");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 删除中间节点")
+    void testRemoveAt_RemoveMiddleNode() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 8, 9, 4, 7, 5, 6, 1, 2, 3));
+        int originalSize = heap.size();
+        
+        // 删除中间节点（索引2，值为9）
+        assertTrue(heap.removeAt(2), "删除中间节点应该成功");
+        assertEquals(originalSize - 1, heap.size(), "删除后堆大小应该减1");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 删除最后一个元素")
+    void testRemoveAt_RemoveLastElement() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 5, 8));
+        
+        // 删除最后一个元素（索引2）
+        assertTrue(heap.removeAt(2), "删除最后一个元素应该成功");
+        assertEquals(2, heap.size(), "删除后堆大小应该为2");
+        assertEquals(10, heap.peek(), "堆顶应该保持不变");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 删除单元素堆")
+    void testRemoveAt_RemoveSingleElement() {
+        MaxHeap heap = new MaxHeap();
+        heap.push(42);
+        
+        assertTrue(heap.removeAt(0), "删除单元素应该成功");
+        assertTrue(heap.isEmpty(), "删除后堆应该为空");
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 无效索引")
+    void testRemoveAt_InvalidIndex() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(1, 2, 3));
+        
+        // 测试负索引
+        assertFalse(heap.removeAt(-1), "负索引应该返回false");
+        
+        // 测试超出范围的索引
+        assertFalse(heap.removeAt(3), "超出范围的索引应该返回false");
+        assertFalse(heap.removeAt(10), "超出范围的索引应该返回false");
+        
+        // 测试空堆
+        MaxHeap emptyHeap = new MaxHeap();
+        assertFalse(emptyHeap.removeAt(0), "空堆删除应该返回false");
+        
+        // 验证原堆未被修改
+        assertEquals(3, heap.size(), "无效删除不应该修改堆大小");
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 需要上浮的情况")
+    void testRemoveAt_RequiresSiftUp() {
+        // 构造一个特殊的堆，删除某个节点后需要上浮
+        MaxHeap heap = new MaxHeap();
+        heap.push(10);  // 根节点
+        heap.push(5);   // 左子节点
+        heap.push(8);   // 右子节点
+        heap.push(3);   // 左子节点的左子节点
+        heap.push(4);   // 左子节点的右子节点
+        heap.push(6);   // 右子节点的左子节点
+        heap.push(7);   // 右子节点的右子节点
+        heap.push(20);  // 最后添加一个大值，会成为叶子节点
+        
+        // 删除索引1的节点（值为5），用最后的元素（20）替换
+        // 这会导致需要上浮操作
+        assertTrue(heap.removeAt(1), "删除应该成功");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试removeAt - 需要下沉的情况")
+    void testRemoveAt_RequiresSiftDown() {
+        // 构造一个堆，删除某个节点后需要下沉
+        MaxHeap heap = new MaxHeap(Arrays.asList(20, 15, 18, 10, 12, 16, 17, 5, 8, 1));
+        
+        // 删除根节点，用最后的元素（1）替换
+        // 这会导致需要下沉操作
+        assertTrue(heap.removeAt(0), "删除根节点应该成功");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试remove - 删除存在的值")
+    void testRemove_ExistingValue() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 8, 9, 4, 7, 5, 6, 1, 2, 3));
+        int originalSize = heap.size();
+        
+        // 删除存在的值
+        assertTrue(heap.remove(7), "删除存在的值应该成功");
+        assertEquals(originalSize - 1, heap.size(), "删除后堆大小应该减1");
+        
+        // 验证值确实被删除
+        assertFalse(heap.toList().contains(7), "删除的值不应该再存在于堆中");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试remove - 删除不存在的值")
+    void testRemove_NonExistingValue() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 8, 9, 4, 7, 5, 6));
+        int originalSize = heap.size();
+        
+        // 删除不存在的值
+        assertFalse(heap.remove(100), "删除不存在的值应该返回false");
+        assertEquals(originalSize, heap.size(), "删除失败后堆大小应该保持不变");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试remove - 删除重复值")
+    void testRemove_DuplicateValues() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 5, 8, 5, 3, 5, 6));
+        
+        // 删除重复值（应该只删除第一个找到的）
+        assertTrue(heap.remove(5), "删除重复值应该成功");
+        assertEquals(6, heap.size(), "删除后堆大小应该减1");
+        
+        // 验证还有其他5存在
+        assertTrue(heap.toList().contains(5), "其他重复值应该仍然存在");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试remove - 删除堆顶值")
+    void testRemove_RemoveMaxValue() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 8, 9, 4, 7, 5, 6));
+        int maxValue = heap.peek();
+        
+        assertTrue(heap.remove(maxValue), "删除堆顶值应该成功");
+        assertTrue(heap.peek() < maxValue, "新堆顶应该小于原来的最大值");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试remove - 空堆删除")
+    void testRemove_EmptyHeap() {
+        MaxHeap heap = new MaxHeap();
+        
+        assertFalse(heap.remove(1), "空堆删除应该返回false");
+        assertTrue(heap.isEmpty(), "空堆应该保持为空");
+    }
+
+    @Test
+    @DisplayName("测试removeAtOptimized - 基本功能")
+    void testRemoveAtOptimized_BasicFunctionality() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(10, 8, 9, 4, 7, 5, 6, 1, 2, 3));
+        int originalSize = heap.size();
+        
+        // 删除中间节点
+        assertTrue(heap.removeAtOptimized(2), "优化删除应该成功");
+        assertEquals(originalSize - 1, heap.size(), "删除后堆大小应该减1");
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试removeAtOptimized - 与removeAt结果一致性")
+    void testRemoveAtOptimized_ConsistencyWithRemoveAt() {
+        // 创建两个相同的堆
+        List<Integer> values = Arrays.asList(15, 10, 20, 8, 12, 16, 25, 6, 9, 11, 13, 17, 22, 30);
+        MaxHeap heap1 = new MaxHeap(new ArrayList<>(values));
+        MaxHeap heap2 = new MaxHeap(new ArrayList<>(values));
+        
+        // 使用不同方法删除相同位置的元素
+        int indexToRemove = 3;
+        heap1.removeAt(indexToRemove);
+        heap2.removeAtOptimized(indexToRemove);
+        
+        // 验证两个堆的大小相同
+        assertEquals(heap1.size(), heap2.size(), "两种删除方法后堆大小应该相同");
+        
+        // 验证两个堆都满足堆性质
+        verifyMaxHeapProperty(heap1);
+        verifyMaxHeapProperty(heap2);
+        
+        // 验证两个堆的堆顶相同（可能的最大值应该相同）
+        assertEquals(heap1.peek(), heap2.peek(), "两种删除方法后堆顶应该相同");
+    }
+
+    @Test
+    @DisplayName("测试removeAtOptimized - 无效索引")
+    void testRemoveAtOptimized_InvalidIndex() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(1, 2, 3));
+        
+        // 测试无效索引
+        assertFalse(heap.removeAtOptimized(-1), "负索引应该返回false");
+        assertFalse(heap.removeAtOptimized(3), "超出范围的索引应该返回false");
+        
+        // 验证堆未被修改
+        assertEquals(3, heap.size(), "无效删除不应该修改堆大小");
+    }
+
+    @Test
+    @DisplayName("测试删除操作的性能")
+    void testDeletionPerformance() {
+        // 创建大堆进行性能测试
+        List<Integer> values = new ArrayList<>();
+        for (int i = 0; i < 10000; i++) {
+            values.add((int) (Math.random() * 10000));
+        }
+        
+        MaxHeap heap = new MaxHeap(values);
+        
+        long startTime = System.currentTimeMillis();
+        
+        // 删除1000个元素
+        for (int i = 0; i < 1000; i++) {
+            if (!heap.isEmpty()) {
+                heap.removeAt(0); // 总是删除堆顶
+            }
+        }
+        
+        long endTime = System.currentTimeMillis();
+        
+        // 验证删除后的堆仍然满足性质
+        verifyMaxHeapProperty(heap);
+        
+        // 性能应该在合理范围内
+        assertTrue(endTime - startTime < 1000, "删除1000个元素应该在1秒内完成");
+    }
+
+    @Test
+    @DisplayName("测试连续删除操作")
+    void testConsecutiveDeletions() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(20, 15, 18, 10, 12, 16, 17, 5, 8, 9, 11, 13, 14));
+        
+        // 连续删除多个元素
+        while (heap.size() > 3) {
+            int sizeBeforeRemoval = heap.size();
+            assertTrue(heap.removeAt(0), "删除应该成功");
+            assertEquals(sizeBeforeRemoval - 1, heap.size(), "每次删除后大小应该减1");
+            verifyMaxHeapProperty(heap);
+        }
+        
+        // 验证最终状态
+        assertEquals(3, heap.size(), "最终应该剩余3个元素");
+        verifyMaxHeapProperty(heap);
+    }
+
+    @Test
+    @DisplayName("测试删除后的堆重建")
+    void testHeapReconstructionAfterDeletion() {
+        MaxHeap heap = new MaxHeap(Arrays.asList(100, 90, 80, 70, 60, 50, 40, 30, 20, 10));
+        
+        // 删除几个元素
+        heap.removeAt(2); // 删除80
+        heap.removeAt(1); // 删除90（现在的索引1）
+        heap.remove(60);  // 删除60
+        
+        // 验证堆性质
+        verifyMaxHeapProperty(heap);
+        
+        // 添加新元素，验证堆仍然正常工作
+        heap.push(95);
+        heap.push(85);
+        
+        verifyMaxHeapProperty(heap);
+        
+        // 验证新添加的元素能正确排序
+        assertTrue(heap.peek() >= 95, "堆顶应该是最大值");
+    }
+
+    /**
+     * 验证最大堆性质的辅助方法
+     * 确保每个父节点都大于等于其子节点
+     */
+    private void verifyMaxHeapProperty(MaxHeap heap) {
+        List<Integer> list = heap.toList();
+        for (int i = 0; i < list.size(); i++) {
+            int left = heap.left(i);
+            int right = heap.right(i);
+            
+            if (left < list.size()) {
+                assertTrue(list.get(i) >= list.get(left), 
+                    String.format("父节点 %d (索引%d) 应该 >= 左子节点 %d (索引%d)", 
+                        list.get(i), i, list.get(left), left));
+            }
+            if (right < list.size()) {
+                assertTrue(list.get(i) >= list.get(right), 
+                    String.format("父节点 %d (索引%d) 应该 >= 右子节点 %d (索引%d)", 
+                        list.get(i), i, list.get(right), right));
+            }
+        }
+    }
 }

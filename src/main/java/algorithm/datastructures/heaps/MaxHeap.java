@@ -488,6 +488,116 @@ public class MaxHeap {
     }
 
     /**
+     * 删除堆中任意位置的元素（值替换删除技巧的完美示例）
+     * <p>
+     * 算法步骤：
+     * 1. 用最后一个元素替换要删除的元素
+     * 2. 删除最后一个元素
+     * 3. 恢复堆性质（关键：可能需要上浮或下沉）
+     * <p>
+     * 为什么需要同时调用siftUp和siftDown？
+     * - 替换元素可能比原元素大（需要上浮）
+     * - 替换元素可能比原元素小（需要下沉）  
+     * - 替换元素可能正好合适（两个操作都会立即返回）
+     * <p>
+     * 调用顺序：先siftUp再siftDown
+     * - siftUp更简单高效（只与1个父节点比较）
+     * - 如果siftUp移动了元素，siftDown会立即返回
+     * - 如果siftUp没移动，再检查是否需要siftDown
+     *
+     * @param index 要删除的元素索引
+     * @return 如果删除成功返回true，索引无效返回false
+     */
+    public boolean removeAt(int index) {
+        if (index < 0 || index >= heap.size()) {
+            return false;
+        }
+        
+        // 特殊情况：删除最后一个元素，直接移除
+        if (index == heap.size() - 1) {
+            heap.remove(heap.size() - 1);
+            return true;
+        }
+        
+        // 核心技巧：用最后一个元素替换要删除的元素
+        int lastElement = heap.get(heap.size() - 1);
+        heap.set(index, lastElement);
+        heap.remove(heap.size() - 1);
+        
+        // 恢复堆性质：关键是要同时考虑上浮和下沉的可能性
+        // 情况分析：
+        // 1. 如果lastElement > 原元素：可能需要上浮
+        // 2. 如果lastElement < 原元素：可能需要下沉
+        // 3. 如果lastElement = 原元素：可能都不需要（但我们不知道原元素值）
+        
+        siftUp(index);    // 先尝试上浮（更高效）
+        siftDown(index);  // 再尝试下沉（如果上浮成功，这里会立即返回）
+        
+        return true;
+    }
+    
+    /**
+     * 删除堆中第一个匹配的指定值
+     * <p>
+     * 展示值替换删除技巧在堆中的应用
+     *
+     * @param val 要删除的值
+     * @return 如果删除成功返回true，值不存在返回false
+     */
+    public boolean remove(int val) {
+        // 1. 查找元素位置（O(n)时间复杂度）
+        int index = -1;
+        for (int i = 0; i < heap.size(); i++) {
+            if (heap.get(i) == val) {
+                index = i;
+                break;
+            }
+        }
+        
+        if (index == -1) {
+            return false; // 元素不存在
+        }
+        
+        // 2. 使用removeAt方法删除（展示技巧的复用性）
+        return removeAt(index);
+    }
+    
+    /**
+     * 优化版本的删除方法（参考Java PriorityQueue的实现）
+     * <p>
+     * 通过检查元素是否移动来优化调用顺序
+     *
+     * @param index 要删除的元素索引
+     * @return 如果删除成功返回true，索引无效返回false
+     */
+    public boolean removeAtOptimized(int index) {
+        if (index < 0 || index >= heap.size()) {
+            return false;
+        }
+        
+        if (index == heap.size() - 1) {
+            heap.remove(heap.size() - 1);
+            return true;
+        }
+        
+        // 记录替换前的元素，用于优化判断
+        int lastElement = heap.get(heap.size() - 1);
+        heap.set(index, lastElement);
+        heap.remove(heap.size() - 1);
+        
+        // 优化：先尝试下沉，如果元素没有移动，再尝试上浮
+        int originalElement = heap.get(index);
+        siftDown(index);
+        
+        // 如果下沉后元素还在原位置，说明可能需要上浮
+        if (heap.get(index) == originalElement) {
+            siftUp(index);
+        }
+        
+        return true;
+    }
+
+    /**
      * 交换堆中两个位置的元素
      *
      * @param a 第一个元素的索引
