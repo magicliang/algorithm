@@ -208,17 +208,20 @@ public class BinarySearchTree {
      *
      * @param node 当前子树的根节点
      * @param val 要删除的值
-     * @return 删除后的子树根节点
+     * @return 删除后的子树根节点。重要：因为外部是有穿针引线的准备的，所以从本节点返回的是本子树的 root 而不是全树的root，直接返回即可
      */
     static BTree.Node deleteRecursive(BTree.Node node, int val) {
         if (node == null) {
             return null;
         }
 
+        // 易错的点：我们业已证明，删除链表/树的节点，prev是必不可少的，所以在非递归的算法里需要保存 prev，在递归的算法里我们要把当前节点和子树重新连起来
         if (val < node.val) {
+            // 易错的点：忘记穿针引线
             node.left = deleteRecursive(node.left, val);
             return node;
         } else if (val > node.val) {
+            // 易错的点：忘记穿针引线
             node.right = deleteRecursive(node.right, val);
             return node;
         }
@@ -291,97 +294,318 @@ public class BinarySearchTree {
              * 这就是BST删除算法的优雅之处 - 巧妙利用树的结构性质解决复杂问题
              */
             node.val = findMin(node.right); // 用右子树最小值替换当前节点值
+            // 易错的点：忘记穿针引线
             node.right = deleteRecursive(node.right, node.val); // 递归删除最小值（必然是度≤1的简单情况）
         }
 
+        // 易错的点：我们业已证明，删除链表/树的节点，prev是必不可少的，所以在非递归的算法里需要保存 prev，在递归的算法里我们要把当前节点和子树重新连起来
         return node;
     }
 
     /**
-     * 删除指定值的节点（返回新的根节点）
-     * 这是一个静态方法版本，便于测试和复用
-     *
-     * @param root 当前子树的根节点
+     * 纯迭代删除方法 - 避免递归栈溢出的高效实现
+     * 
+     * 算法特点：
+     * - 实现方式：纯迭代，无递归调用
+     * - 时间复杂度：O(h)，其中h是树的高度
+     * - 空间复杂度：O(1)，只使用常数个额外变量
+     * - 适用场景：深度较大的树，避免栈溢出风险
+     * 
+     * 核心思想：
+     * 1. 迭代搜索目标节点，同时记录父节点
+     * 2. 手动处理所有删除情况
+     * 3. 显式维护父子关系
+     * 
+     * 删除策略详解：
+     * - 度为0/1：直接用子节点替换目标节点
+     * - 度为2：手动找到右子树最小值，替换后删除最小值节点
+     * 
+     * 关键技术点：
+     * - 使用prev指针维护父子关系
+     * - 手动处理最小值节点的删除（区分是否为右子树根）
+     * - 特殊处理根节点删除情况
+     * 
+     * 测试用例覆盖：
+     * - 删除叶子节点：remove_DeleteLeafNode_Test
+     * - 删除单子节点：remove_DeleteSingleChildNode_Test
+     * - 删除双子节点：remove_DeleteDoubleChildNode_Test
+     * - 删除根节点：remove_DeleteRootNode_Test
+     * - 删除不存在节点：remove_DeleteNonExistentNode_Test
+     * 
+     * @param root 树的根节点
      * @param val 要删除的值
-     * @return 删除后的子树根节点
+     * @return 删除后的树根节点
      */
     static Node remove(Node root, int val) {
+        // 基础情况：空树直接返回
         if (root == null) {
             return root;
         }
 
-        // 这个方法不能使用 searchnode，因为要保持父节点，确认是否替换
+        // 第一阶段：迭代搜索目标节点
         Node current = root;
-        // 保留父节点，以后还会有用
-        Node prev = null;
+        Node prev = null; // 关键：记录父节点，用于后续的父子关系维护
 
-        Node toRemove = null;
+        Node toRemove = null; // 要删除的目标节点
+
+        // 迭代搜索：根据BST性质定位目标节点
+        // 用break 来代替提前退出
         while (current != null) {
             if (current.val == val) {
-                toRemove = current;
-                break;
+                toRemove = current; // 找到目标节点
+                break; // 重要：找到后立即退出，保持prev指向父节点
             } else if (current.val > val) {
+                // 目标值在左子树
                 prev = current;
                 current = current.left;
             } else {
+                // 目标值在右子树
                 prev = current;
                 current = current.right;
             }
         }
 
+        // 未找到目标节点，无需删除
+        // 不删除
         if (toRemove == null) {
             return root;
         }
 
-        if (toRemove.left != null && toRemove.right != null) {
-            // 双度节点不能破坏结构，用替换值删除法
+        // 第二阶段：根据节点度数分类处理删除
+        // 区分度来删除，最核心的共同点是：肯定是子树替换子树，但某些场景下是 val 替换 toRemove 的val
 
-            // 找到右子树的最小值
-            Node minParent = toRemove;
-            Node minChild = toRemove.right;
+        // 情况1&2：度为0或1的节点（简单情况）
+        if (toRemove.left == null || toRemove.right == null) {
+            // 选择存在的子节点作为替换（可能为null）
+            Node newChild = toRemove.left != null ? toRemove.left : toRemove.right;
 
-            // 开始右折左回的操作，向左寻找左节点，minchild 是以非空结尾的
-            while (minChild.left != null) { // 易错的点：这里不能是 minChild != null，不然 minChild 会以 null 结尾
+            // 特殊情况：删除的是根节点
+            // 如果 prev == null，则 toRemove 必定是 root，这里有2种写法
+            if (toRemove == root) {
+                root = newChild; // 直接更新根节点
+                return root;
+            }
+            
+            // 一般情况：更新父节点的子指针
+            if (prev.left == toRemove) {
+                prev.left = newChild; // 目标节点是父节点的左子节点
+            } else {
+                prev.right = newChild; // 目标节点是父节点的右子节点
+            }
+        } else { 
+            // 情况3：度为2的节点（复杂情况）
+            // toRemove.left != null && toRemove.right != null
+            // 两个左右孩子都不等于 null，则我只要把右孩子的最小值取过来，然后删除那个节点就行了，再用遍历的方法再来一次，是 root 也不怕
+
+            // 策略：找到右子树最小值，用其替换目标节点值，然后删除最小值节点
+            
+            // 寻找右子树最小值节点及其父节点
+            // 开始右折左回
+            Node minParent = toRemove; // 最小值节点的父节点
+            Node minChild = toRemove.right; // 从右子树开始搜索
+
+            // 一直向左走，找到最小值节点
+            while (minChild.left != null) {
                 minParent = minChild;
+                // 找到最左节点
                 minChild = minChild.left;
             }
 
-            // 这是找到右子树的一个左节点了，但是这个左节点还是有可能有右子树的
-            if (minChild == minParent.left) {
-                minParent.left = minChild.right; // 用自己的有右子树替代自己作为父亲的左子树
+            // 删除最小值节点：需要判断其位置关系
+            // 校验到底是右回还是左折
+            if (minParent.left == minChild) {
+                // 情况A：最小值节点在更深的左子树中
+                // 子树替换子树：删除 < 的左节点，用右当左
+                minParent.left = minChild.right;
             } else {
-                minParent.right = minChild.right;  // 用自己的有右子树替代自己作为父亲的右子树
+                // 情况B：右子树根节点就是最小值（没有左子树）
+                // 子树替换子树：删除 \ 的右节点，用右当右
+                minParent.right = minChild.right;
             }
+            
+            // 用最小值替换目标节点的值
+            // 在顶部替换
             toRemove.val = minChild.val;
-        } else {
-            // 处理度为1的场景
-            if (toRemove.left != null || toRemove.right != null) {
-                Node newChild = toRemove.left != null ? toRemove.left : toRemove.right;
-                if (prev != null) {
-                    if (prev.left == toRemove) {
-                        prev.left = newChild;
-                    } else {
-                        prev.right = newChild;
-                    }
-                } else {
-                    root = newChild;
-                }
-            } else if (toRemove.left == null && toRemove.right == null) { // 处理度为0的场景
+        }
+        
+        return root; // 返回可能更新的根节点
+    }
 
-                if (prev != null) {
-                    if (prev.left == toRemove) {
-                        prev.left = null;
-                    } else {
-                        prev.right = null;
-                    }
-                } else {
-                    root = null;
-                }
+    /**
+     * 混合删除方法 - 迭代搜索 + 递归删除的优化实现
+     * 
+     * 算法特点：
+     * - 实现方式：混合策略，结合两种方法优点
+     * - 搜索阶段：迭代实现，避免不必要的递归开销
+     * - 删除阶段：对度为2节点使用递归，简化复杂逻辑
+     * - 时间复杂度：O(h)，其中h是树的高度
+     * - 空间复杂度：O(h)，最坏情况下递归删除最小值的栈深度
+     * 
+     * 设计思想：
+     * 1. 搜索用迭代：高效定位，无栈开销
+     * 2. 简单删除用迭代：度≤1的情况直接处理
+     * 3. 复杂删除用递归：度=2的情况委托给递归方法
+     * 
+     * 优势分析：
+     * - 相比纯递归：减少了搜索阶段的栈开销
+     * - 相比纯迭代：简化了度为2节点的删除逻辑
+     * - 代码可读性：逻辑清晰，易于理解和维护
+     * 
+     * 适用场景：
+     * - 平衡考虑性能和代码简洁性
+     * - 树深度中等，既要避免过多递归又要保持代码清晰
+     * 
+     * 测试用例覆盖：
+     * - 删除叶子节点：remove2_DeleteLeafNode_Test
+     * - 删除单子节点：remove2_DeleteSingleChildNode_Test
+     * - 删除双子节点：remove2_DeleteDoubleChildNode_Test
+     * - 删除根节点：remove2_DeleteRootNode_Test
+     * - 删除不存在节点：remove2_DeleteNonExistentNode_Test
+     * 
+     * @param root 树的根节点
+     * @param val 要删除的值
+     * @return 删除后的树根节点
+     */
+    static Node remove2(Node root, int val) {
+        // 基础情况：空树直接返回
+        if (root == null) {
+            return root;
+        }
 
+        // 第一阶段：迭代搜索目标节点（与remove方法相同）
+        Node current = root;
+        Node prev = null; // 记录父节点，用于维护父子关系
+
+        Node toRemove = null; // 要删除的目标节点
+
+        // 迭代搜索：高效定位目标节点
+        // 用break 来代替提前退出
+        while (current != null) {
+            if (current.val == val) {
+                toRemove = current;
+                break; // 找到目标节点，退出搜索
+            } else if (current.val > val) {
+                // 目标在左子树
+                prev = current;
+                current = current.left;
+            } else {
+                // 目标在右子树
+                prev = current;
+                current = current.right;
             }
         }
 
-        return root;
+        // 未找到目标节点
+        // 不删除
+        if (toRemove == null) {
+            return root;
+        }
+
+        // 第二阶段：根据节点度数选择删除策略
+        // 区分度来删除，最核心的共同点是：肯定是子树替换子树，但某些场景下是 val 替换 toRemove 的val
+
+        // 情况1&2：度为0或1的节点 - 使用迭代处理（简单高效）
+        if (toRemove.left == null || toRemove.right == null) {
+            // 选择存在的子节点作为替换
+            Node newChild = toRemove.left != null ? toRemove.left : toRemove.right;
+
+            // 特殊情况：删除根节点
+            // 如果 prev == null，则 toRemove 必定是 root，这里有2种写法
+            if (toRemove == root) {
+                root = newChild;
+                return root;
+            }
+            
+            // 一般情况：更新父节点指针
+            if (prev.left == toRemove) {
+                prev.left = newChild;
+            } else {
+                prev.right = newChild;
+            }
+
+        } else { 
+            // 情况3：度为2的节点 - 使用递归处理（简化逻辑）
+            // toRemove.left != null && toRemove.right != null
+            // 两个左右孩子都不等于 null，则我只要把右孩子的最小值取过来，然后删除那个节点就行了，再用遍历的方法再来一次，是 root 也不怕
+
+            // 混合策略的核心：委托给递归方法处理复杂情况
+            int min = findMin(toRemove.right); // 找到右子树最小值
+            toRemove.val = min; // 用最小值替换当前节点值
+            // 递归删除最小值节点（利用递归的简洁性）
+            toRemove.right = remove2(toRemove.right, min);
+        }
+        
+        return root; // 返回可能更新的根节点
+    }
+
+    /**
+     * 递归删除方法 - 简洁优雅的纯递归实现
+     * 
+     * 算法特点：
+     * - 实现方式：纯递归，代码简洁优雅
+     * - 时间复杂度：O(h)，其中h是树的高度
+     * - 空间复杂度：O(h)，递归栈深度
+     * - 适用场景：树高度不大，追求代码简洁性
+     * 
+     * 核心思想：
+     * 1. 递归搜索目标节点
+     * 2. 找到后根据节点度数分类处理
+     * 3. 自动维护父子关系（通过返回值重新连接）
+     * 
+     * 删除策略分析：
+     * - 度为0（叶子节点）：直接删除，返回null
+     * - 度为1（单子节点）：用唯一子节点替换
+     * - 度为2（双子节点）：用右子树最小值替换，递归删除最小值节点
+     * 
+     * 测试用例覆盖：
+     * - 删除叶子节点：removeRecursive_DeleteLeafNode_Test
+     * - 删除单子节点：removeRecursive_DeleteSingleChildNode_Test  
+     * - 删除双子节点：removeRecursive_DeleteDoubleChildNode_Test
+     * - 删除根节点：removeRecursive_DeleteRootNode_Test
+     * - 删除不存在节点：removeRecursive_DeleteNonExistentNode_Test
+     * 
+     * @param root 当前子树的根节点
+     * @param val 要删除的值
+     * @return 删除后的子树根节点
+     */
+    static Node removeRecursive(Node root, int val) {
+        // 基础情况：空树或递归到叶子节点的子树
+        if (root == null) {
+            return root; // 未找到目标节点，返回null
+        }
+
+        // 递归搜索阶段：根据BST性质决定搜索方向
+        // 递归搜索，穿针引线
+        if (root.val < val) {
+            // 目标值在右子树，递归搜索右子树
+            root.right = removeRecursive(root.right, val);
+            return root; // 重要：重新连接右子树
+        } else if (root.val > val) {
+            // 目标值在左子树，递归搜索左子树
+            root.left = removeRecursive(root.left, val);
+            return root; // 重要：重新连接左子树
+        }
+
+        // 找到目标节点，开始删除操作
+        // 真的删除，才是真的删除，也要做子树/值替换
+
+        // 情况1&2：度为0或1的节点（简单情况）
+        // 首先，如果当前的节点可以直接被子节点替代，则不需要维护树形结构，只要有一个子树不为空就行了
+        if (root.left == null || root.right == null) {
+            // 选择存在的子节点作为替换（可能为null）
+            root = root.left != null ? root.left : root.right;
+        } else {
+            // 情况3：度为2的节点（复杂情况）
+            // 否则，要处理度为2的节点，需要值替换删除
+
+            // 策略：用右子树最小值替换当前节点值，然后删除最小值节点
+            // 找到最小值，替换当前值，删除那个最小值
+            int min = findMin(root.right); // 找到右子树最小值（中序后继）
+            root.val = min; // 用最小值替换当前节点值
+            root.right = removeRecursive(root.right, min); // 递归删除最小值节点（必然是度≤1）
+        }
+
+        return root; // 返回处理后的子树根节点
     }
 
     /**
@@ -438,66 +662,9 @@ public class BinarySearchTree {
     }
 
     /**
-     * 插入新值到BST中
-     * 如果值已存在，则不进行任何操作
-     * 普通二叉树没有办法通过插入实现自动建树的功能，但是搜索二叉树可以
-     *
-     * @param val 要插入的值
-     */
-    public void insert(int val) {
-        root = insertRecursive(root, val);
-    }
-
-    /**
-     * 非递归方式插入新值到BST中
-     * 如果值已存在，则不进行任何操作
-     * 使用迭代方式替代递归，避免栈溢出风险
-     *
-     * @param val 要插入的值
-     */
-    void insertNoneRecursive(int val) {
-        root = insertNoneRecursive(root, val);
-    }
-
-    /**
-     * 搜索指定值是否存在
-     *
-     * @param val 要搜索的值
-     * @return 如果存在返回true，否则返回false
-     */
-    public boolean search(int val) {
-        return searchRecursive(root, val);
-    }
-
-    public boolean searchNoneRecursive(int val) {
-        return searchNoneRecursive(root, val);
-    }
-
-    /**
-     * 搜索指定值的节点
-     *
-     * @param val 要搜索的值
-     * @return 如果找到返回对应节点，否则返回null
-     */
-    public BTree.Node searchNode(int val) {
-        return searchNodeRecursive(root, val);
-    }
-
-    /**
-     * 删除指定值
-     * 如果值不存在，则不进行任何操作
-     *
-     * @param val 要删除的值
-     */
-    public void delete(int val) {
-        // 这个如果没有返回值，则需要考虑删除 root 的问题，就比较麻烦
-        root = deleteRecursive(root, val);
-    }
-
-    /**
      * 实现一个返回值的删除
      * 1. 先搜索再删除。二叉搜索树的特性，让我们看到的前驱总是它的父节点。
-     * 2. 如果搜索不到，则不删除
+     * 2. 如果搜索不到，则不删除。
      * 3. 对于度为2的节点，执行右孩子（后继）删除：要先区分是不是有不同的度，度为  2 的树就直接用右孩子最大节点来替代自己，然后删除这个孩子。但是删除右子树的过程是先右后左的曲折结构，所以要确定找到的节点是父节点的
      * 右孩子（只折了一折，所以没有左孩子），还是父节点的右孩子的子孙（全部都在最左子树线上找到待删除点），如果是前者，则因为不存在任何左子树，用右子树的右孩子替代右子树的根节点，就删除了右节点；否则，用左孩子的右子
      * 树来替代左孩子。然后用右孩子的值来替代自己。
@@ -513,6 +680,7 @@ public class BinarySearchTree {
         }
 
         Node current = root;
+        // 易错的点：必须保持prev，保证穿针引线
         Node prev = null;
 
         // 第一阶段：搜索要删除的节点，同时记录其父节点
@@ -684,10 +852,10 @@ public class BinarySearchTree {
             // 选择存在的子节点作为替换节点（可能为null）
             Node newChild = toRemove.left != null ? toRemove.left : toRemove.right;
 
-            // 如果要删除节点是 root，则 prev 是没用的
+            // 易错的点：如果要删除节点是 root，则 prev 是没用的，而 root 本身是不需要区分左右孩子的
             if (toRemove == root) {
                 // 直接更新根节点
-                root = newChild; // 易错的点：这里如果没有明确写替代 root，就要区分 prev 为 null 的场景
+                root = newChild;
                 return; // 易错的点：忘记 return，可能触发多次删除
             }
 
@@ -700,6 +868,63 @@ public class BinarySearchTree {
                 prev.right = newChild;
             }
         }
+    }
+
+    /**
+     * 插入新值到BST中
+     * 如果值已存在，则不进行任何操作
+     * 普通二叉树没有办法通过插入实现自动建树的功能，但是搜索二叉树可以
+     *
+     * @param val 要插入的值
+     */
+    public void insert(int val) {
+        root = insertRecursive(root, val);
+    }
+
+    /**
+     * 非递归方式插入新值到BST中
+     * 如果值已存在，则不进行任何操作
+     * 使用迭代方式替代递归，避免栈溢出风险
+     *
+     * @param val 要插入的值
+     */
+    void insertNoneRecursive(int val) {
+        root = insertNoneRecursive(root, val);
+    }
+
+    /**
+     * 搜索指定值是否存在
+     *
+     * @param val 要搜索的值
+     * @return 如果存在返回true，否则返回false
+     */
+    public boolean search(int val) {
+        return searchRecursive(root, val);
+    }
+
+    public boolean searchNoneRecursive(int val) {
+        return searchNoneRecursive(root, val);
+    }
+
+    /**
+     * 搜索指定值的节点
+     *
+     * @param val 要搜索的值
+     * @return 如果找到返回对应节点，否则返回null
+     */
+    public BTree.Node searchNode(int val) {
+        return searchNodeRecursive(root, val);
+    }
+
+    /**
+     * 删除指定值
+     * 如果值不存在，则不进行任何操作
+     *
+     * @param val 要删除的值
+     */
+    public void delete(int val) {
+        // 这个如果没有返回值，则需要考虑删除 root 的问题，就比较麻烦
+        root = deleteRecursive(root, val);
     }
 
     /**

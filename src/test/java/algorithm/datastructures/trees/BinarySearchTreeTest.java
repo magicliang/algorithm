@@ -1225,4 +1225,680 @@ class BinarySearchTreeTest {
 
         assertEquals(size - size / 10, bst.size());
     }
+
+    // ==================== removeRecursive 方法专门测试用例 ====================
+
+    @Test
+    void removeRecursive_DeleteLeafNode_Test() {
+        // 测试递归删除叶子节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.left.right = new BTree.Node(7);
+        root.right.left = new BTree.Node(12);
+        root.right.right = new BTree.Node(18);
+
+        // 删除叶子节点7
+        root = BinarySearchTree.removeRecursive(root, 7);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 7));
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 3));
+        
+        // 验证树结构完整性
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 10, 12, 15, 18), inOrder);
+    }
+
+    @Test
+    void removeRecursive_DeleteSingleChildNode_Test() {
+        // 测试递归删除单子节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.right.right = new BTree.Node(20); // 15只有右子节点
+
+        // 删除单子节点15
+        root = BinarySearchTree.removeRecursive(root, 15);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 15));
+        assertTrue(BinarySearchTree.searchRecursive(root, 20));
+        assertTrue(BinarySearchTree.searchRecursive(root, 10));
+        
+        // 验证树结构：20应该直接连接到10的右子树
+        assertEquals(20, root.right.val);
+        assertNull(root.right.left);
+        assertNull(root.right.right);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 10, 20), inOrder);
+    }
+
+    @Test
+    void removeRecursive_DeleteDoubleChildNode_Test() {
+        // 测试递归删除双子节点（度为2的节点）
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.left.right = new BTree.Node(7);
+        root.right.left = new BTree.Node(12);
+        root.right.right = new BTree.Node(18);
+        root.right.left.right = new BTree.Node(13); // 使12有右子节点
+
+        // 删除度为2的节点15
+        root = BinarySearchTree.removeRecursive(root, 15);
+
+        // 验证删除结果：15被右子树最小值18替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 15));
+        assertTrue(BinarySearchTree.searchRecursive(root, 18));
+        assertTrue(BinarySearchTree.searchRecursive(root, 12));
+        assertTrue(BinarySearchTree.searchRecursive(root, 13));
+        
+        // 验证18替换了15的位置
+        assertEquals(18, root.right.val);
+        assertEquals(12, root.right.left.val);
+        assertEquals(13, root.right.left.right.val);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 7, 10, 12, 13, 18), inOrder);
+    }
+
+    @Test
+    void removeRecursive_DeleteRootNode_Test() {
+        // 测试递归删除根节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.right.right = new BTree.Node(18);
+
+        // 删除根节点10
+        root = BinarySearchTree.removeRecursive(root, 10);
+
+        // 验证删除结果：10被右子树最小值15替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 10));
+        assertEquals(15, root.val); // 新的根节点应该是15
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 18));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 15, 18), inOrder);
+    }
+
+    @Test
+    void removeRecursive_DeleteNonExistentNode_Test() {
+        // 测试递归删除不存在的节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+
+        // 删除不存在的节点20
+        BTree.Node originalRoot = root;
+        root = BinarySearchTree.removeRecursive(root, 20);
+
+        // 验证树结构未改变
+        assertEquals(originalRoot, root);
+        assertTrue(BinarySearchTree.searchRecursive(root, 10));
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 15));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 10, 15), inOrder);
+    }
+
+    @Test
+    void removeRecursive_DeleteFromEmptyTree_Test() {
+        // 测试从空树中删除节点
+        BTree.Node root = null;
+        root = BinarySearchTree.removeRecursive(root, 10);
+        assertNull(root);
+    }
+
+    @Test
+    void removeRecursive_DeleteSingleNodeTree_Test() {
+        // 测试删除单节点树
+        BTree.Node root = new BTree.Node(10);
+        root = BinarySearchTree.removeRecursive(root, 10);
+        assertNull(root);
+    }
+
+    @Test
+    void removeRecursive_ComplexDeletionSequence_Test() {
+        // 测试复杂删除序列
+        BTree.Node root = new BTree.Node(50);
+        root.left = new BTree.Node(30);
+        root.right = new BTree.Node(70);
+        root.left.left = new BTree.Node(20);
+        root.left.right = new BTree.Node(40);
+        root.right.left = new BTree.Node(60);
+        root.right.right = new BTree.Node(80);
+        root.left.left.right = new BTree.Node(25);
+        root.left.right.left = new BTree.Node(35);
+        root.right.left.left = new BTree.Node(55);
+
+        // 连续删除多个节点
+        root = BinarySearchTree.removeRecursive(root, 20); // 删除度为1的节点
+        root = BinarySearchTree.removeRecursive(root, 30); // 删除度为2的节点
+        root = BinarySearchTree.removeRecursive(root, 80); // 删除叶子节点
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 20));
+        assertFalse(BinarySearchTree.searchRecursive(root, 30));
+        assertFalse(BinarySearchTree.searchRecursive(root, 80));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(25, 35, 40, 50, 55, 60, 70), inOrder);
+    }
+
+    // ==================== remove 方法专门测试用例 ====================
+
+    @Test
+    void remove_DeleteLeafNode_Test() {
+        // 测试纯迭代删除叶子节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.left.right = new BTree.Node(7);
+        root.right.left = new BTree.Node(12);
+        root.right.right = new BTree.Node(18);
+
+        // 删除叶子节点7
+        root = BinarySearchTree.remove(root, 7);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 7));
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 3));
+        
+        // 验证树结构完整性
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 10, 12, 15, 18), inOrder);
+    }
+
+    @Test
+    void remove_DeleteSingleChildNode_Test() {
+        // 测试纯迭代删除单子节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.right.left = new BTree.Node(12); // 15只有左子节点
+
+        // 删除单子节点15
+        root = BinarySearchTree.remove(root, 15);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 15));
+        assertTrue(BinarySearchTree.searchRecursive(root, 12));
+        assertTrue(BinarySearchTree.searchRecursive(root, 10));
+        
+        // 验证树结构：12应该直接连接到10的右子树
+        assertEquals(12, root.right.val);
+        assertNull(root.right.left);
+        assertNull(root.right.right);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 10, 12), inOrder);
+    }
+
+    @Test
+    void remove_DeleteDoubleChildNode_Test() {
+        // 测试纯迭代删除双子节点（度为2的节点）
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.left.right = new BTree.Node(7);
+        root.right.left = new BTree.Node(12);
+        root.right.right = new BTree.Node(18);
+        root.right.left.left = new BTree.Node(11); // 使12有左子节点
+        root.right.left.right = new BTree.Node(13); // 使12有右子节点
+
+        // 删除度为2的节点15
+        root = BinarySearchTree.remove(root, 15);
+
+        // 验证删除结果：15被右子树最小值18替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 15));
+        assertTrue(BinarySearchTree.searchRecursive(root, 18));
+        assertTrue(BinarySearchTree.searchRecursive(root, 12));
+        assertTrue(BinarySearchTree.searchRecursive(root, 11));
+        assertTrue(BinarySearchTree.searchRecursive(root, 13));
+        
+        // 验证18替换了15的位置
+        assertEquals(18, root.right.val);
+        assertEquals(12, root.right.left.val);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 7, 10, 11, 12, 13, 18), inOrder);
+    }
+
+    @Test
+    void remove_DeleteRootNode_Test() {
+        // 测试纯迭代删除根节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.right.right = new BTree.Node(18);
+
+        // 删除根节点10
+        root = BinarySearchTree.remove(root, 10);
+
+        // 验证删除结果：10被右子树最小值15替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 10));
+        assertEquals(15, root.val); // 新的根节点应该是15
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 18));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 15, 18), inOrder);
+    }
+
+    @Test
+    void remove_DeleteNonExistentNode_Test() {
+        // 测试纯迭代删除不存在的节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+
+        // 删除不存在的节点20
+        BTree.Node originalRoot = root;
+        root = BinarySearchTree.remove(root, 20);
+
+        // 验证树结构未改变
+        assertEquals(originalRoot, root);
+        assertTrue(BinarySearchTree.searchRecursive(root, 10));
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 15));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 10, 15), inOrder);
+    }
+
+    @Test
+    void remove_RightSubtreeMinIsRoot_Test() {
+        // 测试右子树的最小值就是右子树根节点的情况
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15); // 右子树根就是最小值
+        root.right.right = new BTree.Node(20);
+
+        // 删除度为2的根节点10
+        root = BinarySearchTree.remove(root, 10);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 10));
+        assertEquals(15, root.val);
+        assertEquals(20, root.right.val);
+        assertNull(root.right.left);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 15, 20), inOrder);
+    }
+
+    @Test
+    void remove_RightSubtreeMinInDeepLeft_Test() {
+        // 测试右子树的最小值在深层左子树的情况
+        BTree.Node root = new BTree.Node(20);
+        root.left = new BTree.Node(10);
+        root.right = new BTree.Node(30);
+        root.right.left = new BTree.Node(25);
+        root.right.right = new BTree.Node(35);
+        root.right.left.left = new BTree.Node(22); // 右子树的最小值在深层
+        root.right.left.left.right = new BTree.Node(23);
+
+        // 删除度为2的根节点20
+        root = BinarySearchTree.remove(root, 20);
+
+        // 验证删除结果：20被22替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 20));
+        assertEquals(22, root.val);
+        assertTrue(BinarySearchTree.searchRecursive(root, 23));
+        assertTrue(BinarySearchTree.searchRecursive(root, 25));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(10, 22, 23, 25, 30, 35), inOrder);
+    }
+
+    // ==================== remove2 方法专门测试用例 ====================
+
+    @Test
+    void remove2_DeleteLeafNode_Test() {
+        // 测试混合删除叶子节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.left.right = new BTree.Node(7);
+        root.right.left = new BTree.Node(12);
+        root.right.right = new BTree.Node(18);
+
+        // 删除叶子节点7
+        root = BinarySearchTree.remove2(root, 7);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 7));
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 3));
+        
+        // 验证树结构完整性
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 10, 12, 15, 18), inOrder);
+    }
+
+    @Test
+    void remove2_DeleteSingleChildNode_Test() {
+        // 测试混合删除单子节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.right.left = new BTree.Node(12); // 15只有左子节点
+
+        // 删除单子节点15
+        root = BinarySearchTree.remove2(root, 15);
+
+        // 验证删除结果
+        assertFalse(BinarySearchTree.searchRecursive(root, 15));
+        assertTrue(BinarySearchTree.searchRecursive(root, 12));
+        assertTrue(BinarySearchTree.searchRecursive(root, 10));
+        
+        // 验证树结构：12应该直接连接到10的右子树
+        assertEquals(12, root.right.val);
+        assertNull(root.right.left);
+        assertNull(root.right.right);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 10, 12), inOrder);
+    }
+
+    @Test
+    void remove2_DeleteDoubleChildNode_Test() {
+        // 测试混合删除双子节点（度为2的节点）
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.left.right = new BTree.Node(7);
+        root.right.left = new BTree.Node(12);
+        root.right.right = new BTree.Node(18);
+        root.right.left.right = new BTree.Node(13); // 使12有右子节点
+
+        // 删除度为2的节点15
+        root = BinarySearchTree.remove2(root, 15);
+
+        // 验证删除结果：15被右子树最小值18替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 15));
+        assertTrue(BinarySearchTree.searchRecursive(root, 18));
+        assertTrue(BinarySearchTree.searchRecursive(root, 12));
+        assertTrue(BinarySearchTree.searchRecursive(root, 13));
+        
+        // 验证18替换了15的位置
+        assertEquals(18, root.right.val);
+        assertEquals(12, root.right.left.val);
+        assertEquals(13, root.right.left.right.val);
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 7, 10, 12, 13, 18), inOrder);
+    }
+
+    @Test
+    void remove2_DeleteRootNode_Test() {
+        // 测试混合删除根节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+        root.left.left = new BTree.Node(3);
+        root.right.right = new BTree.Node(18);
+
+        // 删除根节点10
+        root = BinarySearchTree.remove2(root, 10);
+
+        // 验证删除结果：10被右子树最小值15替换
+        assertFalse(BinarySearchTree.searchRecursive(root, 10));
+        assertEquals(15, root.val); // 新的根节点应该是15
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 18));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(3, 5, 15, 18), inOrder);
+    }
+
+    @Test
+    void remove2_DeleteNonExistentNode_Test() {
+        // 测试混合删除不存在的节点
+        BTree.Node root = new BTree.Node(10);
+        root.left = new BTree.Node(5);
+        root.right = new BTree.Node(15);
+
+        // 删除不存在的节点20
+        BTree.Node originalRoot = root;
+        root = BinarySearchTree.remove2(root, 20);
+
+        // 验证树结构未改变
+        assertEquals(originalRoot, root);
+        assertTrue(BinarySearchTree.searchRecursive(root, 10));
+        assertTrue(BinarySearchTree.searchRecursive(root, 5));
+        assertTrue(BinarySearchTree.searchRecursive(root, 15));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(5, 10, 15), inOrder);
+    }
+
+    @Test
+    void remove2_RecursiveCallForDoubleChild_Test() {
+        // 测试混合方法中递归调用删除最小值的情况
+        BTree.Node root = new BTree.Node(20);
+        root.left = new BTree.Node(10);
+        root.right = new BTree.Node(30);
+        root.right.left = new BTree.Node(25);
+        root.right.right = new BTree.Node(35);
+        root.right.left.left = new BTree.Node(22);
+        root.right.left.left.right = new BTree.Node(23);
+        root.right.left.right = new BTree.Node(27);
+
+        // 删除度为2的根节点20
+        root = BinarySearchTree.remove2(root, 20);
+
+        // 验证删除结果：20被22替换，22被递归删除
+        assertFalse(BinarySearchTree.searchRecursive(root, 20));
+        assertEquals(22, root.val);
+        assertTrue(BinarySearchTree.searchRecursive(root, 23));
+        assertTrue(BinarySearchTree.searchRecursive(root, 25));
+        assertTrue(BinarySearchTree.searchRecursive(root, 27));
+        
+        BTree bTree = new BTree();
+        List<Integer> inOrder = bTree.midOrder(root);
+        assertEquals(Arrays.asList(10, 22, 23, 25, 27, 30, 35), inOrder);
+    }
+
+    // ==================== 三种删除方法一致性测试 ====================
+
+    @Test
+    void testThreeDeleteMethodsConsistency() {
+        // 测试三种删除方法的一致性
+        int[] values = {50, 30, 70, 20, 40, 60, 80, 10, 25, 35, 45, 55, 65, 75, 85};
+        int[] deleteValues = {30, 70, 10, 85, 50};
+
+        for (int deleteVal : deleteValues) {
+            // 创建三个相同的树
+            BTree.Node root1 = buildTestTree(values);
+            BTree.Node root2 = buildTestTree(values);
+            BTree.Node root3 = buildTestTree(values);
+
+            // 分别用三种方法删除
+            root1 = BinarySearchTree.removeRecursive(root1, deleteVal);
+            root2 = BinarySearchTree.remove(root2, deleteVal);
+            root3 = BinarySearchTree.remove2(root3, deleteVal);
+
+            // 验证三种方法结果一致
+            BTree bTree = new BTree();
+            List<Integer> inOrder1 = bTree.midOrder(root1);
+            List<Integer> inOrder2 = bTree.midOrder(root2);
+            List<Integer> inOrder3 = bTree.midOrder(root3);
+
+            assertEquals(inOrder1, inOrder2, "removeRecursive and remove results differ for deleting " + deleteVal);
+            assertEquals(inOrder2, inOrder3, "remove and remove2 results differ for deleting " + deleteVal);
+            assertEquals(inOrder1, inOrder3, "removeRecursive and remove2 results differ for deleting " + deleteVal);
+        }
+    }
+
+    @Test
+    void testThreeDeleteMethodsPerformanceComparison() {
+        // 性能对比测试（主要验证功能正确性）
+        int[] values = new int[100];
+        for (int i = 0; i < 100; i++) {
+            values[i] = i + 1;
+        }
+
+        // 创建三个相同的大树
+        BTree.Node root1 = buildTestTree(values);
+        BTree.Node root2 = buildTestTree(values);
+        BTree.Node root3 = buildTestTree(values);
+
+        // 删除多个节点
+        int[] deleteValues = {50, 25, 75, 12, 87, 6, 93, 30, 70};
+        
+        for (int deleteVal : deleteValues) {
+            root1 = BinarySearchTree.removeRecursive(root1, deleteVal);
+            root2 = BinarySearchTree.remove(root2, deleteVal);
+            root3 = BinarySearchTree.remove2(root3, deleteVal);
+        }
+
+        // 验证最终结果一致
+        BTree bTree = new BTree();
+        List<Integer> inOrder1 = bTree.midOrder(root1);
+        List<Integer> inOrder2 = bTree.midOrder(root2);
+        List<Integer> inOrder3 = bTree.midOrder(root3);
+
+        assertEquals(inOrder1, inOrder2);
+        assertEquals(inOrder2, inOrder3);
+        assertEquals(91, inOrder1.size()); // 100 - 9 = 91
+    }
+
+    /**
+     * 辅助方法：根据值数组构建测试树
+     */
+    private BTree.Node buildTestTree(int[] values) {
+        BTree.Node root = null;
+        for (int val : values) {
+            root = BinarySearchTree.insertRecursive(root, val);
+        }
+        return root;
+    }
+
+    @Test
+    void testDeleteMethodsEdgeCases() {
+        // 边界情况测试
+        
+        // 测试删除空树
+        assertNull(BinarySearchTree.removeRecursive(null, 10));
+        assertNull(BinarySearchTree.remove(null, 10));
+        assertNull(BinarySearchTree.remove2(null, 10));
+        
+        // 测试删除单节点树
+        BTree.Node singleNode1 = new BTree.Node(10);
+        BTree.Node singleNode2 = new BTree.Node(10);
+        BTree.Node singleNode3 = new BTree.Node(10);
+        
+        assertNull(BinarySearchTree.removeRecursive(singleNode1, 10));
+        assertNull(BinarySearchTree.remove(singleNode2, 10));
+        assertNull(BinarySearchTree.remove2(singleNode3, 10));
+        
+        // 测试删除单节点树中不存在的值
+        BTree.Node singleNode4 = new BTree.Node(10);
+        BTree.Node singleNode5 = new BTree.Node(10);
+        BTree.Node singleNode6 = new BTree.Node(10);
+        
+        assertEquals(10, BinarySearchTree.removeRecursive(singleNode4, 5).val);
+        assertEquals(10, BinarySearchTree.remove(singleNode5, 5).val);
+        assertEquals(10, BinarySearchTree.remove2(singleNode6, 5).val);
+    }
+
+    @Test
+    void testDeleteMethodsWithSkewedTrees() {
+        // 测试倾斜树的删除
+        
+        // 左倾斜树：5->4->3->2->1
+        BTree.Node leftSkewed1 = new BTree.Node(5);
+        leftSkewed1.left = new BTree.Node(4);
+        leftSkewed1.left.left = new BTree.Node(3);
+        leftSkewed1.left.left.left = new BTree.Node(2);
+        leftSkewed1.left.left.left.left = new BTree.Node(1);
+        
+        BTree.Node leftSkewed2 = copyTree(leftSkewed1);
+        BTree.Node leftSkewed3 = copyTree(leftSkewed1);
+        
+        // 删除中间节点3
+        leftSkewed1 = BinarySearchTree.removeRecursive(leftSkewed1, 3);
+        leftSkewed2 = BinarySearchTree.remove(leftSkewed2, 3);
+        leftSkewed3 = BinarySearchTree.remove2(leftSkewed3, 3);
+        
+        // 验证结果一致
+        BTree bTree = new BTree();
+        List<Integer> result1 = bTree.midOrder(leftSkewed1);
+        List<Integer> result2 = bTree.midOrder(leftSkewed2);
+        List<Integer> result3 = bTree.midOrder(leftSkewed3);
+        
+        assertEquals(Arrays.asList(1, 2, 4, 5), result1);
+        assertEquals(result1, result2);
+        assertEquals(result2, result3);
+        
+        // 右倾斜树：1->2->3->4->5
+        BTree.Node rightSkewed1 = new BTree.Node(1);
+        rightSkewed1.right = new BTree.Node(2);
+        rightSkewed1.right.right = new BTree.Node(3);
+        rightSkewed1.right.right.right = new BTree.Node(4);
+        rightSkewed1.right.right.right.right = new BTree.Node(5);
+        
+        BTree.Node rightSkewed2 = copyTree(rightSkewed1);
+        BTree.Node rightSkewed3 = copyTree(rightSkewed1);
+        
+        // 删除中间节点3
+        rightSkewed1 = BinarySearchTree.removeRecursive(rightSkewed1, 3);
+        rightSkewed2 = BinarySearchTree.remove(rightSkewed2, 3);
+        rightSkewed3 = BinarySearchTree.remove2(rightSkewed3, 3);
+        
+        // 验证结果一致
+        List<Integer> rightResult1 = bTree.midOrder(rightSkewed1);
+        List<Integer> rightResult2 = bTree.midOrder(rightSkewed2);
+        List<Integer> rightResult3 = bTree.midOrder(rightSkewed3);
+        
+        assertEquals(Arrays.asList(1, 2, 4, 5), rightResult1);
+        assertEquals(rightResult1, rightResult2);
+        assertEquals(rightResult2, rightResult3);
+    }
+
+    /**
+     * 辅助方法：复制树结构
+     */
+    private BTree.Node copyTree(BTree.Node root) {
+        if (root == null) return null;
+        
+        BTree.Node newRoot = new BTree.Node(root.val);
+        newRoot.left = copyTree(root.left);
+        newRoot.right = copyTree(root.right);
+        return newRoot;
+    }
 }
