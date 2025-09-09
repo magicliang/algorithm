@@ -142,7 +142,7 @@ public class NQueen {
                 List<String> newCombination = new ArrayList<>(combination);
                 newCombinations.add(newCombination);
             }
-            // 易错的点，在回溯法里要尽量使用新数据结构防止修改错
+            // 易错的点，在回溯法里要尽量使用新数据结构防止共享修改错
             result.add(newCombinations);
             return; // 返回，继续探索其他可能性
         }
@@ -153,6 +153,7 @@ public class NQueen {
             // 2b. 剪枝：检查是否与已放置的皇后冲突
             final int coordination1 = row - col + n - 1;
             final int coordination2 = row + col;
+            // 这一步相当于剪枝掉了 isValid 为 false 的方法
             if (cols[col] || diags1[coordination1] || diags2[coordination2]) {
                 continue; // 冲突，跳过此列，尝试下一列
             }

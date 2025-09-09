@@ -125,7 +125,7 @@ public class SubsetSum {
             }
         }
 
-        // 要去重要保持单调有序
+        // 易错的点：要去重要保持单调有序
         Arrays.sort(nums);
         backtrackNoDuplicateCombination(nums, target, new ArrayList<>(), 0, result);
 
@@ -138,7 +138,7 @@ public class SubsetSum {
      * @param nums 已排序的输入整数数组，必须预先排序以支持重复元素去重
      * @param target 剩余需要达到的目标和值
      * @param states 当前已选择的元素列表，表示当前路径状态
-     * @param start 起始搜索位置索引，确保不重复使用前面的元素
+     * @param start 起始搜索位置索引，确保不重复使用前面的元素-这种排除坐标本质上就是类似双指针嵌套搜索的时候的内指针，防止重复选择
      * @param result 存储所有满足条件的子集结果列表
      * @implNote 实现细节：
      *         - 使用排序后的数组来支持重复元素的去重处理
@@ -173,7 +173,7 @@ public class SubsetSum {
                 continue;
             }
 
-            // 作负值剪枝
+            // 做负值剪枝
             // 由于数组已排序，后续元素更大，可以提前终止
             if (target - nums[i] < 0) {
                 continue;
