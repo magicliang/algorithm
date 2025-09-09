@@ -8,6 +8,14 @@ import java.util.NoSuchElementException;
  * description: 基于循环数组实现的双端队列数据结构
  * 支持在队列两端进行高效的插入和删除操作
  *
+ * 循环数组的诀窍：
+ *
+ * 1. 头和尾有单独的指针维护。
+ * 2. 不同的弹出操作会导致头和尾往不同方向移动：elements[tail] = item;elements[head] = item;
+ * 3. 拷贝-扩容操作需要重新拷贝头和尾到新的数组的原始点。新节点的 i = (head + i) % 老 capacity - 这也意味着老节点的 src 需要遵循自身的 capacity 寻址。新数组的 head 总是 0，tail 总是 size。
+ * 4. 头和尾的移动是循环的，需要考虑数组的边界，所以总是要做一个mod修饰。
+ * 5. 添加操作需要先检查扩容，删除操作需要后检查缩容。
+ *
  * @author magicliang
  *
  *         date: 2025-08-12 19:35
@@ -138,6 +146,7 @@ public class ArrayDeque<T> implements Deque<T> {
             newElements[i] = elements[(head + i) % capacity];
         }
 
+        // 替换四个关键要素
         elements = newElements;
         head = 0;
         tail = size;
