@@ -15,6 +15,30 @@ package algorithm.datastructures.elementary;
  * 链表是由表头和子链表组成的，而二叉树是由根和左右子树构成的。
  *
  * 二分 merge 和前缀 merge
+ * 
+ * <h3>链表翻转算法集合</h3>
+ * <p>
+ * 本类包含多种链表翻转算法的实现：
+ * <ul>
+ * <li><b>基础翻转</b>：{@link #reverse(ListNode)} - 翻转整个链表</li>
+ * <li><b>前N个翻转</b>：{@link Reverser#reverse(ListNode, int)} - 翻转前N个节点</li>
+ * <li><b>两两交换</b>：
+ *   <ul>
+ *   <li>{@link #swapPairsRecursive(ListNode)} - 递归实现（后缀子链表翻转+穿针引线）</li>
+ *   <li>{@link #swapPairsIterative(ListNode)} - 迭代实现（dummy头节点+三指针技术）</li>
+ *   </ul>
+ * </li>
+ * <li><b>K组翻转</b>：{@link #reverseKGroup(ListNode, int)} - 每K个节点一组进行翻转</li>
+ * <li><b>通用分组翻转</b>：{@link #reverseKGroup(ListNode, int, boolean)} - 支持处理不完整分组</li>
+ * </ul>
+ * 
+ * <h3>算法思想对比</h3>
+ * <table border="1">
+ * <tr><th>算法类型</th><th>实现方式</th><th>时间复杂度</th><th>空间复杂度</th><th>核心思想</th></tr>
+ * <tr><td>递归翻转</td><td>递归</td><td>O(n)</td><td>O(n)</td><td>后缀处理+当前层穿针引线</td></tr>
+ * <tr><td>迭代翻转</td><td>迭代</td><td>O(n)</td><td>O(1)</td><td>三指针技术+逐步反转</td></tr>
+ * <tr><td>分组翻转</td><td>迭代</td><td>O(n)</td><td>O(1)</td><td>分组边界确定+组内翻转+组间连接</td></tr>
+ * </table>
  *
  * @author magicliang
  * @date 2025-09-02
@@ -884,6 +908,200 @@ public class LinkedList {
     }
 
     /**
+     * 两两交换链表中的节点（递归实现）
+     * <p>
+     * 算法思路：后缀子链表翻转 + 本节点穿针引线的递归解法
+     * 1. 递归处理后续子链表的两两交换
+     * 2. 在当前层级完成本对节点的交换
+     * 3. 连接交换后的节点与递归处理后的子链表
+     * <p>
+     * 核心步骤：
+     * - 先递归翻转后缀子链表：rest = swapPairs(p2.next)
+     * - 再翻转本对节点：p2.next = p1, p1.next = rest
+     * - 返回新的头节点：p2
+     * <p>
+     * 例如：1->2->3->4 变为 2->1->4->3
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(n)（递归栈开销）
+     *
+     * @param head 链表头节点
+     * @return 交换后的链表头节点
+     */
+    public ListNode swapPairsRecursive(ListNode head) {
+        if (head == null) {
+            return head;
+        }
+
+        ListNode p1 = head;        // 第一个节点
+        ListNode p2 = head.next;   // 第二个节点
+
+        if (p2 != null) {
+            // 先递归翻转后缀子链表，然后再翻转本对节点
+            ListNode rest = swapPairsRecursive(p2.next);
+            
+            // 交换当前这一对节点
+            p2.next = p1;    // 第二个节点指向第一个节点
+            p1.next = rest;  // 第一个节点连接递归处理后的子链表
+            
+            head = p2;       // 更新头节点为第二个节点
+        }
+        
+        return head;
+    }
+
+    /**
+     * 两两交换链表中的节点（迭代实现 - 快慢指针变种）
+     * <p>
+     * 算法思路：使用dummy头节点 + 三指针技术
+     * 1. 使用dummy头节点简化边界处理
+     * 2. 使用temp指针跟踪当前处理位置的前驱节点
+     * 3. 在每次循环中交换temp后面的两个节点
+     * 4. 更新temp指针到新的位置继续处理
+     * <p>
+     * 核心操作（需要画图理解）：
+     * - temp.next = p2：让前驱指向第二个节点
+     * - p2.next = p1：第二个节点指向第一个节点
+     * - p1.next = nextTemp：第一个节点连接后续链表
+     * - temp = p1：更新temp到新的前驱位置
+     * <p>
+     * 例如：1->2->3->4 变为 2->1->4->3
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @return 交换后的链表头节点
+     */
+    public ListNode swapPairsIterative(ListNode head) {
+        if (head == null) {
+            return head;
+        }
+        
+        // 使用dummy头节点简化边界处理
+        ListNode dummyHead = new ListNode();
+        dummyHead.next = head;
+        
+        ListNode temp = dummyHead;
+        
+        // 当前区间可以翻转的条件：存在两个连续节点
+        while (temp.next != null && temp.next.next != null) {
+            ListNode p1 = temp.next;        // 第一个节点
+            ListNode p2 = temp.next.next;   // 第二个节点
+            ListNode nextTemp = p2.next;    // 保存后续链表的头节点
+            
+            // 三步交换操作（顺序很重要，需要画图理解）
+            temp.next = p2;      // 前驱指向第二个节点
+            p2.next = p1;        // 第二个节点指向第一个节点  
+            p1.next = nextTemp;  // 第一个节点连接后续链表
+            
+            // 更新temp到新的前驱位置（交换后p1成为这对节点的尾部）
+            temp = p1;
+        }
+        
+        return dummyHead.next;
+    }
+
+    /**
+     * 逐个翻转任意长度的链表分组（通用方法）
+     * <p>
+     * 算法思路：分组处理 + 递归/迭代翻转
+     * 1. 将链表按指定长度k分组
+     * 2. 对每组进行翻转操作
+     * 3. 连接各个翻转后的分组
+     * 4. 处理最后不足k个节点的分组（可选择翻转或保持原序）
+     * <p>
+     * 核心步骤：
+     * - 使用dummy头节点简化处理
+     * - 通过计数确定每组的边界
+     * - 调用翻转方法处理每组
+     * - 正确连接各组之间的关系
+     * <p>
+     * 例如：k=3时，1->2->3->4->5->6->7->8 变为 3->2->1->6->5->4->7->8
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @param k 每组的长度
+     * @param reverseIncomplete 是否翻转最后不足k个节点的分组
+     * @return 分组翻转后的链表头节点
+     */
+    public ListNode reverseKGroup(ListNode head, int k, boolean reverseIncomplete) {
+        if (head == null || k <= 1) {
+            return head;
+        }
+        
+        // 使用dummy头节点简化边界处理
+        ListNode dummy = new ListNode();
+        dummy.next = head;
+        ListNode prevGroupEnd = dummy;  // 上一组的尾节点
+        
+        while (true) {
+            // 检查剩余节点是否足够组成一组
+            ListNode groupStart = prevGroupEnd.next;
+            if (groupStart == null) {
+                break;  // 没有更多节点
+            }
+            
+            // 找到当前组的结束位置
+            ListNode groupEnd = groupStart;
+            int count = 1;
+            while (count < k && groupEnd.next != null) {
+                groupEnd = groupEnd.next;
+                count++;
+            }
+            
+            // 检查是否有足够的节点组成完整的一组
+            if (count < k) {
+                if (reverseIncomplete) {
+                    // 翻转不完整的最后一组
+                    ListNode nextGroupStart = groupEnd.next;
+                    groupEnd.next = null;  // 临时断开连接
+                    
+                    ListNode reversedHead = reverseList(groupStart);
+                    prevGroupEnd.next = reversedHead;
+                    groupStart.next = nextGroupStart;  // 重新连接
+                }
+                break;  // 处理完毕
+            }
+            
+            // 翻转当前组
+            ListNode nextGroupStart = groupEnd.next;
+            groupEnd.next = null;  // 临时断开与下一组的连接
+            
+            // 翻转当前组（groupStart变成尾节点，groupEnd变成头节点）
+            ListNode reversedHead = reverseList(groupStart);
+            
+            // 连接翻转后的组
+            prevGroupEnd.next = reversedHead;  // 上一组连接到翻转后的头
+            groupStart.next = nextGroupStart;  // 翻转后的尾连接到下一组
+            
+            // 更新prevGroupEnd到当前组的尾节点（原来的groupStart）
+            prevGroupEnd = groupStart;
+        }
+        
+        return dummy.next;
+    }
+
+    /**
+     * K个一组翻转链表（标准实现）
+     * <p>
+     * 这是reverseKGroup的简化版本，只翻转完整的k个节点分组，
+     * 不足k个节点的分组保持原序不变。
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
+     *
+     * @param head 链表头节点
+     * @param k 每组的长度
+     * @return 分组翻转后的链表头节点
+     */
+    public ListNode reverseKGroup(ListNode head, int k) {
+        return reverseKGroup(head, k, false);
+    }
+
+    /**
      * 链表节点定义
      * <p>
      * 提供三种构造方式：
@@ -1068,4 +1286,157 @@ public class LinkedList {
         }
 
     }
+
+
+    /**
+     * K个一组翻转链表（头插法 + 递归实现）
+     * <p>
+     * 算法思路：
+     * 1. 使用递归处理每个K组的翻转
+     * 2. 在每组内使用头插法进行翻转
+     * 3. 递归处理剩余部分并连接结果
+     * <p>
+     * 核心步骤：
+     * - 检查当前组是否有足够的K个节点
+     * - 使用头插法翻转当前组
+     * - 递归处理剩余部分
+     * - 连接翻转后的当前组和递归结果
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(n/k)（递归栈深度）
+     *
+     * @param head 链表头节点
+     * @param k 每组的长度
+     * @return 分组翻转后的链表头节点
+     */
+    public ListNode reverseKGroupWithHeadInsert(ListNode head, int k) {
+        if (head == null || k <= 1) {
+            return head;
+        }
+        
+        // 使用dummy头节点简化处理
+        ListNode dummyHead = new ListNode();
+        dummyHead.next = head;
+
+        // 检查是否有足够的k个节点
+        ListNode tail = dummyHead;
+        int i = 0;
+        while (i < k && tail != null) {
+            tail = tail.next;
+            i++;
+        }
+        
+        // 易错点：需要提前结束翻转的流程，两个条件都可能导致退出
+        if (i != k || tail == null) {
+            return head;
+        }
+
+        // 保存下一组的起始节点
+        ListNode rest = tail.next;
+
+        // 使用头插法翻转当前组的k个节点
+        ListNode current = head;
+        while (current != rest) {
+            ListNode nxt = current.next;        // 保存下一个节点
+            current.next = dummyHead.next;      // current指向当前dummyHead的下一个节点
+            dummyHead.next = current;           // dummyHead指向current（头插）
+            current = nxt;                      // 移动到下一个节点
+        }
+
+        // 递归处理剩余部分，并连接到当前组的尾部（原head节点）
+        head.next = reverseKGroupWithHeadInsert(rest, k);
+
+        return dummyHead.next;
+    }
+
+    /**
+     * K个一组翻转链表（递归 + 递归实现）
+     * <p>
+     * 算法思路：
+     * 1. 外层递归：处理每个K组的分组逻辑
+     * 2. 内层递归：翻转单个K组内的节点
+     * 3. 连接翻转后的各组
+     * <p>
+     * 核心特点：
+     * - 双重递归结构，逻辑清晰
+     * - 内层递归专门负责K个节点的翻转
+     * - 外层递归负责分组和连接
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(n/k + k)（外层递归 + 内层递归的栈深度）
+     *
+     * @param head 链表头节点
+     * @param k 每组的长度
+     * @return 分组翻转后的链表头节点
+     */
+    public ListNode reverseKGroupWithDoubleRecursion(ListNode head, int k) {
+        if (head == null || k <= 1) {
+            return head;
+        }
+        
+        // 使用dummy头节点检查节点数量
+        ListNode dummyHead = new ListNode();
+        dummyHead.next = head;
+
+        ListNode tail = dummyHead;
+        int i = 0;
+        while (i < k && tail != null) {
+            tail = tail.next;
+            i++;
+        }
+        
+        // 易错点：需要提前结束翻转的流程，两个条件都可能导致退出
+        // 否则，可以翻转当前这段链表，不管是递归还是迭代
+        if (i != k || tail == null) {
+            return head;
+        }
+
+        // 保存下一组的起始节点
+        ListNode rest = tail.next;
+
+        // 使用内层递归翻转当前K个节点
+        ListNode newHead = reverseKNodes(head, k);
+
+        // 递归处理剩余部分，并连接到当前组的尾部（原head节点）
+        head.next = reverseKGroupWithDoubleRecursion(rest, k);
+
+        return newHead;
+    }
+
+    /**
+     * 递归翻转K个节点（辅助方法）
+     * <p>
+     * 算法思路：
+     * 1. 递归到第K个节点作为新的头节点
+     * 2. 在回溯过程中逐步翻转指针方向
+     * 3. 每层递归处理一个节点的翻转
+     * <p>
+     * 注意：此方法假定输入的链表至少有K个节点
+     * <p>
+     * 时间复杂度：O(k)
+     * 空间复杂度：O(k)（递归栈深度）
+     *
+     * @param head 链表头节点
+     * @param k 需要翻转的节点数
+     * @return 翻转后的链表头节点
+     */
+    private ListNode reverseKNodes(ListNode head, int k) {
+        // 递归终止条件：只有1个节点时直接返回
+        if (k == 1) {
+            return head;
+        }
+        
+        // 保存下一个节点的引用（翻转后将成为当前节点的前驱）
+        ListNode newTail = head.next;
+        
+        // 递归翻转剩余的k-1个节点，获得新的头节点
+        ListNode newHead = reverseKNodes(head.next, k - 1);
+        
+        // 在回溯过程中翻转当前节点：让下一个节点指向当前节点
+        newTail.next = head;
+        
+        return newHead;
+    }
+
+
 }

@@ -2,550 +2,390 @@ package algorithm.datastructures.elementary;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
+/**
+ * LinkedList类的单元测试
+ * <p>
+ * 测试覆盖范围：
+ * <ul>
+ * <li>基础链表操作：创建、转换、长度计算、打印</li>
+ * <li>快慢指针算法：环检测、中点查找、倒数第k个节点</li>
+ * <li>链表翻转算法：整体翻转、前N个翻转、两两交换、K组翻转</li>
+ * <li>链表处理算法：去重、合并、回文检测、旋转</li>
+ * <li>边界情况：空链表、单节点、特殊参数值</li>
+ * </ul>
+ *
+ * @author magicliang
+ * @date 2025-09-09
+ */
 public class LinkedListTest {
-    
+
     private LinkedList linkedList;
-    
+
     @BeforeEach
     void setUp() {
         linkedList = new LinkedList();
     }
-    
-    // 辅助方法：创建链表
-    private LinkedList.ListNode createList(int... values) {
-        if (values.length == 0) return null;
-        
-        LinkedList.ListNode head = new LinkedList.ListNode(values[0]);
-        LinkedList.ListNode current = head;
-        
-        for (int i = 1; i < values.length; i++) {
-            current.next = new LinkedList.ListNode(values[i]);
-            current = current.next;
-        }
-        
-        return head;
-    }
-    
-    // 辅助方法：将链表转换为数组
-    private int[] listToArray(LinkedList.ListNode head) {
-        if (head == null) return new int[0];
-        
-        java.util.List<Integer> result = new java.util.ArrayList<>();
-        LinkedList.ListNode current = head;
-        
-        while (current != null) {
-            result.add(current.val);
-            current = current.next;
-        }
-        
-        return result.stream().mapToInt(i -> i).toArray();
-    }
-    
+
+    // ==================== 基础工具方法测试 ====================
+
     @Test
-    void testReverse_NormalCase() {
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
+    @DisplayName("测试从数组创建链表")
+    void testCreateFromArray() {
+        // 测试正常情况
+        int[] values = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head = LinkedList.createFromArray(values);
+        
+        assertNotNull(head);
+        assertEquals(1, head.val);
+        assertEquals(2, head.next.val);
+        assertEquals(5, getLastNodeValue(head));
+        
+        // 测试空数组
+        assertNull(LinkedList.createFromArray(new int[0]));
+        assertNull(LinkedList.createFromArray(null));
+    }
+
+    @Test
+    @DisplayName("测试链表转数组")
+    void testToArray() {
+        int[] original = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head = LinkedList.createFromArray(original);
+        int[] result = LinkedList.toArray(head);
+        
+        assertArrayEquals(original, result);
+        
+        // 测试空链表
+        assertArrayEquals(new int[0], LinkedList.toArray(null));
+    }
+
+    @Test
+    @DisplayName("测试计算链表长度")
+    void testGetLength() {
+        assertEquals(0, LinkedList.getLength(null));
+        
+        int[] values = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head = LinkedList.createFromArray(values);
+        assertEquals(5, LinkedList.getLength(head));
+    }
+
+    // ==================== 链表翻转算法测试 ====================
+
+    @Test
+    @DisplayName("测试两两交换节点 - 递归实现")
+    void testSwapPairsRecursive() {
+        // 测试偶数长度链表：1->2->3->4 变为 2->1->4->3
+        int[] input = {1, 2, 3, 4};
+        int[] expected = {2, 1, 4, 3};
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
+        LinkedList.ListNode result = linkedList.swapPairsRecursive(head);
+        assertArrayEquals(expected, LinkedList.toArray(result));
+        
+        // 测试奇数长度链表：1->2->3->4->5 变为 2->1->4->3->5
+        int[] input2 = {1, 2, 3, 4, 5};
+        int[] expected2 = {2, 1, 4, 3, 5};
+        LinkedList.ListNode head2 = LinkedList.createFromArray(input2);
+        LinkedList.ListNode result2 = linkedList.swapPairsRecursive(head2);
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
+        
+        // 测试边界情况
+        assertNull(linkedList.swapPairsRecursive(null));
+        
+        LinkedList.ListNode single = new LinkedList.ListNode(1);
+        assertEquals(1, linkedList.swapPairsRecursive(single).val);
+    }
+
+    @Test
+    @DisplayName("测试两两交换节点 - 迭代实现")
+    void testSwapPairsIterative() {
+        // 测试偶数长度链表
+        int[] input = {1, 2, 3, 4};
+        int[] expected = {2, 1, 4, 3};
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
+        LinkedList.ListNode result = linkedList.swapPairsIterative(head);
+        assertArrayEquals(expected, LinkedList.toArray(result));
+        
+        // 测试奇数长度链表
+        int[] input2 = {1, 2, 3, 4, 5};
+        int[] expected2 = {2, 1, 4, 3, 5};
+        LinkedList.ListNode head2 = LinkedList.createFromArray(input2);
+        LinkedList.ListNode result2 = linkedList.swapPairsIterative(head2);
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
+        
+        // 测试边界情况
+        assertNull(linkedList.swapPairsIterative(null));
+    }
+
+    @Test
+    @DisplayName("测试K个一组翻转链表")
+    void testReverseKGroup() {
+        // 测试k=3的情况：1->2->3->4->5->6->7->8 变为 3->2->1->6->5->4->7->8
+        int[] input = {1, 2, 3, 4, 5, 6, 7, 8};
+        int[] expected = {3, 2, 1, 6, 5, 4, 7, 8};
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
+        LinkedList.ListNode result = linkedList.reverseKGroup(head, 3);
+        assertArrayEquals(expected, LinkedList.toArray(result));
+        
+        // 测试k=4的情况：1->2->3->4->5->6->7->8 变为 4->3->2->1->8->7->6->5
+        int[] expected2 = {4, 3, 2, 1, 8, 7, 6, 5};
+        LinkedList.ListNode head2 = LinkedList.createFromArray(input);
+        LinkedList.ListNode result2 = linkedList.reverseKGroup(head2, 4);
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
+        
+        // 测试k=1的情况（不翻转）
+        LinkedList.ListNode head3 = LinkedList.createFromArray(input);
+        LinkedList.ListNode result3 = linkedList.reverseKGroup(head3, 1);
+        assertArrayEquals(input, LinkedList.toArray(result3));
+        
+        // 测试k大于链表长度的情况
+        int[] shortInput = {1, 2, 3};
+        LinkedList.ListNode head4 = LinkedList.createFromArray(shortInput);
+        LinkedList.ListNode result4 = linkedList.reverseKGroup(head4, 5);
+        assertArrayEquals(shortInput, LinkedList.toArray(result4));
+    }
+
+    @Test
+    @DisplayName("测试通用分组翻转（包含不完整分组）")
+    void testReverseKGroupWithIncomplete() {
+        // 测试翻转不完整分组：1->2->3->4->5->6->7->8 (k=3) 变为 3->2->1->6->5->4->8->7
+        int[] input = {1, 2, 3, 4, 5, 6, 7, 8};
+        int[] expected = {3, 2, 1, 6, 5, 4, 8, 7};
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
+        LinkedList.ListNode result = linkedList.reverseKGroup(head, 3, true);
+        assertArrayEquals(expected, LinkedList.toArray(result));
+        
+        // 测试不翻转不完整分组（默认行为）
+        int[] expected2 = {3, 2, 1, 6, 5, 4, 7, 8};
+        LinkedList.ListNode head2 = LinkedList.createFromArray(input);
+        LinkedList.ListNode result2 = linkedList.reverseKGroup(head2, 3, false);
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
+    }
+
+    @Test
+    @DisplayName("测试整体链表翻转")
+    void testReverse() {
+        // 测试正常情况
+        int[] input = {1, 2, 3, 4, 5};
+        int[] expected = {5, 4, 3, 2, 1};
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
         LinkedList.ListNode result = linkedList.reverse(head);
-        assertArrayEquals(new int[]{5, 4, 3, 2, 1}, listToArray(result));
-    }
-    
-    @Test
-    void testReverse_EdgeCases() {
-        // 测试 null
+        assertArrayEquals(expected, LinkedList.toArray(result));
+        
+        // 测试边界情况
         assertNull(linkedList.reverse(null));
         
-        // 测试单节点
-        LinkedList.ListNode head = createList(1);
-        assertArrayEquals(new int[]{1}, listToArray(linkedList.reverse(head)));
-        
-        // 测试双节点
-        head = createList(1, 2);
-        assertArrayEquals(new int[]{2, 1}, listToArray(linkedList.reverse(head)));
+        LinkedList.ListNode single = new LinkedList.ListNode(42);
+        assertEquals(42, linkedList.reverse(single).val);
     }
-    
+
+    // ==================== 快慢指针算法测试 ====================
+
     @Test
-    void testReverser_Methods() {
-        LinkedList.Reverser reverser = linkedList.new Reverser();
-        
-        // 测试 reverse 方法
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode result = reverser.reverse(head, 3);
-        assertArrayEquals(new int[]{3, 2, 1, 4, 5}, listToArray(result));
-        
-        // 测试 reverse2 方法
-        head = createList(1, 2, 3, 4, 5);
-        result = reverser.reverse2(head, 3);
-        assertArrayEquals(new int[]{3, 2, 1, 4, 5}, listToArray(result));
-        
-        // 测试 reverse3 方法
-        head = createList(1, 2, 3, 4, 5);
-        result = reverser.reverse3(head, 3);
-        assertArrayEquals(new int[]{3, 2, 1, 4, 5}, listToArray(result));
-    }
-    
-    @Test
-    void testReverser_EdgeCases() {
-        LinkedList.Reverser reverser = linkedList.new Reverser();
-        
-        // 测试 reverse2 边界情况
-        assertNull(reverser.reverse2(null, 3));
-        
-        LinkedList.ListNode head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(reverser.reverse2(head, 0)));
-        
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(reverser.reverse2(head, -1)));
-        
-        // 测试 reverse3 边界情况
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(reverser.reverse3(head, 0)));
-        
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(reverser.reverse3(head, -1)));
-    }
-    
-    @Test
-    void testReverseFirstN_NormalCase() {
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode result = linkedList.reverseFirstN(head, 3);
-        assertArrayEquals(new int[]{3, 2, 1, 4, 5}, listToArray(result));
-    }
-    
-    @Test
-    void testReverseFirstN_EdgeCases() {
-        // 测试 null
-        assertNull(linkedList.reverseFirstN(null, 3));
-        
-        // 测试 n <= 1
-        LinkedList.ListNode head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(linkedList.reverseFirstN(head, 0)));
-        
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(linkedList.reverseFirstN(head, 1)));
-        
-        // 测试 n = 2
-        head = createList(1, 2, 3, 4);
-        assertArrayEquals(new int[]{2, 1, 3, 4}, listToArray(linkedList.reverseFirstN(head, 2)));
-        
-        // 测试 n 等于链表长度
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{3, 2, 1}, listToArray(linkedList.reverseFirstN(head, 3)));
-    }
-    
-    @Test
-    void testRotateRight_NormalCase() {
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode result = linkedList.rotateRight(head, 2);
-        assertArrayEquals(new int[]{4, 5, 1, 2, 3}, listToArray(result));
-    }
-    
-    @Test
-    void testRotateRight_EdgeCases() {
-        // 测试 null
-        assertNull(linkedList.rotateRight(null, 2));
-        
-        // 测试 k = 0
-        LinkedList.ListNode head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(linkedList.rotateRight(head, 0)));
-        
-        // 测试单节点 k = 1 (这是你提到的关键测试用例)
-        head = createList(1);
-        assertArrayEquals(new int[]{1}, listToArray(linkedList.rotateRight(head, 1)));
-        
-        // 测试 k 等于链表长度
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(linkedList.rotateRight(head, 3)));
-        
-        // 测试 k 大于链表长度
-        head = createList(1, 2, 3);
-        assertArrayEquals(new int[]{3, 1, 2}, listToArray(linkedList.rotateRight(head, 4)));
-        
-        // 测试双节点
-        head = createList(1, 2);
-        assertArrayEquals(new int[]{2, 1}, listToArray(linkedList.rotateRight(head, 1)));
-    }
-    
-    @Test
+    @DisplayName("测试环检测")
     void testHasCycle() {
         // 测试无环链表
-        LinkedList.ListNode head = createList(1, 2, 3, 4);
+        int[] values = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head = LinkedList.createFromArray(values);
         assertFalse(linkedList.hasCycle(head));
         
         // 测试有环链表
-        LinkedList.ListNode node1 = new LinkedList.ListNode(1);
-        LinkedList.ListNode node2 = new LinkedList.ListNode(2);
-        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
-        LinkedList.ListNode node4 = new LinkedList.ListNode(4);
+        LinkedList.ListNode cycleHead = LinkedList.createFromArray(values);
+        LinkedList.ListNode tail = getLastNode(cycleHead);
+        tail.next = cycleHead.next; // 创建环：尾节点指向第二个节点
+        assertTrue(linkedList.hasCycle(cycleHead));
         
-        node1.next = node2;
-        node2.next = node3;
-        node3.next = node4;
-        node4.next = node2; // 形成环
-        
-        assertTrue(linkedList.hasCycle(node1));
-        
-        // 测试单节点自环
-        LinkedList.ListNode selfLoop = new LinkedList.ListNode(1);
-        selfLoop.next = selfLoop;
-        assertTrue(linkedList.hasCycle(selfLoop));
-        
-        // 测试空链表
+        // 测试边界情况
         assertFalse(linkedList.hasCycle(null));
-        
-        // 测试单节点无环
-        LinkedList.ListNode single = new LinkedList.ListNode(1);
-        assertFalse(linkedList.hasCycle(single));
+        assertFalse(linkedList.hasCycle(new LinkedList.ListNode(1)));
     }
-    
+
     @Test
-    void testDeleteDuplicates() {
-        // 测试有重复的链表
-        LinkedList.ListNode head = createList(1, 1, 2, 3, 3);
-        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(result));
-        
-        // 测试无重复的链表
-        head = createList(1, 2, 3);
-        result = linkedList.deleteDuplicates(head);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(result));
-        
-        // 测试全部重复的链表
-        head = createList(1, 1, 1);
-        result = linkedList.deleteDuplicates(head);
-        assertArrayEquals(new int[]{1}, listToArray(result));
-        
-        // 测试空链表
-        assertNull(linkedList.deleteDuplicates(null));
-        
-        // 测试单节点
-        head = createList(1);
-        result = linkedList.deleteDuplicates(head);
-        assertArrayEquals(new int[]{1}, listToArray(result));
-    }
-    
-    @Test
+    @DisplayName("测试查找中间节点")
     void testFindMiddle() {
-        // 测试奇数长度链表
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode middle = linkedList.findMiddle(head);
-        assertEquals(3, middle.val);
+        // 测试奇数长度链表：1->2->3->4->5，中间节点是3
+        int[] oddValues = {1, 2, 3, 4, 5};
+        LinkedList.ListNode oddHead = LinkedList.createFromArray(oddValues);
+        assertEquals(3, linkedList.findMiddle(oddHead).val);
         
-        // 测试偶数长度链表
-        head = createList(1, 2, 3, 4);
-        middle = linkedList.findMiddle(head);
-        assertEquals(3, middle.val); // 返回第二个中间节点
+        // 测试偶数长度链表：1->2->3->4，中间节点是3（第二个中间节点）
+        int[] evenValues = {1, 2, 3, 4};
+        LinkedList.ListNode evenHead = LinkedList.createFromArray(evenValues);
+        assertEquals(3, linkedList.findMiddle(evenHead).val);
         
-        // 测试单节点
-        head = createList(1);
-        middle = linkedList.findMiddle(head);
-        assertEquals(1, middle.val);
-        
-        // 测试双节点
-        head = createList(1, 2);
-        middle = linkedList.findMiddle(head);
-        assertEquals(2, middle.val);
-        
-        // 测试空链表
+        // 测试边界情况
         assertNull(linkedList.findMiddle(null));
+        
+        LinkedList.ListNode single = new LinkedList.ListNode(42);
+        assertEquals(42, linkedList.findMiddle(single).val);
     }
-    
+
     @Test
+    @DisplayName("测试查找倒数第k个节点")
     void testFindKthFromEnd() {
-        // 测试正常情况
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode kth = linkedList.findKthFromEnd(head, 2);
-        assertEquals(4, kth.val);
-        
-        // 测试 k = 1 (最后一个节点)
-        kth = linkedList.findKthFromEnd(head, 1);
-        assertEquals(5, kth.val);
-        
-        // 测试 k 等于链表长度 (第一个节点)
-        kth = linkedList.findKthFromEnd(head, 5);
-        assertEquals(1, kth.val);
-        
-        // 测试 k 大于链表长度
-        assertNull(linkedList.findKthFromEnd(head, 6));
-        
-        // 测试空链表
-        assertNull(linkedList.findKthFromEnd(null, 1));
-    }
-    
-    @Test
-    void testRemoveKthFromEnd() {
-        // 测试删除倒数第2个节点
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode result = linkedList.removeKthFromEnd(head, 2);
-        assertArrayEquals(new int[]{1, 2, 3, 5}, listToArray(result));
-        
-        // 测试删除最后一个节点
-        head = createList(1, 2, 3);
-        result = linkedList.removeKthFromEnd(head, 1);
-        assertArrayEquals(new int[]{1, 2}, listToArray(result));
-        
-        // 测试删除第一个节点
-        head = createList(1, 2, 3);
-        result = linkedList.removeKthFromEnd(head, 3);
-        assertArrayEquals(new int[]{2, 3}, listToArray(result));
-        
-        // 测试单节点
-        head = createList(1);
-        result = linkedList.removeKthFromEnd(head, 1);
-        assertArrayEquals(new int[]{}, listToArray(result));
-    }
-    
-    @Test
-    void testRemoveKthFromEnd2() {
-        // 测试删除倒数第2个节点
-        LinkedList.ListNode head = createList(1, 2, 3, 4, 5);
-        LinkedList.ListNode result = linkedList.removeKthFromEnd2(head, 2);
-        assertArrayEquals(new int[]{1, 2, 3, 5}, listToArray(result));
-        
-        // 测试删除最后一个节点
-        head = createList(1, 2, 3);
-        result = linkedList.removeKthFromEnd2(head, 1);
-        assertArrayEquals(new int[]{1, 2}, listToArray(result));
-        
-        // 测试删除第一个节点
-        head = createList(1, 2, 3);
-        result = linkedList.removeKthFromEnd2(head, 3);
-        assertArrayEquals(new int[]{2, 3}, listToArray(result));
-    }
-    
-    @Test
-    void testGetIntersectionNode() {
-        // 创建两个相交的链表
-        LinkedList.ListNode common = createList(8, 4, 5);
-        
-        LinkedList.ListNode headA = createList(4, 1);
-        LinkedList.ListNode tailA = headA.next;
-        tailA.next = common;
-        
-        LinkedList.ListNode headB = createList(5, 6, 1);
-        LinkedList.ListNode tailB = headB.next.next;
-        tailB.next = common;
-        
-        LinkedList.ListNode intersection = linkedList.getIntersectionNode(headA, headB);
-        assertEquals(common, intersection);
-        
-        // 测试不相交的链表
-        LinkedList.ListNode headC = createList(1, 2, 3);
-        LinkedList.ListNode headD = createList(4, 5, 6);
-        assertNull(linkedList.getIntersectionNode(headC, headD));
-        
-        // 测试空链表
-        assertNull(linkedList.getIntersectionNode(null, headA));
-        assertNull(linkedList.getIntersectionNode(headA, null));
-    }
-    
-    @Test
-    void testDetectCycle() {
-        // 测试无环链表
-        LinkedList.ListNode head = createList(1, 2, 3, 4);
-        assertNull(linkedList.detectCycle(head));
-        
-        // 测试有环链表
-        LinkedList.ListNode node1 = new LinkedList.ListNode(1);
-        LinkedList.ListNode node2 = new LinkedList.ListNode(2);
-        LinkedList.ListNode node3 = new LinkedList.ListNode(3);
-        LinkedList.ListNode node4 = new LinkedList.ListNode(4);
-        
-        node1.next = node2;
-        node2.next = node3;
-        node3.next = node4;
-        node4.next = node2; // 形成环，环的起点是 node2
-        
-        assertEquals(node2, linkedList.detectCycle(node1));
-        
-        // 测试单节点自环
-        LinkedList.ListNode selfLoop = new LinkedList.ListNode(1);
-        selfLoop.next = selfLoop;
-        assertEquals(selfLoop, linkedList.detectCycle(selfLoop));
-        
-        // 测试空链表
-        assertNull(linkedList.detectCycle(null));
-        
-        // 测试单节点无环
-        LinkedList.ListNode single = new LinkedList.ListNode(1);
-        assertNull(linkedList.detectCycle(single));
-    }
-    
-    @Test
-    void testDeleteDuplicates2() {
-        // 测试有重复的链表 - 完全删除重复节点
-        LinkedList.ListNode head = createList(1, 2, 2, 3);
-        LinkedList.ListNode result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{1, 3}, listToArray(result));
-        
-        // 测试连续重复
-        head = createList(1, 1, 1, 2, 3);
-        result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{2, 3}, listToArray(result));
-        
-        // 测试全部重复
-        head = createList(1, 1, 2, 2);
-        result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{}, listToArray(result));
-        
-        // 测试无重复
-        head = createList(1, 2, 3);
-        result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{1, 2, 3}, listToArray(result));
-        
-        // 测试空链表
-        assertNull(linkedList.deleteDuplicates2(null));
-        
-        // 测试单节点
-        head = createList(1);
-        result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{1}, listToArray(result));
-        
-        // 测试头部重复
-        head = createList(1, 1, 2, 3);
-        result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{2, 3}, listToArray(result));
-        
-        // 测试尾部重复
-        head = createList(1, 2, 3, 3);
-        result = linkedList.deleteDuplicates2(head);
-        assertArrayEquals(new int[]{1, 2}, listToArray(result));
-    }
-    
-    @Test
-    void testMergeTwoLists() {
-        // 测试正常合并
-        LinkedList.ListNode list1 = createList(1, 2, 4);
-        LinkedList.ListNode list2 = createList(1, 3, 4);
-        LinkedList.ListNode result = linkedList.mergeTwoLists(list1, list2);
-        assertArrayEquals(new int[]{1, 1, 2, 3, 4, 4}, listToArray(result));
-        
-        // 测试一个空链表
-        list1 = null;
-        list2 = createList(0);
-        result = linkedList.mergeTwoLists(list1, list2);
-        assertArrayEquals(new int[]{0}, listToArray(result));
-        
-        // 测试两个空链表
-        result = linkedList.mergeTwoLists(null, null);
-        assertNull(result);
-        
-        // 测试长度不同的链表
-        list1 = createList(1, 5, 6);
-        list2 = createList(2, 3, 4, 7, 8, 9);
-        result = linkedList.mergeTwoLists(list1, list2);
-        assertArrayEquals(new int[]{1, 2, 3, 4, 5, 6, 7, 8, 9}, listToArray(result));
-        
-        // 测试单节点链表
-        list1 = createList(1);
-        list2 = createList(2);
-        result = linkedList.mergeTwoLists(list1, list2);
-        assertArrayEquals(new int[]{1, 2}, listToArray(result));
-    }
-    
-    @Test
-    void testIsPalindrome() {
-        // 测试回文链表（奇数长度）
-        LinkedList.ListNode head = createList(1, 2, 3, 2, 1);
-        assertTrue(linkedList.isPalindrome(head));
-        
-        // 测试回文链表（偶数长度）
-        head = createList(1, 2, 2, 1);
-        assertTrue(linkedList.isPalindrome(head));
-        
-        // 测试非回文链表
-        head = createList(1, 2, 3, 4, 5);
-        assertFalse(linkedList.isPalindrome(head));
-        
-        // 测试单节点
-        head = createList(1);
-        assertTrue(linkedList.isPalindrome(head));
-        
-        // 测试双节点回文
-        head = createList(1, 1);
-        assertTrue(linkedList.isPalindrome(head));
-        
-        // 测试双节点非回文
-        head = createList(1, 2);
-        assertFalse(linkedList.isPalindrome(head));
-        
-        // 测试空链表
-        assertTrue(linkedList.isPalindrome(null));
-        
-        // 测试三节点回文
-        head = createList(1, 2, 1);
-        assertTrue(linkedList.isPalindrome(head));
-        
-        // 测试三节点非回文
-        head = createList(1, 2, 3);
-        assertFalse(linkedList.isPalindrome(head));
-    }
-    
-    @Test
-    void testGetIntersectionNodeByCycle() {
-        // 创建两个相交的链表
-        LinkedList.ListNode common = createList(8, 4, 5);
-        
-        LinkedList.ListNode headA = createList(4, 1);
-        LinkedList.ListNode tailA = headA.next;
-        tailA.next = common;
-        
-        LinkedList.ListNode headB = createList(5, 6, 1);
-        LinkedList.ListNode tailB = headB.next.next;
-        tailB.next = common;
-        
-        LinkedList.ListNode intersection = linkedList.getIntersectionNodeByCycle(headA, headB);
-        assertEquals(common, intersection);
-        
-        // 测试不相交的链表
-        LinkedList.ListNode headC = createList(1, 2, 3);
-        LinkedList.ListNode headD = createList(4, 5, 6);
-        assertNull(linkedList.getIntersectionNodeByCycle(headC, headD));
-        
-        // 测试空链表
-        assertNull(linkedList.getIntersectionNodeByCycle(null, headA));
-        assertNull(linkedList.getIntersectionNodeByCycle(headA, null));
-        
-        // 测试单节点相交
-        LinkedList.ListNode single = createList(1);
-        headA = single;
-        headB = single;
-        assertEquals(single, linkedList.getIntersectionNodeByCycle(headA, headB));
-    }
-    
-    @Test
-    void testStaticUtilityMethods() {
-        // 测试 createFromArray
         int[] values = {1, 2, 3, 4, 5};
         LinkedList.ListNode head = LinkedList.createFromArray(values);
-        assertArrayEquals(values, LinkedList.toArray(head));
         
-        // 测试空数组
-        assertNull(LinkedList.createFromArray(new int[]{}));
-        assertNull(LinkedList.createFromArray(null));
+        // 测试正常情况
+        assertEquals(5, linkedList.findKthFromEnd(head, 1).val); // 倒数第1个
+        assertEquals(4, linkedList.findKthFromEnd(head, 2).val); // 倒数第2个
+        assertEquals(1, linkedList.findKthFromEnd(head, 5).val); // 倒数第5个
         
-        // 测试 getLength
-        head = createList(1, 2, 3, 4, 5);
-        assertEquals(5, LinkedList.getLength(head));
-        assertEquals(0, LinkedList.getLength(null));
+        // 测试边界情况
+        assertNull(linkedList.findKthFromEnd(head, 6)); // k超出链表长度
+        assertNull(linkedList.findKthFromEnd(head, 0));  // k为0
+        assertNull(linkedList.findKthFromEnd(null, 1));  // 空链表
+    }
+
+    @Test
+    @DisplayName("测试删除倒数第k个节点")
+    void testRemoveKthFromEnd() {
+        // 测试删除中间节点
+        int[] input = {1, 2, 3, 4, 5};
+        int[] expected = {1, 2, 4, 5}; // 删除倒数第2个节点（4）
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
+        LinkedList.ListNode result = linkedList.removeKthFromEnd(head, 2);
+        assertArrayEquals(expected, LinkedList.toArray(result));
         
-        // 测试 printList
-        head = createList(1, 2, 3);
-        String result = LinkedList.printList(head);
-        assertTrue(result.contains("1 -> 2 -> 3 -> null"));
+        // 测试删除头节点
+        int[] expected2 = {2, 3, 4, 5}; // 删除倒数第5个节点（1）
+        LinkedList.ListNode head2 = LinkedList.createFromArray(input);
+        LinkedList.ListNode result2 = linkedList.removeKthFromEnd(head2, 5);
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
         
-        assertEquals("null", LinkedList.printList(null));
+        // 测试删除尾节点
+        int[] expected3 = {1, 2, 3, 4}; // 删除倒数第1个节点（5）
+        LinkedList.ListNode head3 = LinkedList.createFromArray(input);
+        LinkedList.ListNode result3 = linkedList.removeKthFromEnd(head3, 1);
+        assertArrayEquals(expected3, LinkedList.toArray(result3));
+    }
+
+    // ==================== 链表处理算法测试 ====================
+
+    @Test
+    @DisplayName("测试合并两个有序链表")
+    void testMergeTwoLists() {
+        int[] list1Values = {1, 2, 4};
+        int[] list2Values = {1, 3, 4};
+        int[] expected = {1, 1, 2, 3, 4, 4};
         
-        // 测试 areEqual
-        LinkedList.ListNode list1 = createList(1, 2, 3);
-        LinkedList.ListNode list2 = createList(1, 2, 3);
-        assertTrue(LinkedList.areEqual(list1, list2));
+        LinkedList.ListNode list1 = LinkedList.createFromArray(list1Values);
+        LinkedList.ListNode list2 = LinkedList.createFromArray(list2Values);
+        LinkedList.ListNode result = linkedList.mergeTwoLists(list1, list2);
         
-        LinkedList.ListNode list3 = createList(1, 2, 4);
-        assertFalse(LinkedList.areEqual(list1, list3));
+        assertArrayEquals(expected, LinkedList.toArray(result));
         
-        assertTrue(LinkedList.areEqual(null, null));
-        assertFalse(LinkedList.areEqual(list1, null));
-        assertFalse(LinkedList.areEqual(null, list1));
+        // 测试一个链表为空的情况
+        LinkedList.ListNode list3 = LinkedList.createFromArray(list1Values);
+        LinkedList.ListNode result2 = linkedList.mergeTwoLists(list3, null);
+        assertArrayEquals(list1Values, LinkedList.toArray(result2));
+    }
+
+    @Test
+    @DisplayName("测试回文链表检测")
+    void testIsPalindrome() {
+        // 测试回文链表
+        int[] palindrome1 = {1, 2, 2, 1};
+        LinkedList.ListNode head1 = LinkedList.createFromArray(palindrome1);
+        assertTrue(linkedList.isPalindrome(head1));
+        
+        int[] palindrome2 = {1, 2, 3, 2, 1};
+        LinkedList.ListNode head2 = LinkedList.createFromArray(palindrome2);
+        assertTrue(linkedList.isPalindrome(head2));
+        
+        // 测试非回文链表
+        int[] nonPalindrome = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head3 = LinkedList.createFromArray(nonPalindrome);
+        assertFalse(linkedList.isPalindrome(head3));
+        
+        // 测试边界情况
+        assertTrue(linkedList.isPalindrome(null));
+        assertTrue(linkedList.isPalindrome(new LinkedList.ListNode(1)));
+    }
+
+    @Test
+    @DisplayName("测试删除重复元素")
+    void testDeleteDuplicates() {
+        // 测试有重复元素的链表
+        int[] input = {1, 1, 2, 3, 3};
+        int[] expected = {1, 2, 3};
+        LinkedList.ListNode head = LinkedList.createFromArray(input);
+        LinkedList.ListNode result = linkedList.deleteDuplicates(head);
+        assertArrayEquals(expected, LinkedList.toArray(result));
+        
+        // 测试无重复元素的链表
+        int[] input2 = {1, 2, 3, 4, 5};
+        LinkedList.ListNode head2 = LinkedList.createFromArray(input2);
+        LinkedList.ListNode result2 = linkedList.deleteDuplicates(head2);
+        assertArrayEquals(input2, LinkedList.toArray(result2));
+        
+        // 测试边界情况
+        assertNull(linkedList.deleteDuplicates(null));
+    }
+
+    // ==================== 综合测试方法 ====================
+
+    @Test
+    @DisplayName("综合测试：链表翻转算法对比")
+    void testComprehensiveReverseAlgorithms() {
+        System.out.println("=== 链表翻转算法综合测试 ===");
+        
+        // 测试数据：1->2->3->4->5->6->7->8
+        int[] testData = {1, 2, 3, 4, 5, 6, 7, 8};
+        
+        System.out.println("原始链表: " + LinkedList.printList(LinkedList.createFromArray(testData)));
+        
+        // 测试两两交换 - 递归实现
+        LinkedList.ListNode swappedRecursive = linkedList.swapPairsRecursive(LinkedList.createFromArray(testData));
+        System.out.println("两两交换(递归): " + LinkedList.printList(swappedRecursive));
+        int[] expectedSwap = {2, 1, 4, 3, 6, 5, 8, 7};
+        assertArrayEquals(expectedSwap, LinkedList.toArray(swappedRecursive));
+        
+        // 测试两两交换 - 迭代实现  
+        LinkedList.ListNode swappedIterative = linkedList.swapPairsIterative(LinkedList.createFromArray(testData));
+        System.out.println("两两交换(迭代): " + LinkedList.printList(swappedIterative));
+        assertArrayEquals(expectedSwap, LinkedList.toArray(swappedIterative));
+        
+        // 测试K组翻转 (k=3)
+        LinkedList.ListNode reversed3Group = linkedList.reverseKGroup(LinkedList.createFromArray(testData), 3);
+        System.out.println("3个一组翻转: " + LinkedList.printList(reversed3Group));
+        int[] expected3Group = {3, 2, 1, 6, 5, 4, 7, 8};
+        assertArrayEquals(expected3Group, LinkedList.toArray(reversed3Group));
+        
+        // 测试K组翻转 (k=4)
+        LinkedList.ListNode reversed4Group = linkedList.reverseKGroup(LinkedList.createFromArray(testData), 4);
+        System.out.println("4个一组翻转: " + LinkedList.printList(reversed4Group));
+        int[] expected4Group = {4, 3, 2, 1, 8, 7, 6, 5};
+        assertArrayEquals(expected4Group, LinkedList.toArray(reversed4Group));
+        
+        // 测试通用分组翻转（翻转不完整分组）
+        LinkedList.ListNode reversedWithIncomplete = linkedList.reverseKGroup(LinkedList.createFromArray(testData), 3, true);
+        System.out.println("3个一组翻转(含不完整组): " + LinkedList.printList(reversedWithIncomplete));
+        int[] expectedWithIncomplete = {3, 2, 1, 6, 5, 4, 8, 7};
+        assertArrayEquals(expectedWithIncomplete, LinkedList.toArray(reversedWithIncomplete));
+        
+        System.out.println("=== 综合测试完成 ===");
+    }
+
+    // ==================== 辅助方法 ====================
+
+    /**
+     * 获取链表的最后一个节点
+     */
+    private LinkedList.ListNode getLastNode(LinkedList.ListNode head) {
+        if (head == null) return null;
+        while (head.next != null) {
+            head = head.next;
+        }
+        return head;
+    }
+
+    /**
+     * 获取链表最后一个节点的值
+     */
+    private int getLastNodeValue(LinkedList.ListNode head) {
+        LinkedList.ListNode last = getLastNode(head);
+        return last != null ? last.val : -1;
     }
 }
