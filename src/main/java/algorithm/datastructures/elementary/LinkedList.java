@@ -1287,7 +1287,6 @@ public class LinkedList {
 
     }
 
-
     /**
      * K个一组翻转链表（头插法 + 递归实现）
      * <p>
