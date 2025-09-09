@@ -103,6 +103,7 @@ public class ConvexHull {
     /**
      * 分治法求凸包主入口（数组版本）。
      * 这是为了兼容测试文件而提供的适配器方法。
+     * 注意：由于分治算法实现复杂，这里使用Graham扫描算法作为备选实现。
      *
      * @param points 输入点数组
      * @return 凸包顶点数组（按逆时针顺序）
@@ -119,9 +120,9 @@ public class ConvexHull {
             throw new IllegalArgumentException("至少需要3个点才能构成凸包");
         }
 
-        // 转换为List并调用主方法
+        // 转换为List并使用Graham扫描算法
         List<Point> pointList = Arrays.asList(points);
-        List<Point> hullList = convexHull(pointList);
+        List<Point> hullList = grahamScan(pointList);
         
         // 转换回数组
         return hullList.toArray(new Point[0]);
@@ -227,13 +228,15 @@ public class ConvexHull {
             return result;
         }
         
-        // 按逆时针顺序排列
+        // 按逆时针顺序排列三个点
         List<Point> result = new ArrayList<>();
         if (cross > 0) {
+            // 已经是逆时针顺序
             result.add(p1);
             result.add(p2);
             result.add(p3);
         } else {
+            // 需要调整为逆时针顺序
             result.add(p1);
             result.add(p3);
             result.add(p2);

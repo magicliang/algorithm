@@ -39,7 +39,7 @@ class KaratsubaMultiplicationTest {
         assertEquals("2550", KaratsubaMultiplication.karatsubaMultiply("25", "102"));
         
         // 测试多位数乘法
-        assertEquals("121932631137021795", KaratsubaMultiplication.karatsubaMultiply("123456789", "987654321"));
+        assertEquals("121932631112635269", KaratsubaMultiplication.karatsubaMultiply("123456789", "987654321"));
     }
 
     @Test
@@ -149,7 +149,7 @@ class KaratsubaMultiplicationTest {
         assertEquals("10000", KaratsubaMultiplication.karatsubaMultiply("100", "100"));
         
         // 测试回文数
-        assertEquals("14676241", KaratsubaMultiplication.karatsubaMultiply("1221", "12021"));
+        assertEquals("14677641", KaratsubaMultiplication.karatsubaMultiply("1221", "12021"));
     }
 
     /**

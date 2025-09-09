@@ -459,4 +459,158 @@ public class MinimaxAlgorithm {
             return Objects.hash(row, col);
         }
     }
+
+    // ==================== 简化的Minimax方法（用于测试） ====================
+
+    /**
+     * 简化的Minimax算法，直接处理叶子节点值数组。
+     * 为了兼容测试代码而提供的重载方法。
+     * 
+     * @param leafValues 叶子节点值数组
+     * @param depth 博弈树深度
+     * @param isMaximizing 是否为最大化玩家
+     * @return 最优值
+     * @throws IllegalArgumentException 如果输入无效
+     */
+    public static int minimaxSimpleArray(int[] leafValues, int depth, boolean isMaximizing) {
+        if (leafValues == null || leafValues.length == 0) {
+            throw new IllegalArgumentException("叶子节点值数组不能为空");
+        }
+        if (depth <= 0) {
+            throw new IllegalArgumentException("搜索深度必须为正数");
+        }
+
+        return minimaxSimple(leafValues, 0, leafValues.length - 1, depth, isMaximizing);
+    }
+
+    /**
+     * 简化的Alpha-Beta剪枝算法，直接处理叶子节点值数组。
+     * 为了兼容测试代码而提供的重载方法。
+     * 
+     * @param leafValues 叶子节点值数组
+     * @param depth 博弈树深度
+     * @param isMaximizing 是否为最大化玩家
+     * @return 最优值
+     * @throws IllegalArgumentException 如果输入无效
+     */
+    public static int alphaBetaSimpleArray(int[] leafValues, int depth, boolean isMaximizing) {
+        if (leafValues == null || leafValues.length == 0) {
+            throw new IllegalArgumentException("叶子节点值数组不能为空");
+        }
+        if (depth <= 0) {
+            throw new IllegalArgumentException("搜索深度必须为正数");
+        }
+
+        return alphaBetaSimple(leafValues, 0, leafValues.length - 1, depth, 
+                              Integer.MIN_VALUE, Integer.MAX_VALUE, isMaximizing);
+    }
+
+    /**
+     * 简化的Minimax递归实现。
+     */
+    private static int minimaxSimple(int[] leafValues, int left, int right, int depth, boolean isMaximizing) {
+        // 递归基：到达叶子节点
+        if (depth == 1) {
+            if (isMaximizing) {
+                int max = Integer.MIN_VALUE;
+                for (int i = left; i <= right; i++) {
+                    max = Math.max(max, leafValues[i]);
+                }
+                return max;
+            } else {
+                int min = Integer.MAX_VALUE;
+                for (int i = left; i <= right; i++) {
+                    min = Math.min(min, leafValues[i]);
+                }
+                return min;
+            }
+        }
+
+        // 计算每个子树的范围
+        int rangeSize = (right - left + 1) / 2;
+        
+        if (isMaximizing) {
+            int leftResult = minimaxSimple(leafValues, left, left + rangeSize - 1, depth - 1, false);
+            int rightResult = minimaxSimple(leafValues, left + rangeSize, right, depth - 1, false);
+            return Math.max(leftResult, rightResult);
+        } else {
+            int leftResult = minimaxSimple(leafValues, left, left + rangeSize - 1, depth - 1, true);
+            int rightResult = minimaxSimple(leafValues, left + rangeSize, right, depth - 1, true);
+            return Math.min(leftResult, rightResult);
+        }
+    }
+
+    /**
+     * 简化的Alpha-Beta剪枝递归实现。
+     */
+    private static int alphaBetaSimple(int[] leafValues, int left, int right, int depth, 
+                                     int alpha, int beta, boolean isMaximizing) {
+        // 递归基：到达叶子节点
+        if (depth == 1) {
+            if (isMaximizing) {
+                int max = Integer.MIN_VALUE;
+                for (int i = left; i <= right; i++) {
+                    max = Math.max(max, leafValues[i]);
+                    alpha = Math.max(alpha, max);
+                    if (beta <= alpha) {
+                        break; // Beta剪枝
+                    }
+                }
+                return max;
+            } else {
+                int min = Integer.MAX_VALUE;
+                for (int i = left; i <= right; i++) {
+                    min = Math.min(min, leafValues[i]);
+                    beta = Math.min(beta, min);
+                    if (beta <= alpha) {
+                        break; // Alpha剪枝
+                    }
+                }
+                return min;
+            }
+        }
+
+        // 计算每个子树的范围
+        int rangeSize = (right - left + 1) / 2;
+        
+        if (isMaximizing) {
+            int maxEval = Integer.MIN_VALUE;
+            
+            // 左子树
+            int leftResult = alphaBetaSimple(leafValues, left, left + rangeSize - 1, 
+                                           depth - 1, alpha, beta, false);
+            maxEval = Math.max(maxEval, leftResult);
+            alpha = Math.max(alpha, leftResult);
+            
+            if (beta <= alpha) {
+                return maxEval; // Beta剪枝
+            }
+            
+            // 右子树
+            int rightResult = alphaBetaSimple(leafValues, left + rangeSize, right, 
+                                            depth - 1, alpha, beta, false);
+            maxEval = Math.max(maxEval, rightResult);
+            
+            return maxEval;
+        } else {
+            int minEval = Integer.MAX_VALUE;
+            
+            // 左子树
+            int leftResult = alphaBetaSimple(leafValues, left, left + rangeSize - 1, 
+                                           depth - 1, alpha, beta, true);
+            minEval = Math.min(minEval, leftResult);
+            beta = Math.min(beta, leftResult);
+            
+            if (beta <= alpha) {
+                return minEval; // Alpha剪枝
+            }
+            
+            // 右子树
+            int rightResult = alphaBetaSimple(leafValues, left + rangeSize, right, 
+                                            depth - 1, alpha, beta, true);
+            minEval = Math.min(minEval, rightResult);
+            
+            return minEval;
+        }
+    }
 }

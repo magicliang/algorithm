@@ -336,6 +336,19 @@ public class ClosestPair {
     }
 
     /**
+     * 寻找最近点对距离的简化方法（仅返回距离值）。
+     * 为了兼容测试代码而提供的重载方法。
+     * 
+     * @param points 输入的点数组
+     * @return 最近点对的距离
+     * @throws IllegalArgumentException 如果输入无效
+     */
+    public static double findClosestPairDistance(Point[] points) {
+        ClosestPairResult result = findClosestPair(points);
+        return result.distance;
+    }
+
+    /**
      * 在指定范围内使用暴力方法找最近点对。
      * 用于递归基的处理。
      *
