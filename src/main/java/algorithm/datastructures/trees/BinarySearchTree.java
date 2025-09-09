@@ -412,6 +412,7 @@ public class BinarySearchTree {
             }
 
             // 删除最小值节点：需要判断其位置关系
+            // 关键：删除深处的子树，也需要用子树替换法
             // 校验到底是右回还是左折
             if (minParent.left == minChild) {
                 // 情况A：最小值节点在更深的左子树中

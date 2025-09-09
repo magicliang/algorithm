@@ -1065,7 +1065,7 @@ public class BTree {
      * @param inorderMap 中序遍历值到索引的映射（快速定位，确定子树大小）
      * @param preOrderIndex 当前子树根节点在前序遍历中的索引
      * @param inStart 当前子树在中序遍历中的左边界（包含）
-     * @param inEnd 当前子树在中序遍历中的右边界（包含）
+     * @param inEnd 当前子树在中序遍历中的右边界（包含），这第二个参数是很难被理解的，因为右区间的参数意味着可以收束 rootIndex 的范围，区间收束完意味着递归终止
      * @return 构建好的子树根节点，返回给父节点进行拼接
      *
      * 时间复杂度：O(n) - 每个节点只处理一次
@@ -1133,8 +1133,11 @@ public class BTree {
 
         Node root = new Node(rootVal);
         int leftRootPreorderIndex = preOrderIndex + 1;
-        int rightRootPreorderIndex = preOrderIndex + 1 + (rootIndex - inStart); // 越过整个左子树在前序遍历里的位置
+        int rightRootPreorderIndex = preOrderIndex + 1 + (rootIndex - inStart); // 越过整个左子树在前序遍历里的位置，这里没有使用 inEnd 参数，因为
 
+        // 围栏的右边界：[inStart, inEnd] 就像给当前子树划定的一个围栏
+        // 搜索范围的限制：只能在这个围栏内寻找和构建节点
+        // 分治的边界传递：每次递归都会缩小围栏范围，但 inEnd 在构建右子树时保持不变
 
         root.left = dfsConstructTree(preorder, inorderMap, leftRootPreorderIndex, inStart, rootIndex - 1);
         root.right = dfsConstructTree(preorder, inorderMap, rightRootPreorderIndex, rootIndex + 1, inEnd);
