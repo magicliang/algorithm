@@ -51,6 +51,7 @@ public class MaxHeap {
      * 使用给定的列表构建最大堆，时间复杂度为O(n)
      * 这个方法的本质，是倒序让父节点下沉，从最后一个非叶子节点开始，
      * 依次向前处理每个父节点，直到根节点下沉完成后，整个堆才满足最大堆性质
+     *
      * @param queue 用于构建堆的整数列表
      */
     public MaxHeap(List<Integer> queue) {
@@ -60,14 +61,6 @@ public class MaxHeap {
         for (int i = parent(heap.size() - 1); i >= 0; i--) {
             siftDown(i);
         }
-    }
-
-    public boolean isEmpty() {
-        return heap.isEmpty();
-    }
-
-    public int size() {
-        return heap.size();
     }
 
     /**
@@ -223,6 +216,166 @@ public class MaxHeap {
     }
 
     /**
+     * 获取左子节点的索引
+     *
+     * @param i 父节点的索引
+     * @return 左子节点的索引
+     */
+    public static int left(int i) {
+        return 2 * i + 1;
+    }
+
+    /**
+     * 获取右子节点的索引
+     *
+     * @param i 父节点的索引
+     * @return 右子节点的索引
+     */
+    public static int right(int i) {
+        return 2 * i + 2;
+    }
+
+    /**
+     * 获取父节点的索引
+     *
+     * @param i 子节点的索引
+     * @return 父节点的索引
+     */
+    public static int parent(int i) {
+        // 堆的性质告诉我们怎样让2个数变成1个数
+        return (i - 1) / 2;
+    }
+
+    /**
+     * 最优堆排序算法实现（原地排序版本）
+     * <p>
+     * 这是真正最优的堆排序实现，具有以下特点：
+     * 1. 原地排序：空间复杂度O(1)，不需要额外存储空间
+     * 2. 时间复杂度：O(n log n)，与简单版本相同但常数因子更小
+     * 3. 稳定性能：避免了额外的内存分配和数据复制
+     * 4. 代码复用：使用类中已有的parent()方法，保持一致性
+     * <p>
+     * 算法核心思想：
+     * 1. 使用Floyd建堆算法构建最大堆（O(n)时间）
+     * 2. 重复执行以下步骤n-1次：
+     * - 将堆顶（最大元素）与堆的最后一个元素交换
+     * - 减小堆的大小（逻辑上移除最大元素）
+     * - 对新的堆顶执行下沉操作恢复堆性质-要实现有界的下沉
+     * 3. 排序完成后，数组变为升序排列
+     * <p>
+     * 为什么这是最优实现？
+     * - 空间最优：O(1)额外空间，真正的原地排序
+     * - 时间最优：避免了pop操作中的元素移除开销
+     * - 缓存友好：所有操作都在原数组上进行，局部性更好
+     * - 实用性强：这是工业级堆排序的标准实现
+     * - 代码一致：复用类中已有的索引计算方法
+     * <p>
+     * 使用示例：
+     * <pre>{@code
+     * List<Integer> data = new ArrayList<>(Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6));
+     * MaxHeap.heapSortOptimal(data);
+     * // data现在是: [1, 1, 2, 3, 4, 5, 6, 9]
+     * }</pre>
+     *
+     * @param list 需要排序的整数列表（会被原地修改）
+     * @throws IllegalArgumentException 如果输入列表为null
+     */
+    public static void heapSortOptimal(List<Integer> list) {
+        if (list == null) {
+            throw new IllegalArgumentException("Input list cannot be null");
+        }
+
+        if (list.size() <= 1) {
+            return; // 空列表或单元素列表已经有序
+        }
+
+        int n = list.size();
+
+        // 第一阶段：构建最大堆（Floyd建堆算法）
+        // 从最后一个非叶子节点开始，向前遍历所有非叶子节点
+        // 使用静态parent()方法计算最后一个非叶子节点索引
+        for (int i = parent(n - 1); i >= 0; i--) {
+            heapifyDown(list, i, n);
+        }
+
+        // 第二阶段：排序过程
+        // 重复执行：取出最大元素，缩小堆，重新调整
+        for (int i = n - 1; i > 0; i--) {
+            // 将当前最大元素（堆顶）移到正确位置（数组末尾）
+            swap(list, 0, i);
+
+            // 缩小堆的大小（逻辑上移除已排序的元素）
+            // 对新的堆顶执行下沉操作，恢复堆性质
+            heapifyDown(list, 0, i);
+        }
+    }
+
+    /**
+     * 堆的下沉操作（用于堆排序的辅助方法）
+     * <p>
+     * 这是专门为堆排序优化的下沉操作，与实例方法siftDown的区别：
+     * 1. 静态方法，不依赖实例状态
+     * 2. 支持指定堆的大小（用于排序过程中逐步缩小堆）
+     * 3. 直接操作List，避免额外的抽象层开销
+     * 4. 使用静态left()和right()方法，保持代码一致性
+     * <p>
+     * 算法逻辑：
+     * 1. 从指定节点开始，找出其与左右子节点中的最大值
+     * 2. 如果最大值不是当前节点，则交换并继续下沉
+     * 3. 重复直到满足堆性质或到达叶子节点
+     *
+     * @param list 堆数组
+     * @param index 开始下沉的节点索引
+     * @param heapSize 当前堆的大小（用于排序过程中的边界控制）
+     */
+    private static void heapifyDown(List<Integer> list, int index, int heapSize) {
+        while (true) {
+            int largest = index;
+            int leftChild = left(index);   // 使用静态left()方法
+            int rightChild = right(index); // 使用静态right()方法
+
+            // 找出父节点和左右子节点中的最大值
+            if (leftChild < heapSize && list.get(leftChild) > list.get(largest)) {
+                largest = leftChild;
+            }
+
+            if (rightChild < heapSize && list.get(rightChild) > list.get(largest)) {
+                largest = rightChild;
+            }
+
+            // 如果最大值就是当前节点，说明堆性质已满足
+            if (largest == index) {
+                break;
+            }
+
+            // 交换当前节点与最大子节点，继续下沉
+            swap(list, index, largest);
+            index = largest;
+        }
+    }
+
+    /**
+     * 交换列表中两个位置的元素（堆排序辅助方法）
+     *
+     * @param list 列表
+     * @param i 第一个元素的索引
+     * @param j 第二个元素的索引
+     */
+    private static void swap(List<Integer> list, int i, int j) {
+        Integer temp = list.get(i);
+        list.set(i, list.get(j));
+        list.set(j, temp);
+    }
+
+    public boolean isEmpty() {
+        return heap.isEmpty();
+    }
+
+    public int size() {
+        return heap.size();
+    }
+
+    /**
      * 合并两个最大堆
      * <p>
      * 将另一个最大堆的所有元素合并到当前堆中，使用Floyd建堆算法（从最后一个非叶子节点开始下沉）重新构建堆结构
@@ -308,37 +461,6 @@ public class MaxHeap {
      */
     public List<Integer> toList() {
         return heap;
-    }
-
-    /**
-     * 获取左子节点的索引
-     *
-     * @param i 父节点的索引
-     * @return 左子节点的索引
-     */
-    public static int left(int i) {
-        return 2 * i + 1;
-    }
-
-    /**
-     * 获取右子节点的索引
-     *
-     * @param i 父节点的索引
-     * @return 右子节点的索引
-     */
-    public static int right(int i) {
-        return 2 * i + 2;
-    }
-
-    /**
-     * 获取父节点的索引
-     *
-     * @param i 子节点的索引
-     * @return 父节点的索引
-     */
-    public static int parent(int i) {
-        // 堆的性质告诉我们怎样让2个数变成1个数
-        return (i - 1) / 2;
     }
 
     /**
@@ -491,127 +613,6 @@ public class MaxHeap {
     }
 
     /**
-     * 最优堆排序算法实现（原地排序版本）
-     * <p>
-     * 这是真正最优的堆排序实现，具有以下特点：
-     * 1. 原地排序：空间复杂度O(1)，不需要额外存储空间
-     * 2. 时间复杂度：O(n log n)，与简单版本相同但常数因子更小
-     * 3. 稳定性能：避免了额外的内存分配和数据复制
-     * 4. 代码复用：使用类中已有的parent()方法，保持一致性
-     * <p>
-     * 算法核心思想：
-     * 1. 使用Floyd建堆算法构建最大堆（O(n)时间）
-     * 2. 重复执行以下步骤n-1次：
-     *    - 将堆顶（最大元素）与堆的最后一个元素交换
-     *    - 减小堆的大小（逻辑上移除最大元素）
-     *    - 对新的堆顶执行下沉操作恢复堆性质-要实现有界的下沉
-     * 3. 排序完成后，数组变为升序排列
-     * <p>
-     * 为什么这是最优实现？
-     * - 空间最优：O(1)额外空间，真正的原地排序
-     * - 时间最优：避免了pop操作中的元素移除开销
-     * - 缓存友好：所有操作都在原数组上进行，局部性更好
-     * - 实用性强：这是工业级堆排序的标准实现
-     * - 代码一致：复用类中已有的索引计算方法
-     * <p>
-     * 使用示例：
-     * <pre>{@code
-     * List<Integer> data = new ArrayList<>(Arrays.asList(3, 1, 4, 1, 5, 9, 2, 6));
-     * MaxHeap.heapSortOptimal(data);
-     * // data现在是: [1, 1, 2, 3, 4, 5, 6, 9]
-     * }</pre>
-     *
-     * @param list 需要排序的整数列表（会被原地修改）
-     * @throws IllegalArgumentException 如果输入列表为null
-     */
-    public static void heapSortOptimal(List<Integer> list) {
-        if (list == null) {
-            throw new IllegalArgumentException("Input list cannot be null");
-        }
-        
-        if (list.size() <= 1) {
-            return; // 空列表或单元素列表已经有序
-        }
-        
-        int n = list.size();
-        
-        // 第一阶段：构建最大堆（Floyd建堆算法）
-        // 从最后一个非叶子节点开始，向前遍历所有非叶子节点
-        // 使用静态parent()方法计算最后一个非叶子节点索引
-        for (int i = parent(n - 1); i >= 0; i--) {
-            heapifyDown(list, i, n);
-        }
-        
-        // 第二阶段：排序过程
-        // 重复执行：取出最大元素，缩小堆，重新调整
-        for (int i = n - 1; i > 0; i--) {
-            // 将当前最大元素（堆顶）移到正确位置（数组末尾）
-            swap(list, 0, i);
-            
-            // 缩小堆的大小（逻辑上移除已排序的元素）
-            // 对新的堆顶执行下沉操作，恢复堆性质
-            heapifyDown(list, 0, i);
-        }
-    }
-    
-    /**
-     * 堆的下沉操作（用于堆排序的辅助方法）
-     * <p>
-     * 这是专门为堆排序优化的下沉操作，与实例方法siftDown的区别：
-     * 1. 静态方法，不依赖实例状态
-     * 2. 支持指定堆的大小（用于排序过程中逐步缩小堆）
-     * 3. 直接操作List，避免额外的抽象层开销
-     * 4. 使用静态left()和right()方法，保持代码一致性
-     * <p>
-     * 算法逻辑：
-     * 1. 从指定节点开始，找出其与左右子节点中的最大值
-     * 2. 如果最大值不是当前节点，则交换并继续下沉
-     * 3. 重复直到满足堆性质或到达叶子节点
-     *
-     * @param list 堆数组
-     * @param index 开始下沉的节点索引
-     * @param heapSize 当前堆的大小（用于排序过程中的边界控制）
-     */
-    private static void heapifyDown(List<Integer> list, int index, int heapSize) {
-        while (true) {
-            int largest = index;
-            int leftChild = left(index);   // 使用静态left()方法
-            int rightChild = right(index); // 使用静态right()方法
-            
-            // 找出父节点和左右子节点中的最大值
-            if (leftChild < heapSize && list.get(leftChild) > list.get(largest)) {
-                largest = leftChild;
-            }
-            
-            if (rightChild < heapSize && list.get(rightChild) > list.get(largest)) {
-                largest = rightChild;
-            }
-            
-            // 如果最大值就是当前节点，说明堆性质已满足
-            if (largest == index) {
-                break;
-            }
-            
-            // 交换当前节点与最大子节点，继续下沉
-            swap(list, index, largest);
-            index = largest;
-        }
-    }
-    
-    /**
-     * 交换列表中两个位置的元素（堆排序辅助方法）
-     *
-     * @param list 列表
-     * @param i 第一个元素的索引
-     * @param j 第二个元素的索引
-     */
-    private static void swap(List<Integer> list, int i, int j) {
-        Integer temp = list.get(i);
-        list.set(i, list.get(j));
-        list.set(j, temp);
-    }
-
-    /**
      * 删除堆中任意位置的元素（值替换删除技巧的完美示例）
      * <p>
      * 算法步骤：
@@ -621,7 +622,7 @@ public class MaxHeap {
      * <p>
      * 为什么需要同时调用siftUp和siftDown？
      * - 替换元素可能比原元素大（需要上浮）
-     * - 替换元素可能比原元素小（需要下沉）  
+     * - 替换元素可能比原元素小（需要下沉）
      * - 替换元素可能正好合适（两个操作都会立即返回）
      * <p>
      * 调用顺序：先siftUp再siftDown
@@ -636,30 +637,30 @@ public class MaxHeap {
         if (index < 0 || index >= heap.size()) {
             return false;
         }
-        
+
         // 特殊情况：删除最后一个元素，直接移除
         if (index == heap.size() - 1) {
             heap.remove(heap.size() - 1);
             return true;
         }
-        
+
         // 核心技巧：用最后一个元素替换要删除的元素
         int lastElement = heap.get(heap.size() - 1);
         heap.set(index, lastElement);
         heap.remove(heap.size() - 1);
-        
+
         // 恢复堆性质：关键是要同时考虑上浮和下沉的可能性
         // 情况分析：
         // 1. 如果lastElement > 原元素：可能需要上浮
         // 2. 如果lastElement < 原元素：可能需要下沉
         // 3. 如果lastElement = 原元素：可能都不需要（但我们不知道原元素值）
-        
+
         siftUp(index);    // 先尝试上浮（更高效）
         siftDown(index);  // 再尝试下沉（如果上浮成功，这里会立即返回）
-        
+
         return true;
     }
-    
+
     /**
      * 删除堆中第一个匹配的指定值
      * <p>
@@ -677,15 +678,15 @@ public class MaxHeap {
                 break;
             }
         }
-        
+
         if (index == -1) {
             return false; // 元素不存在
         }
-        
+
         // 2. 使用removeAt方法删除（展示技巧的复用性）
         return removeAt(index);
     }
-    
+
     /**
      * 优化版本的删除方法（参考Java PriorityQueue的实现）
      * <p>
@@ -698,26 +699,26 @@ public class MaxHeap {
         if (index < 0 || index >= heap.size()) {
             return false;
         }
-        
+
         if (index == heap.size() - 1) {
             heap.remove(heap.size() - 1);
             return true;
         }
-        
+
         // 记录替换前的元素，用于优化判断
         int lastElement = heap.get(heap.size() - 1);
         heap.set(index, lastElement);
         heap.remove(heap.size() - 1);
-        
+
         // 优化：先尝试下沉，如果元素没有移动，再尝试上浮
         int originalElement = heap.get(index);
         siftDown(index);
-        
+
         // 如果下沉后元素还在原位置，说明可能需要上浮
         if (heap.get(index) == originalElement) {
             siftUp(index);
         }
-        
+
         return true;
     }
 

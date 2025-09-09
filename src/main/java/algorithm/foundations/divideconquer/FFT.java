@@ -1,7 +1,5 @@
 package algorithm.foundations.divideconquer;
 
-import java.util.*;
-
 /**
  * 快速傅里叶变换 (FFT) 算法实现。
  *
@@ -40,9 +38,195 @@ import java.util.*;
 public class FFT {
 
     /**
+     * 快速傅里叶变换主入口。
+     * 步骤：
+     * 1. 参数验证和预处理
+     * 2. 将输入长度扩展到2的幂次
+     * 3. 调用递归的 FFT 算法
+     * 4. 返回变换结果
+     *
+     * @param input 输入信号（复数数组）
+     * @return FFT 变换结果
+     */
+    public static Complex[] fft(Complex[] input) {
+        if (input == null || input.length == 0) {
+            throw new IllegalArgumentException("输入不能为空");
+        }
+
+        int n = input.length;
+
+        // 将长度扩展到2的幂次
+        int powerOfTwo = 1;
+        while (powerOfTwo < n) {
+            powerOfTwo <<= 1;
+        }
+
+        // 如果需要，用0填充
+        Complex[] paddedInput = new Complex[powerOfTwo];
+        System.arraycopy(input, 0, paddedInput, 0, n);
+        for (int i = n; i < powerOfTwo; i++) {
+            paddedInput[i] = new Complex(0, 0);
+        }
+
+        return fftRecursive(paddedInput);
+    }
+
+    /**
+     * 递归的 FFT 算法实现。
+     * 步骤：
+     * 1. 递归基：长度为1直接返回
+     * 2. 分：将序列按奇偶索引分为两部分
+     * 3. 治：递归计算两个子序列的 FFT
+     * 4. 合：通过蝶形运算合并结果
+     *
+     * @param input 输入序列
+     * @return FFT 结果
+     */
+    private static Complex[] fftRecursive(Complex[] input) {
+        int n = input.length;
+
+        // 递归基：长度为1
+        if (n == 1) {
+            return new Complex[]{input[0]};
+        }
+
+        // 分：按奇偶索引分离
+        Complex[] even = new Complex[n / 2];
+        Complex[] odd = new Complex[n / 2];
+
+        for (int i = 0; i < n / 2; i++) {
+            even[i] = input[2 * i];      // 偶数索引
+            odd[i] = input[2 * i + 1];   // 奇数索引
+        }
+
+        // 治：递归计算子问题
+        Complex[] evenFFT = fftRecursive(even);
+        Complex[] oddFFT = fftRecursive(odd);
+
+        // 合：蝶形运算合并结果
+        Complex[] result = new Complex[n];
+        for (int k = 0; k < n / 2; k++) {
+            // 计算旋转因子 W_n^k = e^(-j*2π*k/n)
+            double angle = -2 * Math.PI * k / n;
+            Complex twiddle = new Complex(Math.cos(angle), Math.sin(angle));
+
+            // 蝶形运算
+            Complex t = twiddle.multiply(oddFFT[k]);
+            result[k] = evenFFT[k].add(t);           // 前半部分
+            result[k + n / 2] = evenFFT[k].subtract(t); // 后半部分
+        }
+
+        return result;
+    }
+
+    /**
+     * 快速傅里叶逆变换 (IFFT)。
+     *
+     * @param input 频域信号
+     * @return 时域信号
+     */
+    public static Complex[] ifft(Complex[] input) {
+        if (input == null || input.length == 0) {
+            throw new IllegalArgumentException("输入不能为空");
+        }
+
+        int n = input.length;
+
+        // 共轭输入
+        Complex[] conjugated = new Complex[n];
+        for (int i = 0; i < n; i++) {
+            conjugated[i] = new Complex(input[i].real, -input[i].imag);
+        }
+
+        // 执行 FFT
+        Complex[] result = fft(conjugated);
+
+        // 共轭结果并除以 n
+        for (int i = 0; i < n; i++) {
+            result[i] = new Complex(result[i].real / n, -result[i].imag / n);
+        }
+
+        return result;
+    }
+
+    /**
+     * 使用 FFT 进行多项式乘法。
+     * 两个多项式的乘积可以通过卷积计算，而卷积可以用 FFT 高效实现。
+     *
+     * @param poly1 第一个多项式的系数
+     * @param poly2 第二个多项式的系数
+     * @return 乘积多项式的系数
+     */
+    public static double[] polynomialMultiply(double[] poly1, double[] poly2) {
+        if (poly1 == null || poly2 == null || poly1.length == 0 || poly2.length == 0) {
+            return new double[0];
+        }
+
+        int resultSize = poly1.length + poly2.length - 1;
+
+        // 找到大于等于 resultSize 的最小2的幂次
+        int fftSize = 1;
+        while (fftSize < resultSize) {
+            fftSize <<= 1;
+        }
+
+        // 转换为复数并填充0
+        Complex[] complex1 = new Complex[fftSize];
+        Complex[] complex2 = new Complex[fftSize];
+
+        for (int i = 0; i < fftSize; i++) {
+            complex1[i] = new Complex(i < poly1.length ? poly1[i] : 0);
+            complex2[i] = new Complex(i < poly2.length ? poly2[i] : 0);
+        }
+
+        // 执行 FFT
+        Complex[] fft1 = fft(complex1);
+        Complex[] fft2 = fft(complex2);
+
+        // 点乘
+        Complex[] product = new Complex[fftSize];
+        for (int i = 0; i < fftSize; i++) {
+            product[i] = fft1[i].multiply(fft2[i]);
+        }
+
+        // 执行 IFFT
+        Complex[] ifftResult = ifft(product);
+
+        // 提取实部作为结果
+        double[] result = new double[resultSize];
+        for (int i = 0; i < resultSize; i++) {
+            result[i] = Math.round(ifftResult[i].real); // 四舍五入消除浮点误差
+        }
+
+        return result;
+    }
+
+    /**
+     * 生成测试用的正弦波信号。
+     *
+     * @param frequency 频率
+     * @param sampleRate 采样率
+     * @param duration 持续时间（秒）
+     * @return 信号样本
+     */
+    public static Complex[] generateSineWave(double frequency, int sampleRate, double duration) {
+        int numSamples = (int) (sampleRate * duration);
+        Complex[] signal = new Complex[numSamples];
+
+        for (int i = 0; i < numSamples; i++) {
+            double t = (double) i / sampleRate;
+            double amplitude = Math.sin(2 * Math.PI * frequency * t);
+            signal[i] = new Complex(amplitude, 0);
+        }
+
+        return signal;
+    }
+
+    /**
      * 复数类，用于表示复数运算。
      */
     public static class Complex {
+
         public double real;  // 实部
         public double imag;  // 虚部
 
@@ -103,195 +287,14 @@ public class FFT {
 
         @Override
         public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
             Complex complex = (Complex) obj;
             return Math.abs(real - complex.real) < 1e-9 && Math.abs(imag - complex.imag) < 1e-9;
         }
-    }
-
-    /**
-     * 快速傅里叶变换主入口。
-     * 步骤：
-     * 1. 参数验证和预处理
-     * 2. 将输入长度扩展到2的幂次
-     * 3. 调用递归的 FFT 算法
-     * 4. 返回变换结果
-     *
-     * @param input 输入信号（复数数组）
-     * @return FFT 变换结果
-     */
-    public static Complex[] fft(Complex[] input) {
-        if (input == null || input.length == 0) {
-            throw new IllegalArgumentException("输入不能为空");
-        }
-
-        int n = input.length;
-        
-        // 将长度扩展到2的幂次
-        int powerOfTwo = 1;
-        while (powerOfTwo < n) {
-            powerOfTwo <<= 1;
-        }
-
-        // 如果需要，用0填充
-        Complex[] paddedInput = new Complex[powerOfTwo];
-        System.arraycopy(input, 0, paddedInput, 0, n);
-        for (int i = n; i < powerOfTwo; i++) {
-            paddedInput[i] = new Complex(0, 0);
-        }
-
-        return fftRecursive(paddedInput);
-    }
-
-    /**
-     * 递归的 FFT 算法实现。
-     * 步骤：
-     * 1. 递归基：长度为1直接返回
-     * 2. 分：将序列按奇偶索引分为两部分
-     * 3. 治：递归计算两个子序列的 FFT
-     * 4. 合：通过蝶形运算合并结果
-     *
-     * @param input 输入序列
-     * @return FFT 结果
-     */
-    private static Complex[] fftRecursive(Complex[] input) {
-        int n = input.length;
-
-        // 递归基：长度为1
-        if (n == 1) {
-            return new Complex[]{input[0]};
-        }
-
-        // 分：按奇偶索引分离
-        Complex[] even = new Complex[n / 2];
-        Complex[] odd = new Complex[n / 2];
-
-        for (int i = 0; i < n / 2; i++) {
-            even[i] = input[2 * i];      // 偶数索引
-            odd[i] = input[2 * i + 1];   // 奇数索引
-        }
-
-        // 治：递归计算子问题
-        Complex[] evenFFT = fftRecursive(even);
-        Complex[] oddFFT = fftRecursive(odd);
-
-        // 合：蝶形运算合并结果
-        Complex[] result = new Complex[n];
-        for (int k = 0; k < n / 2; k++) {
-            // 计算旋转因子 W_n^k = e^(-j*2π*k/n)
-            double angle = -2 * Math.PI * k / n;
-            Complex twiddle = new Complex(Math.cos(angle), Math.sin(angle));
-            
-            // 蝶形运算
-            Complex t = twiddle.multiply(oddFFT[k]);
-            result[k] = evenFFT[k].add(t);           // 前半部分
-            result[k + n / 2] = evenFFT[k].subtract(t); // 后半部分
-        }
-
-        return result;
-    }
-
-    /**
-     * 快速傅里叶逆变换 (IFFT)。
-     *
-     * @param input 频域信号
-     * @return 时域信号
-     */
-    public static Complex[] ifft(Complex[] input) {
-        if (input == null || input.length == 0) {
-            throw new IllegalArgumentException("输入不能为空");
-        }
-
-        int n = input.length;
-        
-        // 共轭输入
-        Complex[] conjugated = new Complex[n];
-        for (int i = 0; i < n; i++) {
-            conjugated[i] = new Complex(input[i].real, -input[i].imag);
-        }
-
-        // 执行 FFT
-        Complex[] result = fft(conjugated);
-
-        // 共轭结果并除以 n
-        for (int i = 0; i < n; i++) {
-            result[i] = new Complex(result[i].real / n, -result[i].imag / n);
-        }
-
-        return result;
-    }
-
-    /**
-     * 使用 FFT 进行多项式乘法。
-     * 两个多项式的乘积可以通过卷积计算，而卷积可以用 FFT 高效实现。
-     *
-     * @param poly1 第一个多项式的系数
-     * @param poly2 第二个多项式的系数
-     * @return 乘积多项式的系数
-     */
-    public static double[] polynomialMultiply(double[] poly1, double[] poly2) {
-        if (poly1 == null || poly2 == null || poly1.length == 0 || poly2.length == 0) {
-            return new double[0];
-        }
-
-        int resultSize = poly1.length + poly2.length - 1;
-        
-        // 找到大于等于 resultSize 的最小2的幂次
-        int fftSize = 1;
-        while (fftSize < resultSize) {
-            fftSize <<= 1;
-        }
-
-        // 转换为复数并填充0
-        Complex[] complex1 = new Complex[fftSize];
-        Complex[] complex2 = new Complex[fftSize];
-        
-        for (int i = 0; i < fftSize; i++) {
-            complex1[i] = new Complex(i < poly1.length ? poly1[i] : 0);
-            complex2[i] = new Complex(i < poly2.length ? poly2[i] : 0);
-        }
-
-        // 执行 FFT
-        Complex[] fft1 = fft(complex1);
-        Complex[] fft2 = fft(complex2);
-
-        // 点乘
-        Complex[] product = new Complex[fftSize];
-        for (int i = 0; i < fftSize; i++) {
-            product[i] = fft1[i].multiply(fft2[i]);
-        }
-
-        // 执行 IFFT
-        Complex[] ifftResult = ifft(product);
-
-        // 提取实部作为结果
-        double[] result = new double[resultSize];
-        for (int i = 0; i < resultSize; i++) {
-            result[i] = Math.round(ifftResult[i].real); // 四舍五入消除浮点误差
-        }
-
-        return result;
-    }
-
-    /**
-     * 生成测试用的正弦波信号。
-     *
-     * @param frequency 频率
-     * @param sampleRate 采样率
-     * @param duration 持续时间（秒）
-     * @return 信号样本
-     */
-    public static Complex[] generateSineWave(double frequency, int sampleRate, double duration) {
-        int numSamples = (int) (sampleRate * duration);
-        Complex[] signal = new Complex[numSamples];
-        
-        for (int i = 0; i < numSamples; i++) {
-            double t = (double) i / sampleRate;
-            double amplitude = Math.sin(2 * Math.PI * frequency * t);
-            signal[i] = new Complex(amplitude, 0);
-        }
-        
-        return signal;
     }
 }

@@ -29,8 +29,8 @@ package algorithm.sorting;
  *
  * @author magicliang
  * @version 1.0
- * @since 2025-08-21
  * @see <a href="https://en.wikipedia.org/wiki/Merge_sort">Merge sort - Wikipedia</a>
+ * @since 2025-08-21
  */
 public class MergeSort {
 
@@ -94,7 +94,7 @@ public class MergeSort {
         int[] a = new int[mid];
         int[] b = new int[arr.length - mid];
         System.arraycopy(arr, 0, a, 0, mid);
-        System.arraycopy(arr, 0 + mid, b, 0, b.length);
+        System.arraycopy(arr, mid, b, 0, b.length);
 
         return merge2Arrays(mergeSort(a), mergeSort(b));
     }

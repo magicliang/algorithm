@@ -25,7 +25,7 @@ public class Solution {
         List<String> tmpResult = letterCasePermutation(str.substring(1, strLength));
         // 把当前问题的解和子问题的解-也就是子串 merge 起来
         if (isLetter) {
-        	// 如果当前字符是字母，则转化为双结果
+            // 如果当前字符是字母，则转化为双结果
             char upperCase = Character.toUpperCase(ch);
             char lowerCase = Character.toLowerCase(upperCase);
             // 注意 i、character、i+1 这三个区间的分隔
@@ -40,7 +40,7 @@ public class Solution {
             }
             return result;
         } else {
-        	// 否则转化为单结果
+            // 否则转化为单结果
             if (tmpResult.size() > 0) {
                 for (String tmpStr : tmpResult) {
                     result.add(ch + tmpStr);

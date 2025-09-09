@@ -3,6 +3,7 @@ package algorithm.advanced.backtracking;
 import algorithm.datastructures.trees.BTree;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,9 +18,9 @@ import java.util.List;
  */
 public class GenericBacktrackFinder {
 
-    private int targetValue;
+    private final int targetValue;
 
-    private int forbiddenValue;
+    private final int forbiddenValue;
 
     /**
      * 构造函数，指定目标值和禁止值
@@ -40,6 +41,22 @@ public class GenericBacktrackFinder {
     }
 
     /**
+     * 便捷方法：查找值为7的路径（禁止选择3）
+     */
+    public static List<List<BTree.Node>> findSevenPaths(BTree.Node root) {
+        GenericBacktrackFinder finder = new GenericBacktrackFinder();
+        return finder.findPaths(root);
+    }
+
+    /**
+     * 便捷方法：自定义目标值和约束值
+     */
+    public static List<List<BTree.Node>> findPathsWithConstraints(BTree.Node root, int target, int forbidden) {
+        GenericBacktrackFinder finder = new GenericBacktrackFinder(target, forbidden);
+        return finder.findPaths(root);
+    }
+
+    /**
      * 公共接口：查找满足条件的路径
      */
     public List<List<BTree.Node>> findPaths(BTree.Node root) {
@@ -49,7 +66,7 @@ public class GenericBacktrackFinder {
         }
 
         List<BTree.Node> state = new ArrayList<>();
-        backtrack(state, Arrays.asList(root), result);
+        backtrack(state, Collections.singletonList(root), result);
         return result;
     }
 
@@ -98,21 +115,5 @@ public class GenericBacktrackFinder {
                 undoChoice(state, choice); // 去除本路径
             }
         }
-    }
-
-    /**
-     * 便捷方法：查找值为7的路径（禁止选择3）
-     */
-    public static List<List<BTree.Node>> findSevenPaths(BTree.Node root) {
-        GenericBacktrackFinder finder = new GenericBacktrackFinder();
-        return finder.findPaths(root);
-    }
-
-    /**
-     * 便捷方法：自定义目标值和约束值
-     */
-    public static List<List<BTree.Node>> findPathsWithConstraints(BTree.Node root, int target, int forbidden) {
-        GenericBacktrackFinder finder = new GenericBacktrackFinder(target, forbidden);
-        return finder.findPaths(root);
     }
 }

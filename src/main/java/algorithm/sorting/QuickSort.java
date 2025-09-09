@@ -31,8 +31,8 @@ package algorithm.sorting;
  *
  * @author magicliang
  * @version 1.0
- * @since 2025-08-21
  * @see <a href="https://en.wikipedia.org/wiki/Quicksort">Quicksort - Wikipedia</a>
+ * @since 2025-08-21
  */
 public class QuickSort {
 

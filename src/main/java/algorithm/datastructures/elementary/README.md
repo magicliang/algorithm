@@ -24,9 +24,12 @@ src/main/java/algorithm/datastructures/elementary/
 **空间复杂度**：O(log n)，栈空间
 
 **示例**：
+
 ```java
 PalindromeAlgorithms.isPalindromeNumber(121);   // true
-PalindromeAlgorithms.isPalindromeNumber(123);   // false
+PalindromeAlgorithms.
+
+isPalindromeNumber(123);   // false
 ```
 
 ### 2. 回文字符串检测 (`isPalindromeString`)
@@ -37,30 +40,40 @@ PalindromeAlgorithms.isPalindromeNumber(123);   // false
 **空间复杂度**：O(n/2)，栈空间
 
 **示例**：
+
 ```java
 PalindromeAlgorithms.isPalindromeString("racecar");                    // true
-PalindromeAlgorithms.isPalindromeString("A man a plan a canal Panama"); // true
+PalindromeAlgorithms.
+
+isPalindromeString("A man a plan a canal Panama"); // true
 ```
 
 ### 3. 回文链表检测
 
 #### 普通版本 (`isPalindromeLinkedList`)
+
 **思路**：遍历链表将所有值压入栈中，然后再次遍历链表与栈中弹出的值比较。
 
 **时间复杂度**：O(n)  
 **空间复杂度**：O(n)
 
 #### 优化版本 (`isPalindromeLinkedListOptimized`)
+
 **思路**：使用快慢指针找到链表中点，将后半部分压入栈，然后与前半部分比较。
 
 **时间复杂度**：O(n)  
 **空间复杂度**：O(n/2)
 
 **示例**：
+
 ```java
 ListNode head = ListNode.fromArray(new Integer[]{1, 2, 2, 1});
-PalindromeAlgorithms.isPalindromeLinkedList(head);          // true
-PalindromeAlgorithms.isPalindromeLinkedListOptimized(head); // true
+PalindromeAlgorithms.
+
+isPalindromeLinkedList(head);          // true
+PalindromeAlgorithms.
+
+isPalindromeLinkedListOptimized(head); // true
 ```
 
 ### 4. 字符串转回文 (`makePalindrome`)
@@ -68,6 +81,7 @@ PalindromeAlgorithms.isPalindromeLinkedListOptimized(head); // true
 **思路**：将字符串的每个字符压入栈，然后弹出拼接到原字符串后面。
 
 **示例**：
+
 ```java
 PalindromeAlgorithms.makePalindrome("abc"); // "abccba"
 ```
@@ -77,33 +91,37 @@ PalindromeAlgorithms.makePalindrome("abc"); // "abccba"
 **思路**：遇到左括号压栈，遇到右括号弹栈匹配。
 
 **示例**：
+
 ```java
 PalindromeAlgorithms.isBalancedParentheses("([{}])"); // true
-PalindromeAlgorithms.isBalancedParentheses("([)]");   // false
+PalindromeAlgorithms.
+
+isBalancedParentheses("([)]");   // false
 ```
 
 ## 栈实现对比
 
-| 特性 | ArrayStack | LinkedStack |
-|------|------------|-------------|
-| 底层结构 | 动态数组 | 单向链表 |
-| 空间效率 | 较高（连续内存） | 较低（指针开销） |
-| 扩容机制 | 需要扩容 | 无需扩容 |
-| 缓存友好性 | 好 | 一般 |
+| 特性    | ArrayStack | LinkedStack |
+|-------|------------|-------------|
+| 底层结构  | 动态数组       | 单向链表        |
+| 空间效率  | 较高（连续内存）   | 较低（指针开销）    |
+| 扩容机制  | 需要扩容       | 无需扩容        |
+| 缓存友好性 | 好          | 一般          |
 
 ## 性能测试结果
 
 基于测试环境的性能数据：
 
 - **回文数检测**：100,000 次操作耗时约 5.55ms
-- **回文字符串检测**：10,000 次操作耗时约 14.14ms  
+- **回文字符串检测**：10,000 次操作耗时约 14.14ms
 - **回文链表检测**：
-  - 普通版本：1,000 次操作耗时约 2.96ms
-  - 优化版本：1,000 次操作耗时约 1.79ms（节省约40%空间和时间）
+    - 普通版本：1,000 次操作耗时约 2.96ms
+    - 优化版本：1,000 次操作耗时约 1.79ms（节省约40%空间和时间）
 
 ## 运行测试
 
 ### 功能测试
+
 ```bash
 cd /path/to/algorithm
 javac -cp . src/main/java/algorithm/datastructures/elementary/*.java
@@ -111,6 +129,7 @@ java -cp src/main/java algorithm.datastructures.elementary.PalindromeAlgorithmsT
 ```
 
 ### 性能测试
+
 ```bash
 java -cp src/main/java algorithm.datastructures.elementary.PalindromePerformanceTest
 ```

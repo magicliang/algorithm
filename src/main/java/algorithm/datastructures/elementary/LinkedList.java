@@ -22,52 +22,134 @@ package algorithm.datastructures.elementary;
 public class LinkedList {
 
     /**
-     * 链表节点定义
+     * 根据数组创建链表
      * <p>
-     * 提供三种构造方式：
-     * 1. 默认构造：创建值为0的节点
-     * 2. 值构造：创建指定值的节点
-     * 3. 完整构造：创建指定值和下一个节点的节点
+     * 工具方法，便于测试和调试
+     *
+     * @param values 数组值
+     * @return 创建的链表头节点
      */
-    public static class ListNode {
-        int val;        // 节点存储的值
-        ListNode next;  // 指向下一个节点的指针
-
-        /**
-         * 默认构造函数，创建值为0的节点
-         */
-        ListNode() {
+    public static ListNode createFromArray(int[] values) {
+        if (values == null || values.length == 0) {
+            return null;
         }
 
-        /**
-         * 值构造函数
-         *
-         * @param val 节点的值
-         */
-        ListNode(int val) {
-            this.val = val;
+        ListNode dummy = new ListNode();
+        ListNode current = dummy;
+
+        for (int val : values) {
+            current.next = new ListNode(val);
+            current = current.next;
         }
 
-        /**
-         * 完整构造函数
-         *
-         * @param val  节点的值
-         * @param next 下一个节点的引用
-         */
-        ListNode(int val, ListNode next) {
-            this.val = val;
-            this.next = next;
+        return dummy.next;
+    }
+
+    /**
+     * 将链表转换为数组
+     * <p>
+     * 工具方法，便于测试验证结果
+     * 注意：此方法假设链表无环，最多遍历1000个节点防止无限循环
+     *
+     * @param head 链表头节点
+     * @return 链表值组成的数组
+     */
+    public static int[] toArray(ListNode head) {
+        if (head == null) {
+            return new int[0];
         }
 
-        /**
-         * 重写toString方法，便于调试
-         *
-         * @return 节点的字符串表示
-         */
-        @Override
-        public String toString() {
-            return "ListNode{val=" + val + "}";
+        java.util.List<Integer> result = new java.util.ArrayList<>();
+        ListNode current = head;
+        int count = 0;
+
+        // 防止无限循环，最多遍历1000个节点
+        while (current != null && count < 1000) {
+            result.add(current.val);
+            current = current.next;
+            count++;
         }
+
+        return result.stream().mapToInt(i -> i).toArray();
+    }
+
+    /**
+     * 计算链表长度
+     * <p>
+     * 注意：此方法假设链表无环
+     *
+     * @param head 链表头节点
+     * @return 链表长度
+     */
+    public static int getLength(ListNode head) {
+        int length = 0;
+        ListNode current = head;
+
+        while (current != null) {
+            length++;
+            current = current.next;
+        }
+
+        return length;
+    }
+
+    /**
+     * 打印链表内容
+     * <p>
+     * 调试工具方法，格式：1 -> 2 -> 3 -> null
+     *
+     * @param head 链表头节点
+     * @return 链表的字符串表示
+     */
+    public static String printList(ListNode head) {
+        if (head == null) {
+            return "null";
+        }
+
+        StringBuilder sb = new StringBuilder();
+        ListNode current = head;
+        int count = 0;
+
+        // 防止无限循环
+        while (current != null && count < 100) {
+            sb.append(current.val);
+            if (current.next != null) {
+                sb.append(" -> ");
+            }
+            current = current.next;
+            count++;
+        }
+
+        if (count >= 100) {
+            sb.append(" -> ... (可能有环或链表过长)");
+        } else {
+            sb.append(" -> null");
+        }
+
+        return sb.toString();
+    }
+
+    /**
+     * 检查两个链表是否相等（值相等且顺序相同）
+     *
+     * @param list1 第一个链表
+     * @param list2 第二个链表
+     * @return 是否相等
+     */
+    public static boolean areEqual(ListNode list1, ListNode list2) {
+        ListNode current1 = list1;
+        ListNode current2 = list2;
+
+        while (current1 != null && current2 != null) {
+            if (current1.val != current2.val) {
+                return false;
+            }
+            current1 = current1.next;
+            current2 = current2.next;
+        }
+
+        // 两个链表都应该同时到达末尾
+        return current1 == null && current2 == null;
     }
 
     /**
@@ -108,143 +190,6 @@ public class LinkedList {
         // 最后 prev 是新头，pcn 的最终返回值就是 p
         return prev;
     }
-
-    /**
-     * 链表反转器内部类
-     * 提供两种反转前n个节点的实现方式：递归和迭代
-     */
-    class Reverser {
-
-        ListNode successor; // 保存未反转部分的头节点
-
-        /**
-         * 反转链表的前 n 个节点（递归实现）
-         * <p>
-         * 算法思路：
-         * 1. 递归到第n个节点作为新的头节点
-         * 2. 在回溯过程中逐步反转指针方向
-         * 3. 保存第n+1个节点作为successor，用于连接未反转部分
-         * <p>
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(n)（递归栈开销）
-         *
-         * @param head 链表头节点
-         * @param n    需要反转的节点数
-         * @return 反转后的链表头节点
-         */
-        public ListNode reverse(ListNode head, int n) {
-            if (n == 1) {
-                // 找到尾巴节点
-                successor = head.next; // 记录第 n+1 个节点
-                return head;
-            }
-            ListNode newHead = reverse(head.next, n - 1);
-            // 此时本头还保留新尾的引用，即 head.next 是子链表的尾，把本头放到子链表的尾部去
-            head.next.next = head;
-            // 从底部返回 successor 必已赋值
-            head.next = successor; // 这个 head.next 会发生多次，最终是最初的head连上了 successor
-            return newHead; // 这个 newHead 回不断被返回回去，不会被替换
-        }
-
-        /**
-         * 反转链表的前 n 个节点（迭代实现）
-         * <p>
-         * 算法思路：
-         * 1. 使用三个指针：prev（前驱）、current（当前）、next（后继）
-         * 2. 逐个反转前n个节点的指针方向
-         * 3. 反转完成后，原头节点变成尾节点，连接剩余未反转部分
-         * <p>
-         * 相比递归实现的优势：
-         * - 空间复杂度更优：O(1)
-         * - 避免递归栈溢出风险
-         * - 逻辑更直观易懂
-         * <p>
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(1)
-         *
-         * @param head 链表头节点
-         * @param n    需要反转的节点数
-         * @return 反转后的链表头节点
-         */
-        public ListNode reverse2(ListNode head, int n) {
-
-            // 边界情况处理，对于不需要翻转的场景， head.next = current; 会导致错误
-            if (head == null || n <= 0) {
-                return head;
-            }
-
-            ListNode current = head;
-            ListNode prev = null;
-
-            // 反转前n个节点
-            while (n > 0) {
-                ListNode nxt = current.next;  // 保存下一个节点
-                current.next = prev;          // 反转当前节点指针
-                prev = current;               // 移动prev指针
-                current = nxt;                // 移动current指针
-                n--;
-            }
-
-            // 这个算法里的head天然就是末尾，只要直接赋值到 current 的越界值就行了
-            // 连接反转部分和未反转部分：原头节点现在是尾节点，连接到剩余部分
-            head.next = current;
-
-            // prev 是新的头
-            return prev;
-        }
-
-        /**
-         * 反转链表的前 n 个节点（dummy头节点实现）
-         * <p>
-         * 算法思路：
-         * 1. 使用dummy头节点简化边界处理
-         * 2. 通过头插法逐个将节点插入到dummy节点后面
-         * 3. 最终形成反转效果
-         * <p>
-         * 核心技巧：头插法反转
-         * - 每次将current节点插入到dummyHead的后面
-         * - 这样自然形成了反转的顺序
-         * <p>
-         * 相比其他实现的特点：
-         * - 使用dummy节点避免特殊处理头节点
-         * - 头插法思路清晰直观
-         * - 代码简洁优雅
-         * <p>
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(1)
-         *
-         * @param head 链表头节点
-         * @param n    需要反转的节点数
-         * @return 反转后的链表头节点
-         */
-        public ListNode reverse3(ListNode head, int n) {
-            if (head == null || n <= 0) {
-                return head;
-            }
-
-            // 创建dummy头节点，简化边界处理
-            ListNode dummyHead = new ListNode();
-            dummyHead.next = head;
-
-            ListNode current = head;
-            while (n > 0) {
-                // 这一步对所有的翻转都是一样的
-                // 头插法：将current节点插入到dummyHead后面
-                ListNode nxt = current.next;        // 保存下一个节点，下一圈的节点有用
-                current.next = dummyHead.next;      // current指向当前dummyHead的下一个节点
-                dummyHead.next = current;           // dummyHead指向current（头插）
-                current = nxt;                      // 移动到下一个节点
-                n--;
-            }
-
-            // 此时 head 本身就是新链表的末尾，链表结构即使被破坏了也无所谓
-            // 连接反转部分和未反转部分
-            head.next = current;
-            return dummyHead.next;
-        }
-
-    }
-
 
     /**
      * 检测链表是否有环（Floyd判圈算法）
@@ -322,7 +267,7 @@ public class LinkedList {
      * 空间复杂度：O(1)
      *
      * @param head 链表头节点
-     * @param k    倒数第k个
+     * @param k 倒数第k个
      * @return 倒数第k个节点，如果k超出链表长度则返回null
      */
     public ListNode findKthFromEnd(ListNode head, int k) {
@@ -366,7 +311,7 @@ public class LinkedList {
      * 3. 所以要让 fast 先走 k + 1 步。
      *
      * @param head 链表头节点
-     * @param k    倒数第k个
+     * @param k 倒数第k个
      * @return 删除节点后的链表头
      */
     public ListNode removeKthFromEnd(ListNode head, int k) {
@@ -410,7 +355,7 @@ public class LinkedList {
      * 这个算法是正确的，因为头节点可以被删除，所以 dummy 节点是必须的
      *
      * @param head 链表头节点
-     * @param k    倒数第k个
+     * @param k 倒数第k个
      * @return 删除节点后的链表头
      */
     public ListNode removeKthFromEnd2(ListNode head, int k) {
@@ -548,7 +493,7 @@ public class LinkedList {
      * <p>
      * 数学推导：
      * - 设链表头到环起点距离为 a
-     * - 环起点到快慢指针相遇点距离为 b  
+     * - 环起点到快慢指针相遇点距离为 b
      * - 相遇点到环起点距离为 c
      * - 环长为 b + c
      * <p>
@@ -579,7 +524,7 @@ public class LinkedList {
         while (fast != null && fast.next != null) {
             slow = slow.next;        // 慢指针每次移动1步
             fast = fast.next.next;   // 快指针每次移动2步
-            
+
             if (slow == fast) {      // 快慢指针相遇，说明有环
                 hasCycle = true;
                 break;
@@ -594,7 +539,7 @@ public class LinkedList {
         // 第二阶段：找到环的起始节点
         // 将慢指针重置到链表头，快指针保持在相遇点
         slow = head;
-        
+
         // 两指针以相同速度移动，相遇点即为环的起始节点
         while (slow != fast) {
             slow = slow.next;
@@ -639,12 +584,12 @@ public class LinkedList {
             // 检查当前节点是否有重复
             if (current.next != null && current.val == current.next.val) {
                 int duplicateVal = current.val;
-                
+
                 // 跳过所有值为duplicateVal的节点
                 while (current != null && current.val == duplicateVal) {
                     current = current.next;
                 }
-                
+
                 // 将prev连接到跳过重复节点后的位置
                 prev.next = current;
             } else {
@@ -656,6 +601,8 @@ public class LinkedList {
 
         return dummy.next;
     }
+
+    // ==================== 辅助工具方法 ====================
 
     /**
      * 合并两个有序链表
@@ -726,7 +673,7 @@ public class LinkedList {
         // 第一步：找到链表中点
         ListNode slow = head;
         ListNode fast = head;
-        
+
         while (fast.next != null && fast.next.next != null) {
             slow = slow.next;
             fast = fast.next.next;
@@ -739,7 +686,7 @@ public class LinkedList {
         // 第三步：比较前半部分和后半部分
         ListNode firstHalf = head;
         boolean isPalindrome = true;
-        
+
         while (secondHalf != null) {
             if (firstHalf.val != secondHalf.val) {
                 isPalindrome = false;
@@ -763,148 +710,15 @@ public class LinkedList {
     private ListNode reverseList(ListNode head) {
         ListNode prev = null;
         ListNode current = head;
-        
+
         while (current != null) {
             ListNode next = current.next;
             current.next = prev;
             prev = current;
             current = next;
         }
-        
+
         return prev;
-    }
-
-    // ==================== 辅助工具方法 ====================
-
-    /**
-     * 根据数组创建链表
-     * <p>
-     * 工具方法，便于测试和调试
-     *
-     * @param values 数组值
-     * @return 创建的链表头节点
-     */
-    public static ListNode createFromArray(int[] values) {
-        if (values == null || values.length == 0) {
-            return null;
-        }
-
-        ListNode dummy = new ListNode();
-        ListNode current = dummy;
-
-        for (int val : values) {
-            current.next = new ListNode(val);
-            current = current.next;
-        }
-
-        return dummy.next;
-    }
-
-    /**
-     * 将链表转换为数组
-     * <p>
-     * 工具方法，便于测试验证结果
-     * 注意：此方法假设链表无环，最多遍历1000个节点防止无限循环
-     *
-     * @param head 链表头节点
-     * @return 链表值组成的数组
-     */
-    public static int[] toArray(ListNode head) {
-        if (head == null) {
-            return new int[0];
-        }
-
-        java.util.List<Integer> result = new java.util.ArrayList<>();
-        ListNode current = head;
-        int count = 0;
-
-        // 防止无限循环，最多遍历1000个节点
-        while (current != null && count < 1000) {
-            result.add(current.val);
-            current = current.next;
-            count++;
-        }
-
-        return result.stream().mapToInt(i -> i).toArray();
-    }
-
-    /**
-     * 计算链表长度
-     * <p>
-     * 注意：此方法假设链表无环
-     *
-     * @param head 链表头节点
-     * @return 链表长度
-     */
-    public static int getLength(ListNode head) {
-        int length = 0;
-        ListNode current = head;
-
-        while (current != null) {
-            length++;
-            current = current.next;
-        }
-
-        return length;
-    }
-
-    /**
-     * 打印链表内容
-     * <p>
-     * 调试工具方法，格式：1 -> 2 -> 3 -> null
-     *
-     * @param head 链表头节点
-     * @return 链表的字符串表示
-     */
-    public static String printList(ListNode head) {
-        if (head == null) {
-            return "null";
-        }
-
-        StringBuilder sb = new StringBuilder();
-        ListNode current = head;
-        int count = 0;
-
-        // 防止无限循环
-        while (current != null && count < 100) {
-            sb.append(current.val);
-            if (current.next != null) {
-                sb.append(" -> ");
-            }
-            current = current.next;
-            count++;
-        }
-
-        if (count >= 100) {
-            sb.append(" -> ... (可能有环或链表过长)");
-        } else {
-            sb.append(" -> null");
-        }
-
-        return sb.toString();
-    }
-
-    /**
-     * 检查两个链表是否相等（值相等且顺序相同）
-     *
-     * @param list1 第一个链表
-     * @param list2 第二个链表
-     * @return 是否相等
-     */
-    public static boolean areEqual(ListNode list1, ListNode list2) {
-        ListNode current1 = list1;
-        ListNode current2 = list2;
-
-        while (current1 != null && current2 != null) {
-            if (current1.val != current2.val) {
-                return false;
-            }
-            current1 = current1.next;
-            current2 = current2.next;
-        }
-
-        // 两个链表都应该同时到达末尾
-        return current1 == null && current2 == null;
     }
 
     /**
@@ -920,11 +734,11 @@ public class LinkedList {
      * 1. 初始化 `slow` 和 `fast` 都指向头节点 `head`。
      * 2. `fast` 指针遍历整个链表。
      * 3. 如果 `fast` 指向的节点值与 `slow` 不同，说明遇到了一个新的不重复元素。
-     *    - 将 `slow` 的 `next` 指向 `fast`，将这个新元素连接到不重复部分的末尾。
-     *    - `slow` 指针前进一步，指向这个新的末尾节点。
+     * - 将 `slow` 的 `next` 指向 `fast`，将这个新元素连接到不重复部分的末尾。
+     * - `slow` 指针前进一步，指向这个新的末尾节点。
      * 4. 循环结束后，`fast` 指向 `null`。此时 `slow` 是不重复部分的最后一个节点。
      * 5. **关键步骤**：将 `slow.next` 设置为 `null`。这是为了处理链表末尾有重复元素的情况（例如 1->2->3->3->3）。
-     *    如果不执行此步，`slow` 会指向第一个3，但它后面的 `3->3` 链依然存在。
+     * 如果不执行此步，`slow` 会指向第一个3，但它后面的 `3->3` 链依然存在。
      * <p>
      * 时间复杂度：O(n)，因为 `fast` 指针遍历链表一次。
      * 空间复杂度：O(1)，只使用了常数个额外指针。
@@ -979,7 +793,7 @@ public class LinkedList {
      * 空间复杂度：O(1)
      *
      * @param head 链表头节点
-     * @param k    向右旋转的位置数
+     * @param k 向右旋转的位置数
      * @return 旋转后的链表头节点
      */
     public ListNode rotateRight(ListNode head, int k) {
@@ -1011,7 +825,7 @@ public class LinkedList {
         // 第三步：分别翻转前 n 个节点和后 (length - n) 个节点
         ListNode newHead2 = reverseFirstN(newHead1, n);        // 翻转前 n 个节点
         ListNode newHead3 = reverseFirstN(p, length - n);      // 翻转后 (length - n) 个节点
-        
+
         // 第四步：连接两部分（newHead1 现在是前半部分的尾节点）
         newHead1.next = newHead3;
 
@@ -1035,7 +849,7 @@ public class LinkedList {
      * 空间复杂度：O(1)
      *
      * @param head 链表头节点
-     * @param n    需要翻转的节点数
+     * @param n 需要翻转的节点数
      * @return 翻转后的链表头节点
      */
     ListNode reverseFirstN(ListNode head, int n) {
@@ -1043,11 +857,11 @@ public class LinkedList {
         if (head == null || n <= 1) {
             return head;
         }
-        
+
         // 初始化三个指针
         ListNode prev = null;    // 前驱节点，初始为null
         ListNode current = head; // 当前处理的节点
-        
+
         // 翻转前 n 个节点
         while (current != null && n > 0) {
             ListNode tmp = current.next; // 临时保存下一个节点
@@ -1056,16 +870,202 @@ public class LinkedList {
             current = tmp;               // 当前指针前移
             n--;                         // 计数器递减
         }
-        
+
         // 翻转完成后的状态：
         // head 现在是翻转部分的尾节点
-        // current 是未翻转部分的头节点  
+        // current 是未翻转部分的头节点
         // prev 是翻转部分的新头节点
-        
+
         // 连接翻转部分和未翻转部分
         head.next = current;
-        
+
         // 返回翻转部分的新头节点
         return prev;
+    }
+
+    /**
+     * 链表节点定义
+     * <p>
+     * 提供三种构造方式：
+     * 1. 默认构造：创建值为0的节点
+     * 2. 值构造：创建指定值的节点
+     * 3. 完整构造：创建指定值和下一个节点的节点
+     */
+    public static class ListNode {
+
+        int val;        // 节点存储的值
+        ListNode next;  // 指向下一个节点的指针
+
+        /**
+         * 默认构造函数，创建值为0的节点
+         */
+        ListNode() {
+        }
+
+        /**
+         * 值构造函数
+         *
+         * @param val 节点的值
+         */
+        ListNode(int val) {
+            this.val = val;
+        }
+
+        /**
+         * 完整构造函数
+         *
+         * @param val 节点的值
+         * @param next 下一个节点的引用
+         */
+        ListNode(int val, ListNode next) {
+            this.val = val;
+            this.next = next;
+        }
+
+        /**
+         * 重写toString方法，便于调试
+         *
+         * @return 节点的字符串表示
+         */
+        @Override
+        public String toString() {
+            return "ListNode{val=" + val + "}";
+        }
+    }
+
+    /**
+     * 链表反转器内部类
+     * 提供两种反转前n个节点的实现方式：递归和迭代
+     */
+    class Reverser {
+
+        ListNode successor; // 保存未反转部分的头节点
+
+        /**
+         * 反转链表的前 n 个节点（递归实现）
+         * <p>
+         * 算法思路：
+         * 1. 递归到第n个节点作为新的头节点
+         * 2. 在回溯过程中逐步反转指针方向
+         * 3. 保存第n+1个节点作为successor，用于连接未反转部分
+         * <p>
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(n)（递归栈开销）
+         *
+         * @param head 链表头节点
+         * @param n 需要反转的节点数
+         * @return 反转后的链表头节点
+         */
+        public ListNode reverse(ListNode head, int n) {
+            if (n == 1) {
+                // 找到尾巴节点
+                successor = head.next; // 记录第 n+1 个节点
+                return head;
+            }
+            ListNode newHead = reverse(head.next, n - 1);
+            // 此时本头还保留新尾的引用，即 head.next 是子链表的尾，把本头放到子链表的尾部去
+            head.next.next = head;
+            // 从底部返回 successor 必已赋值
+            head.next = successor; // 这个 head.next 会发生多次，最终是最初的head连上了 successor
+            return newHead; // 这个 newHead 回不断被返回回去，不会被替换
+        }
+
+        /**
+         * 反转链表的前 n 个节点（迭代实现）
+         * <p>
+         * 算法思路：
+         * 1. 使用三个指针：prev（前驱）、current（当前）、next（后继）
+         * 2. 逐个反转前n个节点的指针方向
+         * 3. 反转完成后，原头节点变成尾节点，连接剩余未反转部分
+         * <p>
+         * 相比递归实现的优势：
+         * - 空间复杂度更优：O(1)
+         * - 避免递归栈溢出风险
+         * - 逻辑更直观易懂
+         * <p>
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(1)
+         *
+         * @param head 链表头节点
+         * @param n 需要反转的节点数
+         * @return 反转后的链表头节点
+         */
+        public ListNode reverse2(ListNode head, int n) {
+
+            // 边界情况处理，对于不需要翻转的场景， head.next = current; 会导致错误
+            if (head == null || n <= 0) {
+                return head;
+            }
+
+            ListNode current = head;
+            ListNode prev = null;
+
+            // 反转前n个节点
+            while (n > 0) {
+                ListNode nxt = current.next;  // 保存下一个节点
+                current.next = prev;          // 反转当前节点指针
+                prev = current;               // 移动prev指针
+                current = nxt;                // 移动current指针
+                n--;
+            }
+
+            // 这个算法里的head天然就是末尾，只要直接赋值到 current 的越界值就行了
+            // 连接反转部分和未反转部分：原头节点现在是尾节点，连接到剩余部分
+            head.next = current;
+
+            // prev 是新的头
+            return prev;
+        }
+
+        /**
+         * 反转链表的前 n 个节点（dummy头节点实现）
+         * <p>
+         * 算法思路：
+         * 1. 使用dummy头节点简化边界处理
+         * 2. 通过头插法逐个将节点插入到dummy节点后面
+         * 3. 最终形成反转效果
+         * <p>
+         * 核心技巧：头插法反转
+         * - 每次将current节点插入到dummyHead的后面
+         * - 这样自然形成了反转的顺序
+         * <p>
+         * 相比其他实现的特点：
+         * - 使用dummy节点避免特殊处理头节点
+         * - 头插法思路清晰直观
+         * - 代码简洁优雅
+         * <p>
+         * 时间复杂度：O(n)
+         * 空间复杂度：O(1)
+         *
+         * @param head 链表头节点
+         * @param n 需要反转的节点数
+         * @return 反转后的链表头节点
+         */
+        public ListNode reverse3(ListNode head, int n) {
+            if (head == null || n <= 0) {
+                return head;
+            }
+
+            // 创建dummy头节点，简化边界处理
+            ListNode dummyHead = new ListNode();
+            dummyHead.next = head;
+
+            ListNode current = head;
+            while (n > 0) {
+                // 这一步对所有的翻转都是一样的
+                // 头插法：将current节点插入到dummyHead后面
+                ListNode nxt = current.next;        // 保存下一个节点，下一圈的节点有用
+                current.next = dummyHead.next;      // current指向当前dummyHead的下一个节点
+                dummyHead.next = current;           // dummyHead指向current（头插）
+                current = nxt;                      // 移动到下一个节点
+                n--;
+            }
+
+            // 此时 head 本身就是新链表的末尾，链表结构即使被破坏了也无所谓
+            // 连接反转部分和未反转部分
+            head.next = current;
+            return dummyHead.next;
+        }
+
     }
 }

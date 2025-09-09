@@ -5,11 +5,11 @@ import java.util.Arrays;
 /**
  * @author liangchuan
  *
- * 具有处理不存在target或存在多个target适应性的方法：
- * 1. findFirstGreaterOrEqual - 找到第一个大于等于target的位置，适用于边界情况
- * 2. floor2 - 通用floor实现，适合数组中1个或多个target的情况
- * 3. leftBound3 - 基于findFirstGreaterOrEqual的左边界查找实现
- * 4. rightBound3 - 基于findFirstGreaterOrEqual的右边界查找实现
+ *         具有处理不存在target或存在多个target适应性的方法：
+ *         1. findFirstGreaterOrEqual - 找到第一个大于等于target的位置，适用于边界情况
+ *         2. floor2 - 通用floor实现，适合数组中1个或多个target的情况
+ *         3. leftBound3 - 基于findFirstGreaterOrEqual的左边界查找实现
+ *         4. rightBound3 - 基于findFirstGreaterOrEqual的右边界查找实现
  */
 public class BinarySearch {
 
@@ -49,7 +49,7 @@ public class BinarySearch {
     }
 
     /**
-    /**
+     * /**
      * 在一个升序排列的整数数组中执行二分查找，返回目标值 target 的索引。
      * 如果目标值不存在于数组中，则返回 -1。
      * 一个一般的二分查找在找不到的时候返回-1，只要这个地方不返回-1，而返回下标，就得到了插入点算法

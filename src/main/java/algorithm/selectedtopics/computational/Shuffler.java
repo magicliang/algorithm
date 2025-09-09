@@ -4,13 +4,13 @@ import java.util.concurrent.ThreadLocalRandom;
 
 /**
  * 洗牌算法实现类
- * 
+ *
  * 功能：从0到n-1的整数中随机选择k个不重复的数
  * 算法：基于Fisher-Yates洗牌算法的部分洗牌实现
- * 
+ *
  * 时间复杂度：O(n) - 需要初始化数组和k次交换
  * 空间复杂度：O(n) - 需要存储整个数组
- * 
+ *
  * @author liangchuan
  */
 public class Shuffler {
@@ -19,6 +19,7 @@ public class Shuffler {
      * 从0到n-1的整数中随机选择k个不重复的数
      * 正确的思路：
      * 如果要提取前k个元素，则把前k个元素和它和它后方的全部元素交换，然后返回前k个元素
+     *
      * @param n 整数范围的上限（不包含n）
      * @param k 需要选择的整数个数
      * @return 包含k个随机整数的数组，范围在[0, n-1]之间
@@ -56,9 +57,7 @@ public class Shuffler {
 
         // 提取前k个元素作为结果
         int[] result = new int[k];
-        for (int m = 0; m < k; m++) {
-            result[m] = total[m];
-        }
+        System.arraycopy(total, 0, result, 0, k);
 
         return result;
     }
@@ -88,9 +87,8 @@ public class Shuffler {
 
         // 正确的结果提取：从末尾k个位置提取
         int[] result = new int[k];
-        for (int m = 0; m < k; m++) {
-            result[m] = total[n - k + m];  // 提取total[n-k..n-1]
-        }
+        // 提取total[n-k..n-1]
+        System.arraycopy(total, n - k + 0, result, 0, k);
 
         return result;
     }
@@ -120,7 +118,7 @@ public class Shuffler {
         // 使用更简洁高效的虚拟数组实现
         // 使用HashMap来跟踪已交换的位置，避免重复
         java.util.Map<Integer, Integer> virtualArray = new java.util.HashMap<>();
-        
+
         for (int i = 0; i < k; i++) {
             // 从[i, n-1]范围内随机选择一个位置
             int randomPos = ThreadLocalRandom.current().nextInt(i, n);
@@ -129,7 +127,7 @@ public class Shuffler {
             int valueAtI = virtualArray.getOrDefault(i, i);
             // 获取randomPos位置的当前值（可能是虚拟值或实际值）
             int valueAtRandom = virtualArray.getOrDefault(randomPos, randomPos);
-            
+
             // 将选择的值放入结果
             result[i] = valueAtRandom;
 
@@ -402,9 +400,7 @@ public class Shuffler {
         int[] reservoir = new int[k];
 
         // 初始化蓄水池，存储前k个元素
-        for (int i = 0; i < k; i++) {
-            reservoir[i] = data[i];
-        }
+        System.arraycopy(data, 0, reservoir, 0, k);
 
         // 对剩余的元素进行随机选择
         for (int i = k; i < data.length; i++) {

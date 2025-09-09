@@ -12,7 +12,8 @@ import java.util.NoSuchElementException;
  *
  * 1. 头和尾有单独的指针维护。
  * 2. 不同的弹出操作会导致头和尾往不同方向移动：elements[tail] = item;elements[head] = item;
- * 3. 拷贝-扩容操作需要重新拷贝头和尾到新的数组的原始点。新节点的 i = (head + i) % 老 capacity - 这也意味着老节点的 src 需要遵循自身的 capacity 寻址。新数组的 head 总是 0，tail 总是 size。
+ * 3. 拷贝-扩容操作需要重新拷贝头和尾到新的数组的原始点。新节点的 i = (head + i) % 老 capacity - 这也意味着老节点的 src 需要遵循自身的 capacity 寻址。新数组的 head 总是 0，tail
+ * 总是 size。
  * 4. 头和尾的移动是循环的，需要考虑数组的边界，所以总是要做一个mod修饰。
  * 5. 添加操作需要先检查扩容，删除操作需要后检查缩容。
  *

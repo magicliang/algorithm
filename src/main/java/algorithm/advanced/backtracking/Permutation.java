@@ -108,10 +108,10 @@ import java.util.List;
  *
  * @author magicliang
  * @version 1.0
- * @since 2025-08-07
  * @see <a href="https://leetcode-cn.com/problems/permutations/">LeetCode 46. 全排列</a>
  * @see <a href="https://en.wikipedia.org/wiki/Permutation">Permutation - Wikipedia</a>
  * @see <a href="https://en.wikipedia.org/wiki/Backtracking">Backtracking - Wikipedia</a>
+ * @since 2025-08-07
  */
 public class Permutation {
 
@@ -292,7 +292,6 @@ class Permutation1 {
      * @param used 标记数组，used[i]为true表示nums[i]已被使用
      * @param path 当前构建的排列路径
      * @param result 存储所有排列结果的列表
-     *
      * @implNote 该方法修改传入的used数组和path列表，但在递归返回前会恢复原状态
      * @implSpec 使用深度优先搜索遍历所有可能的排列组合
      * @see <a href="https://en.wikipedia.org/wiki/Depth-first_search">Depth-first search</a>

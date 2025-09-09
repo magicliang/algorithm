@@ -76,7 +76,7 @@ package algorithm.advanced.dynamicprogramming;
  *   <li><strong>计算顺序差异：</strong>DFS自顶向下递归分解问题，DP自底向上迭代构建解</li>
  *   <li><strong>效率差异根源：</strong>DFS因重复计算导致指数复杂度，DP通过表格存储避免重复实现多项式复杂度</li>
  * </ul>
- * 
+ *
  * 因此，可以将DP理解为：<strong>将DFS的递归决策树"拍平"为表格，并按依赖顺序填充的优化版本</strong>。
  * 这种统一认知有助于：
  * <ul>
@@ -162,15 +162,15 @@ public class GridMinPath {
      * @return 从左上角(0,0)到右下角(m-1,n-1)的最小路径和
      * @throws IllegalArgumentException 如果grid为null、空数组或包含负数
      * @example <pre>
-     *         GridMinPath solver = new GridMinPath();
-     *         int[][] grid = {
-     *             {1, 3, 1},
-     *             {1, 5, 1},
-     *             {4, 2, 1}
-     *         };
-     *         int result = solver.minPathSum(grid); // 返回 7
-     *         // 最优路径：1→3→1→1→1，总和为7
-     *         </pre>
+     *                 GridMinPath solver = new GridMinPath();
+     *                 int[][] grid = {
+     *                     {1, 3, 1},
+     *                     {1, 5, 1},
+     *                     {4, 2, 1}
+     *                 };
+     *                 int result = solver.minPathSum(grid); // 返回 7
+     *                 // 最优路径：1→3→1→1→1，总和为7
+     *                 </pre>
      * @apiNote 对于大规模网格，建议使用 {@link #minPathSumMemoization(int[][], int, int)}
      *         或 {@link #minPathSumDp(int[][], int, int)} 方法
      * @see #minPathSumDFS(int[][], int, int)
@@ -287,20 +287,20 @@ public class GridMinPath {
      * @throws IllegalArgumentException 如果参数无效
      * @throws ArrayIndexOutOfBoundsException 如果索引越界
      * @example <pre>
-     *         GridMinPath solver = new GridMinPath();
-     *         int[][] grid = {
-     *             {1, 2, 3},
-     *             {4, 5, 6}
-     *         };
+     *                 GridMinPath solver = new GridMinPath();
+     *                 int[][] grid = {
+     *                     {1, 2, 3},
+     *                     {4, 5, 6}
+     *                 };
      *
-     *         // 计算到右下角的最小路径和
-     *         int result1 = solver.minPathSumMemoization(grid, 1, 2); // 返回 12
-     *         // 最优路径：1→2→3→6 或 1→4→5→6，都是12
+     *                 // 计算到右下角的最小路径和
+     *                 int result1 = solver.minPathSumMemoization(grid, 1, 2); // 返回 12
+     *                 // 最优路径：1→2→3→6 或 1→4→5→6，都是12
      *
-     *         // 计算到中间位置的最小路径和
-     *         int result2 = solver.minPathSumMemoization(grid, 0, 1); // 返回 3
-     *         // 最优路径：1→2，总和为3
-     *         </pre>
+     *                 // 计算到中间位置的最小路径和
+     *                 int result2 = solver.minPathSumMemoization(grid, 0, 1); // 返回 3
+     *                 // 最优路径：1→2，总和为3
+     *                 </pre>
      * @implNote 该方法创建新的缓存数组，适合单次计算。如需多次查询，
      *         考虑预先计算整个DP表
      * @see #minPathSumMemoization(int[][], int, int, Integer[][])
@@ -453,15 +453,15 @@ public class GridMinPath {
      * @param j 目标列索引
      * @return 从(0,0)到(i,j)的最小路径和
      * @example <pre>
-     *                 GridMinPath solver = new GridMinPath();
-     *                 int[][] grid = {
-     *                     {1, 3, 1},
-     *                     {1, 5, 1},
-     *                     {4, 2, 1}
-     *                 };
-     *                 int result = solver.minPathSumDPCompOptimized(grid, 2, 2); // 返回 7
-     *                 // 使用O(3)空间而非O(9)空间完成计算
-     *                 </pre>
+     *                         GridMinPath solver = new GridMinPath();
+     *                         int[][] grid = {
+     *                             {1, 3, 1},
+     *                             {1, 5, 1},
+     *                             {4, 2, 1}
+     *                         };
+     *                         int result = solver.minPathSumDPCompOptimized(grid, 2, 2); // 返回 7
+     *                         // 使用O(3)空间而非O(9)空间完成计算
+     *                         </pre>
      * @see #minPathSumDp(int[][], int, int)
      * @since 1.0
      */

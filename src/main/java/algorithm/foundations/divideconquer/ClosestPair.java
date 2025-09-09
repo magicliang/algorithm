@@ -1,6 +1,10 @@
 package algorithm.foundations.divideconquer;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Random;
 
 /**
  * 最近点对问题求解器 - 几何分治算法的经典应用。
@@ -32,54 +36,6 @@ import java.util.*;
 public class ClosestPair {
 
     /**
-     * 二维点类，表示平面上的一个点。
-     */
-    public static class Point {
-        public double x, y;
-
-        public Point(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        /**
-         * 计算当前点到另一个点的欧几里得距离。
-         *
-         * @param other 另一个点
-         * @return 两点之间的距离
-         */
-        public double distanceTo(Point other) {
-            double dx = this.x - other.x;
-            double dy = this.y - other.y;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%.2f, %.2f)", x, y);
-        }
-    }
-
-    /**
-     * 最近点对结果类，包含两个最近的点和它们之间的距离。
-     */
-    public static class ClosestPairResult {
-        public Point point1, point2;
-        public double distance;
-
-        public ClosestPairResult(Point p1, Point p2, double dist) {
-            this.point1 = p1;
-            this.point2 = p2;
-            this.distance = dist;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("最近点对: %s 和 %s，距离: %.6f", point1, point2, distance);
-        }
-    }
-
-    /**
      * 程序入口，测试最近点对算法。
      *
      * @param args 命令行参数
@@ -88,34 +44,34 @@ public class ClosestPair {
         // 测试用例1：简单的4个点
         System.out.println("=== 测试用例1：4个点 ===");
         Point[] points1 = {
-            new Point(2, 3),
-            new Point(12, 30),
-            new Point(40, 50),
-            new Point(5, 1)
+                new Point(2, 3),
+                new Point(12, 30),
+                new Point(40, 50),
+                new Point(5, 1)
         };
         testClosestPair(points1);
 
         // 测试用例2：更多点的随机分布
         System.out.println("\n=== 测试用例2：8个随机点 ===");
         Point[] points2 = {
-            new Point(1, 1),
-            new Point(2, 2),
-            new Point(3, 3),
-            new Point(10, 10),
-            new Point(11, 11),
-            new Point(20, 20),
-            new Point(25, 25),
-            new Point(30, 30)
+                new Point(1, 1),
+                new Point(2, 2),
+                new Point(3, 3),
+                new Point(10, 10),
+                new Point(11, 11),
+                new Point(20, 20),
+                new Point(25, 25),
+                new Point(30, 30)
         };
         testClosestPair(points2);
 
         // 测试用例3：包含重复点
         System.out.println("\n=== 测试用例3：包含重复点 ===");
         Point[] points3 = {
-            new Point(0, 0),
-            new Point(1, 1),
-            new Point(1, 1),  // 重复点
-            new Point(5, 5)
+                new Point(0, 0),
+                new Point(1, 1),
+                new Point(1, 1),  // 重复点
+                new Point(5, 5)
         };
         testClosestPair(points3);
 
@@ -209,8 +165,8 @@ public class ClosestPair {
      * @param right 右边界（包含）
      * @return 最近点对结果
      */
-    private static ClosestPairResult closestPairRec(Point[] sortedByX, Point[] sortedByY, 
-                                                   int left, int right) {
+    private static ClosestPairResult closestPairRec(Point[] sortedByX, Point[] sortedByY,
+            int left, int right) {
         int n = right - left + 1;
 
         // 递归基：点数较少时使用暴力方法
@@ -225,7 +181,7 @@ public class ClosestPair {
         // 将按 y 坐标排序的点集分为左右两部分
         List<Point> leftByY = new ArrayList<>();
         List<Point> rightByY = new ArrayList<>();
-        
+
         for (Point p : sortedByY) {
             if (p.x <= midPoint.x) {
                 leftByY.add(p);
@@ -235,21 +191,21 @@ public class ClosestPair {
         }
 
         // 治：递归求解左右两部分
-        ClosestPairResult leftResult = closestPairRec(sortedByX, 
-                                                     leftByY.toArray(new Point[0]), 
-                                                     left, mid);
-        ClosestPairResult rightResult = closestPairRec(sortedByX, 
-                                                      rightByY.toArray(new Point[0]), 
-                                                      mid + 1, right);
+        ClosestPairResult leftResult = closestPairRec(sortedByX,
+                leftByY.toArray(new Point[0]),
+                left, mid);
+        ClosestPairResult rightResult = closestPairRec(sortedByX,
+                rightByY.toArray(new Point[0]),
+                mid + 1, right);
 
         // 找到左右两部分中的最小距离
-        ClosestPairResult minResult = (leftResult.distance <= rightResult.distance) ? 
-                                     leftResult : rightResult;
+        ClosestPairResult minResult = (leftResult.distance <= rightResult.distance) ?
+                leftResult : rightResult;
         double minDistance = minResult.distance;
 
         // 合：处理跨越分界线的点对
         ClosestPairResult crossResult = findClosestCrossPair(sortedByY, midPoint.x, minDistance);
-        
+
         if (crossResult != null && crossResult.distance < minDistance) {
             return crossResult;
         } else {
@@ -269,8 +225,8 @@ public class ClosestPair {
      * @param minDistance 当前已知的最小距离
      * @return 跨越分界线的最近点对，如果不存在更近的则返回 null
      */
-    private static ClosestPairResult findClosestCrossPair(Point[] sortedByY, double midX, 
-                                                         double minDistance) {
+    private static ClosestPairResult findClosestCrossPair(Point[] sortedByY, double midX,
+            double minDistance) {
         // 筛选出距离分界线不超过 minDistance 的点
         List<Point> strip = new ArrayList<>();
         for (Point p : sortedByY) {
@@ -293,7 +249,7 @@ public class ClosestPair {
                 if (p2.y - p1.y >= minDist) {
                     break;
                 }
-                
+
                 double dist = p1.distanceTo(p2);
                 if (dist < minDist) {
                     minDist = dist;
@@ -338,7 +294,7 @@ public class ClosestPair {
     /**
      * 寻找最近点对距离的简化方法（仅返回距离值）。
      * 为了兼容测试代码而提供的重载方法。
-     * 
+     *
      * @param points 输入的点数组
      * @return 最近点对的距离
      * @throws IllegalArgumentException 如果输入无效
@@ -373,5 +329,55 @@ public class ClosestPair {
         }
 
         return new ClosestPairResult(closestP1, closestP2, minDistance);
+    }
+
+    /**
+     * 二维点类，表示平面上的一个点。
+     */
+    public static class Point {
+
+        public double x, y;
+
+        public Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        /**
+         * 计算当前点到另一个点的欧几里得距离。
+         *
+         * @param other 另一个点
+         * @return 两点之间的距离
+         */
+        public double distanceTo(Point other) {
+            double dx = this.x - other.x;
+            double dy = this.y - other.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%.2f, %.2f)", x, y);
+        }
+    }
+
+    /**
+     * 最近点对结果类，包含两个最近的点和它们之间的距离。
+     */
+    public static class ClosestPairResult {
+
+        public Point point1, point2;
+        public double distance;
+
+        public ClosestPairResult(Point p1, Point p2, double dist) {
+            this.point1 = p1;
+            this.point2 = p2;
+            this.distance = dist;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("最近点对: %s 和 %s，距离: %.6f", point1, point2, distance);
+        }
     }
 }

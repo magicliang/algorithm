@@ -7,7 +7,7 @@ package algorithm.datastructures.elementary;
  * 包含回文数、回文字符串、回文链表的检测算法
  *
  * @author magicliang
- * date: 2025-09-05 14:44
+ *         date: 2025-09-05 14:44
  */
 public class PalindromeAlgorithms {
 
@@ -23,30 +23,30 @@ public class PalindromeAlgorithms {
         if (num < 0) {
             return false;
         }
-        
+
         // 单位数都是回文数
         if (num < 10) {
             return true;
         }
-        
+
         Stack<Integer> stack = new ArrayStack<>();
         int originalNum = num;
-        
+
         // 将每一位数字压入栈中
         while (num > 0) {
             stack.push(num % 10);
             num /= 10;
         }
-        
+
         // 重新构造数字并与原数字比较
         int reconstructedNum = 0;
         int multiplier = 1;
-        
+
         while (!stack.isEmpty()) {
             reconstructedNum += stack.pop() * multiplier;
             multiplier *= 10;
         }
-        
+
         return originalNum == reconstructedNum;
     }
 
@@ -61,32 +61,32 @@ public class PalindromeAlgorithms {
         if (str == null || str.length() <= 1) {
             return true;
         }
-        
+
         // 转换为小写并去除非字母数字字符
         String cleanStr = str.toLowerCase().replaceAll("[^a-z0-9]", "");
-        
+
         if (cleanStr.length() <= 1) {
             return true;
         }
-        
+
         Stack<Character> stack = new LinkedStack<>();
         int length = cleanStr.length();
         int mid = length / 2;
-        
+
         // 将前半部分字符压入栈中
         for (int i = 0; i < mid; i++) {
             stack.push(cleanStr.charAt(i));
         }
-        
+
         // 从中间位置开始比较（奇数长度时跳过中间字符）
         int startIndex = length % 2 == 0 ? mid : mid + 1;
-        
+
         for (int i = startIndex; i < length; i++) {
             if (stack.isEmpty() || !stack.pop().equals(cleanStr.charAt(i))) {
                 return false;
             }
         }
-        
+
         return stack.isEmpty();
     }
 
@@ -101,16 +101,16 @@ public class PalindromeAlgorithms {
         if (head == null || head.next == null) {
             return true;
         }
-        
+
         Stack<Integer> stack = new ArrayStack<>();
         ListNode current = head;
-        
+
         // 第一次遍历：将所有值压入栈中
         while (current != null) {
             stack.push(current.val);
             current = current.next;
         }
-        
+
         // 第二次遍历：与栈中弹出的值比较
         current = head;
         while (current != null && !stack.isEmpty()) {
@@ -119,7 +119,7 @@ public class PalindromeAlgorithms {
             }
             current = current.next;
         }
-        
+
         return stack.isEmpty() && current == null;
     }
 
@@ -134,23 +134,23 @@ public class PalindromeAlgorithms {
         if (head == null || head.next == null) {
             return true;
         }
-        
+
         // 使用快慢指针找到链表中点
         ListNode slow = head;
         ListNode fast = head;
-        
+
         while (fast != null && fast.next != null) {
             slow = slow.next;
             fast = fast.next.next;
         }
-        
+
         // 将后半部分压入栈
         Stack<Integer> stack = new LinkedStack<>();
         while (slow != null) {
             stack.push(slow.val);
             slow = slow.next;
         }
-        
+
         // 与前半部分比较
         ListNode current = head;
         while (!stack.isEmpty()) {
@@ -159,7 +159,7 @@ public class PalindromeAlgorithms {
             }
             current = current.next;
         }
-        
+
         return true;
     }
 
@@ -174,21 +174,21 @@ public class PalindromeAlgorithms {
         if (str == null || str.isEmpty()) {
             return str;
         }
-        
+
         Stack<Character> stack = new ArrayStack<>();
-        
+
         // 将字符串的每个字符压入栈中
         for (char c : str.toCharArray()) {
             stack.push(c);
         }
-        
+
         StringBuilder result = new StringBuilder(str);
-        
+
         // 弹出栈中字符拼接到原字符串后面
         while (!stack.isEmpty()) {
             result.append(stack.pop());
         }
-        
+
         return result.toString();
     }
 
@@ -203,9 +203,9 @@ public class PalindromeAlgorithms {
         if (str == null || str.isEmpty()) {
             return true;
         }
-        
+
         Stack<Character> stack = new LinkedStack<>();
-        
+
         for (char c : str.toCharArray()) {
             switch (c) {
                 case '(':
@@ -233,7 +233,7 @@ public class PalindromeAlgorithms {
                     break;
             }
         }
-        
+
         return stack.isEmpty();
     }
 
@@ -241,20 +241,22 @@ public class PalindromeAlgorithms {
      * 简单的链表节点定义
      */
     public static class ListNode {
+
         Integer val;
         ListNode next;
-        
-        ListNode() {}
-        
+
+        ListNode() {
+        }
+
         ListNode(Integer val) {
             this.val = val;
         }
-        
+
         ListNode(Integer val, ListNode next) {
             this.val = val;
             this.next = next;
         }
-        
+
         /**
          * 便于测试的工具方法：从数组创建链表
          */
@@ -262,30 +264,30 @@ public class PalindromeAlgorithms {
             if (arr == null || arr.length == 0) {
                 return null;
             }
-            
+
             ListNode head = new ListNode(arr[0]);
             ListNode current = head;
-            
+
             for (int i = 1; i < arr.length; i++) {
                 current.next = new ListNode(arr[i]);
                 current = current.next;
             }
-            
+
             return head;
         }
-        
+
         /**
          * 便于测试的工具方法：将链表转换为数组
          */
         public Integer[] toArray() {
             java.util.List<Integer> list = new java.util.ArrayList<>();
             ListNode current = this;
-            
+
             while (current != null) {
                 list.add(current.val);
                 current = current.next;
             }
-            
+
             return list.toArray(new Integer[0]);
         }
     }

@@ -1,7 +1,13 @@
 package algorithm.foundations.divideconquer;
 
-import java.util.*;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.Stack;
 
 /**
  * 凸包算法 - 分治法实现。
@@ -37,70 +43,6 @@ import java.util.Arrays;
 public class ConvexHull {
 
     /**
-     * 二维点类。
-     */
-    public static class Point {
-        public final double x;
-        public final double y;
-
-        public Point(double x, double y) {
-            this.x = x;
-            this.y = y;
-        }
-
-        /**
-         * 计算两点间距离。
-         */
-        public double distanceTo(Point other) {
-            double dx = this.x - other.x;
-            double dy = this.y - other.y;
-            return Math.sqrt(dx * dx + dy * dy);
-        }
-
-        /**
-         * 计算向量叉积，用于判断三点的方向关系。
-         * 返回值 > 0：逆时针
-         * 返回值 < 0：顺时针  
-         * 返回值 = 0：共线
-         */
-        public static double crossProduct(Point a, Point b, Point c) {
-            return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
-        }
-
-        /**
-         * 判断点c是否在点a的左侧（相对于向量ab）。
-         */
-        public static boolean isLeftTurn(Point a, Point b, Point c) {
-            return crossProduct(a, b, c) > 0;
-        }
-
-        /**
-         * 判断点c是否在点a的右侧（相对于向量ab）。
-         */
-        public static boolean isRightTurn(Point a, Point b, Point c) {
-            return crossProduct(a, b, c) < 0;
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj == null || getClass() != obj.getClass()) return false;
-            Point point = (Point) obj;
-            return Math.abs(x - point.x) < 1e-9 && Math.abs(y - point.y) < 1e-9;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(x, y);
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%.1f, %.1f)", x, y);
-        }
-    }
-
-    /**
      * 分治法求凸包主入口（数组版本）。
      * 这是为了兼容测试文件而提供的适配器方法。
      * 注意：由于分治算法实现复杂，这里使用Graham扫描算法作为备选实现。
@@ -123,7 +65,7 @@ public class ConvexHull {
         // 转换为List并使用Graham扫描算法
         List<Point> pointList = Arrays.asList(points);
         List<Point> hullList = grahamScan(pointList);
-        
+
         // 转换回数组
         return hullList.toArray(new Point[0]);
     }
@@ -202,20 +144,20 @@ public class ConvexHull {
      */
     private static List<Point> handleSmallCase(List<Point> points) {
         int n = points.size();
-        
+
         if (n == 1) {
             return new ArrayList<>(points);
         }
-        
+
         if (n == 2) {
             return new ArrayList<>(points);
         }
-        
+
         // n == 3的情况
         Point p1 = points.get(0);
         Point p2 = points.get(1);
         Point p3 = points.get(2);
-        
+
         // 检查三点是否共线
         double cross = Point.crossProduct(p1, p2, p3);
         if (Math.abs(cross) < 1e-9) {
@@ -227,7 +169,7 @@ public class ConvexHull {
             }
             return result;
         }
-        
+
         // 按逆时针顺序排列三个点
         List<Point> result = new ArrayList<>();
         if (cross > 0) {
@@ -241,7 +183,7 @@ public class ConvexHull {
             result.add(p3);
             result.add(p2);
         }
-        
+
         return result;
     }
 
@@ -256,8 +198,12 @@ public class ConvexHull {
      * @return 合并后的凸包
      */
     private static List<Point> mergeHulls(List<Point> leftHull, List<Point> rightHull) {
-        if (leftHull.isEmpty()) return rightHull;
-        if (rightHull.isEmpty()) return leftHull;
+        if (leftHull.isEmpty()) {
+            return rightHull;
+        }
+        if (rightHull.isEmpty()) {
+            return leftHull;
+        }
         if (leftHull.size() == 1 && rightHull.size() == 1) {
             List<Point> result = new ArrayList<>(leftHull);
             result.addAll(rightHull);
@@ -280,20 +226,24 @@ public class ConvexHull {
 
         // 构造合并后的凸包
         List<Point> result = new ArrayList<>();
-        
+
         // 添加左凸包从下公切线到上公切线的部分
         int i = lowerLeft;
         while (true) {
             result.add(leftHull.get(i));
-            if (i == upperLeft) break;
+            if (i == upperLeft) {
+                break;
+            }
             i = (i + 1) % leftHull.size();
         }
-        
+
         // 添加右凸包从上公切线到下公切线的部分
         i = upperRight;
         while (true) {
             result.add(rightHull.get(i));
-            if (i == lowerRight) break;
+            if (i == lowerRight) {
+                break;
+            }
             i = (i + 1) % rightHull.size();
         }
 
@@ -329,25 +279,25 @@ public class ConvexHull {
     /**
      * 找到两个凸包的上公切线。
      */
-    private static int[] findUpperTangent(List<Point> leftHull, List<Point> rightHull, 
-                                        int leftStart, int rightStart) {
+    private static int[] findUpperTangent(List<Point> leftHull, List<Point> rightHull,
+            int leftStart, int rightStart) {
         int leftIdx = leftStart;
         int rightIdx = rightStart;
         boolean done = false;
 
         while (!done) {
             done = true;
-            
+
             // 调整右侧点
-            while (Point.isLeftTurn(leftHull.get(leftIdx), rightHull.get(rightIdx), 
-                                  rightHull.get((rightIdx + 1) % rightHull.size()))) {
+            while (Point.isLeftTurn(leftHull.get(leftIdx), rightHull.get(rightIdx),
+                    rightHull.get((rightIdx + 1) % rightHull.size()))) {
                 rightIdx = (rightIdx + 1) % rightHull.size();
                 done = false;
             }
-            
+
             // 调整左侧点
-            while (Point.isRightTurn(rightHull.get(rightIdx), leftHull.get(leftIdx), 
-                                   leftHull.get((leftIdx - 1 + leftHull.size()) % leftHull.size()))) {
+            while (Point.isRightTurn(rightHull.get(rightIdx), leftHull.get(leftIdx),
+                    leftHull.get((leftIdx - 1 + leftHull.size()) % leftHull.size()))) {
                 leftIdx = (leftIdx - 1 + leftHull.size()) % leftHull.size();
                 done = false;
             }
@@ -359,25 +309,25 @@ public class ConvexHull {
     /**
      * 找到两个凸包的下公切线。
      */
-    private static int[] findLowerTangent(List<Point> leftHull, List<Point> rightHull, 
-                                        int leftStart, int rightStart) {
+    private static int[] findLowerTangent(List<Point> leftHull, List<Point> rightHull,
+            int leftStart, int rightStart) {
         int leftIdx = leftStart;
         int rightIdx = rightStart;
         boolean done = false;
 
         while (!done) {
             done = true;
-            
+
             // 调整右侧点
-            while (Point.isRightTurn(leftHull.get(leftIdx), rightHull.get(rightIdx), 
-                                   rightHull.get((rightIdx - 1 + rightHull.size()) % rightHull.size()))) {
+            while (Point.isRightTurn(leftHull.get(leftIdx), rightHull.get(rightIdx),
+                    rightHull.get((rightIdx - 1 + rightHull.size()) % rightHull.size()))) {
                 rightIdx = (rightIdx - 1 + rightHull.size()) % rightHull.size();
                 done = false;
             }
-            
+
             // 调整左侧点
-            while (Point.isLeftTurn(rightHull.get(rightIdx), leftHull.get(leftIdx), 
-                                  leftHull.get((leftIdx + 1) % leftHull.size()))) {
+            while (Point.isLeftTurn(rightHull.get(rightIdx), leftHull.get(leftIdx),
+                    leftHull.get((leftIdx + 1) % leftHull.size()))) {
                 leftIdx = (leftIdx + 1) % leftHull.size();
                 done = false;
             }
@@ -400,11 +350,11 @@ public class ConvexHull {
 
         // 找到最下方的点（y最小，y相同时x最小）
         Point pivot = points.stream()
-            .min((p1, p2) -> {
-                int cmp = Double.compare(p1.y, p2.y);
-                return cmp != 0 ? cmp : Double.compare(p1.x, p2.x);
-            })
-            .orElse(points.get(0));
+                .min((p1, p2) -> {
+                    int cmp = Double.compare(p1.y, p2.y);
+                    return cmp != 0 ? cmp : Double.compare(p1.x, p2.x);
+                })
+                .orElse(points.get(0));
 
         // 按极角排序
         List<Point> sortedPoints = new ArrayList<>(points);
@@ -421,7 +371,7 @@ public class ConvexHull {
         // Graham扫描
         Stack<Point> stack = new Stack<>();
         stack.push(pivot);
-        
+
         for (Point point : sortedPoints) {
             while (stack.size() > 1) {
                 Point top = stack.pop();
@@ -444,17 +394,19 @@ public class ConvexHull {
      * @return 面积
      */
     public static double calculateArea(List<Point> hull) {
-        if (hull.size() < 3) return 0;
+        if (hull.size() < 3) {
+            return 0;
+        }
 
         double area = 0;
         int n = hull.size();
-        
+
         for (int i = 0; i < n; i++) {
             Point current = hull.get(i);
             Point next = hull.get((i + 1) % n);
             area += current.x * next.y - next.x * current.y;
         }
-        
+
         return Math.abs(area) / 2.0;
     }
 
@@ -465,17 +417,88 @@ public class ConvexHull {
      * @return 周长
      */
     public static double calculatePerimeter(List<Point> hull) {
-        if (hull.size() < 2) return 0;
+        if (hull.size() < 2) {
+            return 0;
+        }
 
         double perimeter = 0;
         int n = hull.size();
-        
+
         for (int i = 0; i < n; i++) {
             Point current = hull.get(i);
             Point next = hull.get((i + 1) % n);
             perimeter += current.distanceTo(next);
         }
-        
+
         return perimeter;
+    }
+
+    /**
+     * 二维点类。
+     */
+    public static class Point {
+
+        public final double x;
+        public final double y;
+
+        public Point(double x, double y) {
+            this.x = x;
+            this.y = y;
+        }
+
+        /**
+         * 计算向量叉积，用于判断三点的方向关系。
+         * 返回值 > 0：逆时针
+         * 返回值 < 0：顺时针
+         * 返回值 = 0：共线
+         */
+        public static double crossProduct(Point a, Point b, Point c) {
+            return (b.x - a.x) * (c.y - a.y) - (b.y - a.y) * (c.x - a.x);
+        }
+
+        /**
+         * 判断点c是否在点a的左侧（相对于向量ab）。
+         */
+        public static boolean isLeftTurn(Point a, Point b, Point c) {
+            return crossProduct(a, b, c) > 0;
+        }
+
+        /**
+         * 判断点c是否在点a的右侧（相对于向量ab）。
+         */
+        public static boolean isRightTurn(Point a, Point b, Point c) {
+            return crossProduct(a, b, c) < 0;
+        }
+
+        /**
+         * 计算两点间距离。
+         */
+        public double distanceTo(Point other) {
+            double dx = this.x - other.x;
+            double dy = this.y - other.y;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || getClass() != obj.getClass()) {
+                return false;
+            }
+            Point point = (Point) obj;
+            return Math.abs(x - point.x) < 1e-9 && Math.abs(y - point.y) < 1e-9;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(x, y);
+        }
+
+        @Override
+        public String toString() {
+            return String.format("(%.1f, %.1f)", x, y);
+        }
     }
 }

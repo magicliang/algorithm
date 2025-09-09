@@ -304,34 +304,34 @@ public class BinarySearchTree {
 
     /**
      * 纯迭代删除方法 - 避免递归栈溢出的高效实现
-     * 
+     *
      * 算法特点：
      * - 实现方式：纯迭代，无递归调用
      * - 时间复杂度：O(h)，其中h是树的高度
      * - 空间复杂度：O(1)，只使用常数个额外变量
      * - 适用场景：深度较大的树，避免栈溢出风险
-     * 
+     *
      * 核心思想：
      * 1. 迭代搜索目标节点，同时记录父节点
      * 2. 手动处理所有删除情况
      * 3. 显式维护父子关系
-     * 
+     *
      * 删除策略详解：
      * - 度为0/1：直接用子节点替换目标节点
      * - 度为2：手动找到右子树最小值，替换后删除最小值节点
-     * 
+     *
      * 关键技术点：
      * - 使用prev指针维护父子关系
      * - 手动处理最小值节点的删除（区分是否为右子树根）
      * - 特殊处理根节点删除情况
-     * 
+     *
      * 测试用例覆盖：
      * - 删除叶子节点：remove_DeleteLeafNode_Test
      * - 删除单子节点：remove_DeleteSingleChildNode_Test
      * - 删除双子节点：remove_DeleteDoubleChildNode_Test
      * - 删除根节点：remove_DeleteRootNode_Test
      * - 删除不存在节点：remove_DeleteNonExistentNode_Test
-     * 
+     *
      * @param root 树的根节点
      * @param val 要删除的值
      * @return 删除后的树根节点
@@ -385,20 +385,20 @@ public class BinarySearchTree {
                 root = newChild; // 直接更新根节点
                 return root;
             }
-            
+
             // 一般情况：更新父节点的子指针
             if (prev.left == toRemove) {
                 prev.left = newChild; // 目标节点是父节点的左子节点
             } else {
                 prev.right = newChild; // 目标节点是父节点的右子节点
             }
-        } else { 
+        } else {
             // 情况3：度为2的节点（复杂情况）
             // toRemove.left != null && toRemove.right != null
             // 两个左右孩子都不等于 null，则我只要把右孩子的最小值取过来，然后删除那个节点就行了，再用遍历的方法再来一次，是 root 也不怕
 
             // 策略：找到右子树最小值，用其替换目标节点值，然后删除最小值节点
-            
+
             // 寻找右子树最小值节点及其父节点
             // 开始右折左回
             Node minParent = toRemove; // 最小值节点的父节点
@@ -423,46 +423,46 @@ public class BinarySearchTree {
                 // 子树替换子树：删除 \ 的右节点，用右当右
                 minParent.right = minChild.right;
             }
-            
+
             // 用最小值替换目标节点的值
             // 在顶部替换
             toRemove.val = minChild.val;
         }
-        
+
         return root; // 返回可能更新的根节点
     }
 
     /**
      * 混合删除方法 - 迭代搜索 + 递归删除的优化实现
-     * 
+     *
      * 算法特点：
      * - 实现方式：混合策略，结合两种方法优点
      * - 搜索阶段：迭代实现，避免不必要的递归开销
      * - 删除阶段：对度为2节点使用递归，简化复杂逻辑
      * - 时间复杂度：O(h)，其中h是树的高度
      * - 空间复杂度：O(h)，最坏情况下递归删除最小值的栈深度
-     * 
+     *
      * 设计思想：
      * 1. 搜索用迭代：高效定位，无栈开销
      * 2. 简单删除用迭代：度≤1的情况直接处理
      * 3. 复杂删除用递归：度=2的情况委托给递归方法
-     * 
+     *
      * 优势分析：
      * - 相比纯递归：减少了搜索阶段的栈开销
      * - 相比纯迭代：简化了度为2节点的删除逻辑
      * - 代码可读性：逻辑清晰，易于理解和维护
-     * 
+     *
      * 适用场景：
      * - 平衡考虑性能和代码简洁性
      * - 树深度中等，既要避免过多递归又要保持代码清晰
-     * 
+     *
      * 测试用例覆盖：
      * - 删除叶子节点：remove2_DeleteLeafNode_Test
      * - 删除单子节点：remove2_DeleteSingleChildNode_Test
      * - 删除双子节点：remove2_DeleteDoubleChildNode_Test
      * - 删除根节点：remove2_DeleteRootNode_Test
      * - 删除不存在节点：remove2_DeleteNonExistentNode_Test
-     * 
+     *
      * @param root 树的根节点
      * @param val 要删除的值
      * @return 删除后的树根节点
@@ -516,7 +516,7 @@ public class BinarySearchTree {
                 root = newChild;
                 return root;
             }
-            
+
             // 一般情况：更新父节点指针
             if (prev.left == toRemove) {
                 prev.left = newChild;
@@ -524,7 +524,7 @@ public class BinarySearchTree {
                 prev.right = newChild;
             }
 
-        } else { 
+        } else {
             // 情况3：度为2的节点 - 使用递归处理（简化逻辑）
             // toRemove.left != null && toRemove.right != null
             // 两个左右孩子都不等于 null，则我只要把右孩子的最小值取过来，然后删除那个节点就行了，再用遍历的方法再来一次，是 root 也不怕
@@ -535,36 +535,36 @@ public class BinarySearchTree {
             // 递归删除最小值节点（利用递归的简洁性）
             toRemove.right = remove2(toRemove.right, min);
         }
-        
+
         return root; // 返回可能更新的根节点
     }
 
     /**
      * 递归删除方法 - 简洁优雅的纯递归实现
-     * 
+     *
      * 算法特点：
      * - 实现方式：纯递归，代码简洁优雅
      * - 时间复杂度：O(h)，其中h是树的高度
      * - 空间复杂度：O(h)，递归栈深度
      * - 适用场景：树高度不大，追求代码简洁性
-     * 
+     *
      * 核心思想：
      * 1. 递归搜索目标节点
      * 2. 找到后根据节点度数分类处理
      * 3. 自动维护父子关系（通过返回值重新连接）
-     * 
+     *
      * 删除策略分析：
      * - 度为0（叶子节点）：直接删除，返回null
      * - 度为1（单子节点）：用唯一子节点替换
      * - 度为2（双子节点）：用右子树最小值替换，递归删除最小值节点
-     * 
+     *
      * 测试用例覆盖：
      * - 删除叶子节点：removeRecursive_DeleteLeafNode_Test
-     * - 删除单子节点：removeRecursive_DeleteSingleChildNode_Test  
+     * - 删除单子节点：removeRecursive_DeleteSingleChildNode_Test
      * - 删除双子节点：removeRecursive_DeleteDoubleChildNode_Test
      * - 删除根节点：removeRecursive_DeleteRootNode_Test
      * - 删除不存在节点：removeRecursive_DeleteNonExistentNode_Test
-     * 
+     *
      * @param root 当前子树的根节点
      * @param val 要删除的值
      * @return 删除后的子树根节点

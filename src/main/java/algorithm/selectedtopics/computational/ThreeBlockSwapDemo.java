@@ -32,11 +32,14 @@ public class ThreeBlockSwapDemo {
 
     /**
      * 标准化旋转：将第一段移到最后
+     *
      * @param array 向量数组
      * @param segmentLengths 每一段的长度数组
      */
     public static void rotateVectorSegments(char[] array, int[] segmentLengths) {
-        if (segmentLengths.length < 2) return;
+        if (segmentLengths.length < 2) {
+            return;
+        }
 
         // 计算第一段长度
         int firstLen = segmentLengths[0];

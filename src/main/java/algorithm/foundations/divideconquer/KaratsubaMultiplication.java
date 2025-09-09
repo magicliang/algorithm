@@ -1,7 +1,5 @@
 package algorithm.foundations.divideconquer;
 
-import java.util.*;
-
 /**
  * 大整数乘法算法 - Karatsuba算法实现。
  *
@@ -17,7 +15,7 @@ import java.util.*;
  * 传统方法需要计算4个乘积：x₁y₁, x₁y₀, x₀y₁, x₀y₀
  * Karatsuba 算法巧妙地只需要3个乘积：
  * 1. z₂ = x₁ × y₁
- * 2. z₀ = x₀ × y₀  
+ * 2. z₀ = x₀ × y₀
  * 3. z₁ = (x₁ + x₀) × (y₁ + y₀) - z₂ - z₀
  *
  * 最终结果：x × y = z₂ × 10^n + z₁ × 10^(n/2) + z₀
@@ -63,7 +61,7 @@ public class KaratsubaMultiplication {
 
         // 调用递归算法
         String result = karatsubaMultiplyRec(num1, num2);
-        
+
         // 去除结果中的前导0
         return removeLeadingZeros(result);
     }
@@ -109,7 +107,7 @@ public class KaratsubaMultiplication {
         // 治：递归计算三个乘积
         String z2 = karatsubaMultiplyRec(x1, y1);                    // z₂ = x₁ × y₁
         String z0 = karatsubaMultiplyRec(x0, y0);                    // z₀ = x₀ × y₀
-        
+
         String sum1 = addStrings(x1, x0);                            // x₁ + x₀
         String sum2 = addStrings(y1, y0);                            // y₁ + y₀
         String z1_temp = karatsubaMultiplyRec(sum1, sum2);           // (x₁ + x₀) × (y₁ + y₀)
@@ -248,8 +246,12 @@ public class KaratsubaMultiplication {
         num1 = removeLeadingZeros(num1);
         num2 = removeLeadingZeros(num2);
 
-        if (num1.length() < num2.length()) return -1;
-        if (num1.length() > num2.length()) return 1;
+        if (num1.length() < num2.length()) {
+            return -1;
+        }
+        if (num1.length() > num2.length()) {
+            return 1;
+        }
 
         return num1.compareTo(num2);
     }

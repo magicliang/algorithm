@@ -20,6 +20,7 @@ public class LinkedQueue<T> implements Queue<T> {
     private Node<T> head;  // 队列头部（出队端）
     private Node<T> tail;  // 队列尾部（入队端）
     private int size;      // 当前元素数量
+
     public LinkedQueue() {
         this.head = null;
         this.tail = null;

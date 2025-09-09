@@ -12,13 +12,13 @@ import java.util.List;
  *
  * 解题思路：
  * 1. 约束分析：
- *    - 位置约束：骑士只能按照马的走法移动（8个可能方向）。
- *    - 访问约束：每个格子只能访问一次，使用 visited[row][col] 记录格子是否已被访问。
- *    - 路径约束：需要访问所有 N×N 个格子，使用 moveCount 记录当前已访问的格子数。
+ * - 位置约束：骑士只能按照马的走法移动（8个可能方向）。
+ * - 访问约束：每个格子只能访问一次，使用 visited[row][col] 记录格子是否已被访问。
+ * - 路径约束：需要访问所有 N×N 个格子，使用 moveCount 记录当前已访问的格子数。
  * 2. 算法选择：使用回溯法（Backtracking）进行深度优先搜索。
  * 3. 剪枝策略：
- *    - 边界剪枝：检查下一步是否越界。
- *    - 访问剪枝：检查下一步的格子是否已被访问。
+ * - 边界剪枝：检查下一步是否越界。
+ * - 访问剪枝：检查下一步的格子是否已被访问。
  * 4. 优化策略：Warnsdorff启发式 - 优先选择可达格子数最少的下一步（减少搜索空间）。
  *
  * 时间复杂度：O(8^(N²))，最坏情况下需要尝试每个位置的8个方向
@@ -41,15 +41,15 @@ public class KnightTour {
     public static void main(String[] args) {
         // 测试不同大小的棋盘
         int[] testSizes = {5, 6, 8};
-        
+
         for (int n : testSizes) {
             System.out.println("=== 测试 " + n + "×" + n + " 棋盘 ===");
             long startTime = System.currentTimeMillis();
-            
+
             int[][] solution = solveKnightTour(n, 0, 0);
-            
+
             long endTime = System.currentTimeMillis();
-            
+
             if (solution != null) {
                 System.out.println("找到解！耗时：" + (endTime - startTime) + "ms");
                 printSolution(solution);
@@ -81,14 +81,14 @@ public class KnightTour {
 
         // 1. 初始化访问状态数组
         boolean[][] visited = new boolean[n][n];
-        
+
         // 2. 初始化路径记录数组，solution[i][j] 表示位置 (i,j) 是第几步访问的
         int[][] solution = new int[n][n];
-        
+
         // 3. 标记起始位置
         visited[startX][startY] = true;
         solution[startX][startY] = 1; // 第1步
-        
+
         // 4. 调用回溯方法，从第2步开始（moveCount = 2）
         if (backtrack(n, startX, startY, 2, visited, solution)) {
             return solution; // 找到解
@@ -102,14 +102,14 @@ public class KnightTour {
      * 步骤：
      * 1. 递归基（Base Case）：如果已访问的格子数等于总格子数，返回 true。
      * 2. 递归步骤（Recursive Step）：尝试骑士的8个可能移动。
-     *    a. 遍历8个移动方向。
-     *    b. 计算下一步的位置坐标。
-     *    c. 剪枝：检查下一步是否有效（不越界且未访问）。
-     *    d. 如果有效：
-     *       i.   更新状态：标记新位置为已访问，记录步数。
-     *       ii.  递归调用，继续寻找下一步。
-     *       iii. 如果递归成功，返回 true。
-     *       iv.  回溯（Backtrack）：撤销当前步的标记。
+     * a. 遍历8个移动方向。
+     * b. 计算下一步的位置坐标。
+     * c. 剪枝：检查下一步是否有效（不越界且未访问）。
+     * d. 如果有效：
+     * i.   更新状态：标记新位置为已访问，记录步数。
+     * ii.  递归调用，继续寻找下一步。
+     * iii. 如果递归成功，返回 true。
+     * iv.  回溯（Backtrack）：撤销当前步的标记。
      * 3. 如果所有方向都尝试失败，返回 false。
      *
      * @param n 棋盘大小
@@ -120,8 +120,8 @@ public class KnightTour {
      * @param solution 路径记录数组
      * @return 如果能完成巡游返回 true，否则返回 false
      */
-    private static boolean backtrack(int n, int currentX, int currentY, int moveCount, 
-                                   boolean[][] visited, int[][] solution) {
+    private static boolean backtrack(int n, int currentX, int currentY, int moveCount,
+            boolean[][] visited, int[][] solution) {
         // 1. 递归基：所有格子都已访问
         if (moveCount > n * n) {
             return true; // 成功完成巡游
@@ -187,10 +187,10 @@ public class KnightTour {
 
         boolean[][] visited = new boolean[n][n];
         int[][] solution = new int[n][n];
-        
+
         visited[startX][startY] = true;
         solution[startX][startY] = 1;
-        
+
         if (backtrackWithHeuristic(n, startX, startY, 2, visited, solution)) {
             return solution;
         } else {
@@ -201,8 +201,8 @@ public class KnightTour {
     /**
      * 使用Warnsdorff启发式的回溯方法。
      */
-    private static boolean backtrackWithHeuristic(int n, int currentX, int currentY, int moveCount, 
-                                                boolean[][] visited, int[][] solution) {
+    private static boolean backtrackWithHeuristic(int n, int currentX, int currentY, int moveCount,
+            boolean[][] visited, int[][] solution) {
         if (moveCount > n * n) {
             return true;
         }
@@ -212,7 +212,7 @@ public class KnightTour {
         for (int i = 0; i < 8; i++) {
             int nextX = currentX + MOVE_X[i];
             int nextY = currentY + MOVE_Y[i];
-            
+
             if (isValidMove(n, nextX, nextY, visited)) {
                 int accessibility = getAccessibility(n, nextX, nextY, visited);
                 validMoves.add(new Move(nextX, nextY, accessibility));
@@ -254,20 +254,6 @@ public class KnightTour {
     }
 
     /**
-     * 表示一个移动的内部类。
-     */
-    private static class Move {
-        int x, y;
-        int accessibility; // 可达位置数
-
-        Move(int x, int y, int accessibility) {
-            this.x = x;
-            this.y = y;
-            this.accessibility = accessibility;
-        }
-    }
-
-    /**
      * 打印骑士巡游的解。
      *
      * @param solution 路径矩阵，每个位置记录访问顺序
@@ -275,12 +261,27 @@ public class KnightTour {
     private static void printSolution(int[][] solution) {
         int n = solution.length;
         System.out.println("骑士巡游路径（数字表示访问顺序）：");
-        
+
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 System.out.printf("%3d ", solution[i][j]);
             }
             System.out.println();
+        }
+    }
+
+    /**
+     * 表示一个移动的内部类。
+     */
+    private static class Move {
+
+        int x, y;
+        int accessibility; // 可达位置数
+
+        Move(int x, int y, int accessibility) {
+            this.x = x;
+            this.y = y;
+            this.accessibility = accessibility;
         }
     }
 }

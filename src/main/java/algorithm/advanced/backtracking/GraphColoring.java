@@ -12,9 +12,9 @@ import java.util.List;
  *
  * 解题思路：
  * 1. 约束分析：
- *    - 相邻约束：相邻的顶点不能使用相同的颜色。
- *    - 颜色约束：每个顶点只能选择 k 种颜色中的一种。
- *    - 使用邻接表表示图结构，colors[vertex] 记录顶点 vertex 当前使用的颜色。
+ * - 相邻约束：相邻的顶点不能使用相同的颜色。
+ * - 颜色约束：每个顶点只能选择 k 种颜色中的一种。
+ * - 使用邻接表表示图结构，colors[vertex] 记录顶点 vertex 当前使用的颜色。
  * 2. 算法选择：使用回溯法（Backtracking）进行深度优先搜索。
  * 3. 剪枝策略：在给顶点着色时，检查所有相邻顶点的颜色，如果冲突则跳过该颜色。
  * 4. 优化策略：按顶点度数降序排列，优先处理度数高的顶点（启发式优化）。
@@ -44,7 +44,7 @@ public class GraphColoring {
         addEdge(graph1, 0, 1);
         addEdge(graph1, 1, 2);
         addEdge(graph1, 2, 0);
-        
+
         int colors1 = 3;
         int[] result1 = solveGraphColoring(graph1, colors1);
         if (result1 != null) {
@@ -68,7 +68,7 @@ public class GraphColoring {
         addEdge(graph2, 1, 3);
         addEdge(graph2, 2, 3);
         addEdge(graph2, 3, 4);
-        
+
         int colors2 = 3;
         int[] result2 = solveGraphColoring(graph2, colors2);
         if (result2 != null) {
@@ -116,15 +116,15 @@ public class GraphColoring {
      * 步骤：
      * 1. 递归基（Base Case）：如果所有顶点都已着色，返回 true。
      * 2. 递归步骤（Recursive Step）：给当前顶点尝试着色。
-     *    a. 遍历所有可用颜色（0 到 k-1）。
-     *    b. 剪枝：检查当前颜色是否与相邻顶点冲突。
-     *       - 遍历当前顶点的所有邻居。
-     *       - 如果邻居已着色且颜色相同，则跳过当前颜色。
-     *    c. 如果不冲突：
-     *       i.   更新状态：给当前顶点着色。
-     *       ii.  递归调用，处理下一个顶点。
-     *       iii. 如果递归成功，返回 true。
-     *       iv.  回溯（Backtrack）：撤销当前顶点的着色。
+     * a. 遍历所有可用颜色（0 到 k-1）。
+     * b. 剪枝：检查当前颜色是否与相邻顶点冲突。
+     * - 遍历当前顶点的所有邻居。
+     * - 如果邻居已着色且颜色相同，则跳过当前颜色。
+     * c. 如果不冲突：
+     * i.   更新状态：给当前顶点着色。
+     * ii.  递归调用，处理下一个顶点。
+     * iii. 如果递归成功，返回 true。
+     * iv.  回溯（Backtrack）：撤销当前顶点的着色。
      * 3. 如果所有颜色都尝试失败，返回 false。
      *
      * @param graph 图的邻接表表示

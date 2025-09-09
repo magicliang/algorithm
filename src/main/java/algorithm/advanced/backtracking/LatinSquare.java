@@ -12,14 +12,14 @@ import java.util.List;
  *
  * 解题思路：
  * 1. 约束分析：
- *    - 行约束：每一行的数字 1-N 不能重复，使用 rowUsed[row][num] 记录第 row 行是否已使用数字 num。
- *    - 列约束：每一列的数字 1-N 不能重复，使用 colUsed[col][num] 记录第 col 列是否已使用数字 num。
- *    - 与数独不同，拉丁方阵没有九宫格约束，只有行列约束。
+ * - 行约束：每一行的数字 1-N 不能重复，使用 rowUsed[row][num] 记录第 row 行是否已使用数字 num。
+ * - 列约束：每一列的数字 1-N 不能重复，使用 colUsed[col][num] 记录第 col 列是否已使用数字 num。
+ * - 与数独不同，拉丁方阵没有九宫格约束，只有行列约束。
  * 2. 算法选择：使用回溯法（Backtracking）进行深度优先搜索。
  * 3. 剪枝策略：在每个位置尝试填入数字时，检查行、列约束。如果冲突，则跳过该数字。
  * 4. 优化策略：
- *    - 预填充第一行和第一列以减少搜索空间。
- *    - 使用启发式方法优先填充约束最多的位置。
+ * - 预填充第一行和第一列以减少搜索空间。
+ * - 使用启发式方法优先填充约束最多的位置。
  *
  * 时间复杂度：O(N^(N²))，最坏情况下需要尝试每个位置的N种可能
  * 空间复杂度：O(N²)，用于存储约束数组和方阵
@@ -37,15 +37,15 @@ public class LatinSquare {
     public static void main(String[] args) {
         // 测试不同大小的拉丁方阵
         int[] testSizes = {3, 4, 5};
-        
+
         for (int n : testSizes) {
             System.out.println("=== 测试 " + n + "×" + n + " 拉丁方阵 ===");
             long startTime = System.currentTimeMillis();
-            
+
             int[][] solution = solveLatinSquare(n);
-            
+
             long endTime = System.currentTimeMillis();
-            
+
             if (solution != null) {
                 System.out.println("找到解！耗时：" + (endTime - startTime) + "ms");
                 printSolution(solution);
@@ -86,7 +86,7 @@ public class LatinSquare {
 
         // 1. 初始化方阵，0 表示未填充
         int[][] square = new int[n][n];
-        
+
         // 2. 初始化约束数组
         // rowUsed[i][num] 表示第 i 行是否已使用数字 num+1（num 范围 0 到 n-1）
         boolean[][] rowUsed = new boolean[n][n];
@@ -114,13 +114,13 @@ public class LatinSquare {
      * 1. 递归基（Base Case）：如果所有位置都已填充，返回 true。
      * 2. 位置管理：计算下一个要填充的位置。
      * 3. 递归步骤（Recursive Step）：在当前位置尝试填入数字 1-N。
-     *    a. 遍历所有可能的数字（1 到 N）。
-     *    b. 剪枝：检查当前数字是否与行、列约束冲突。
-     *    c. 如果不冲突：
-     *       i.   更新状态：在方阵中填入数字，更新约束数组。
-     *       ii.  递归调用，处理下一个位置。
-     *       iii. 如果递归成功，返回 true。
-     *       iv.  回溯（Backtrack）：撤销当前填入的数字，恢复约束数组。
+     * a. 遍历所有可能的数字（1 到 N）。
+     * b. 剪枝：检查当前数字是否与行、列约束冲突。
+     * c. 如果不冲突：
+     * i.   更新状态：在方阵中填入数字，更新约束数组。
+     * ii.  递归调用，处理下一个位置。
+     * iii. 如果递归成功，返回 true。
+     * iv.  回溯（Backtrack）：撤销当前填入的数字，恢复约束数组。
      * 4. 如果所有数字都尝试失败，返回 false。
      *
      * @param square 当前的拉丁方阵状态
@@ -131,8 +131,8 @@ public class LatinSquare {
      * @param col 当前处理的列号
      * @return 如果能成功填充返回 true，否则返回 false
      */
-    private static boolean backtrack(int[][] square, boolean[][] rowUsed, boolean[][] colUsed, 
-                                   int n, int row, int col) {
+    private static boolean backtrack(int[][] square, boolean[][] rowUsed, boolean[][] colUsed,
+            int n, int row, int col) {
         // 1. 递归基：所有位置都已填充
         if (row >= n) {
             return true; // 成功构造拉丁方阵
@@ -145,7 +145,7 @@ public class LatinSquare {
         // 3. 递归步骤：在当前位置 (row, col) 尝试填入数字 1-N
         for (int num = 1; num <= n; num++) {
             int numIndex = num - 1; // 转换为数组索引（0 到 n-1）
-            
+
             // 3b. 剪枝：检查约束冲突
             if (rowUsed[row][numIndex] || colUsed[col][numIndex]) {
                 continue; // 冲突，跳过此数字
@@ -198,15 +198,15 @@ public class LatinSquare {
 
         // 寻找所有解
         backtrackAll(square, rowUsed, colUsed, n, 1, 0, allSolutions);
-        
+
         return allSolutions;
     }
 
     /**
      * 寻找所有解的回溯方法。
      */
-    private static void backtrackAll(int[][] square, boolean[][] rowUsed, boolean[][] colUsed, 
-                                   int n, int row, int col, List<int[][]> allSolutions) {
+    private static void backtrackAll(int[][] square, boolean[][] rowUsed, boolean[][] colUsed,
+            int n, int row, int col, List<int[][]> allSolutions) {
         if (row >= n) {
             // 找到一个解，进行深拷贝后添加到结果中
             int[][] solution = new int[n][n];
@@ -222,7 +222,7 @@ public class LatinSquare {
 
         for (int num = 1; num <= n; num++) {
             int numIndex = num - 1;
-            
+
             if (rowUsed[row][numIndex] || colUsed[col][numIndex]) {
                 continue;
             }
@@ -254,7 +254,7 @@ public class LatinSquare {
         }
 
         int n = square.length;
-        
+
         // 检查是否为方阵
         for (int[] row : square) {
             if (row.length != n) {

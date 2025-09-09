@@ -17,6 +17,7 @@ public class LinkedDeque<T> implements Deque<T> {
     private Node<T> head;
     private Node<T> tail;
     private int size;
+
     public LinkedDeque() {
         head = null;
         tail = null;

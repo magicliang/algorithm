@@ -1,7 +1,5 @@
 package algorithm.foundations.divideconquer;
 
-import java.util.*;
-
 /**
  * 三分搜索算法实现。
  *
@@ -34,14 +32,6 @@ import java.util.*;
  * @date 2025-09-09 12:45
  */
 public class TernarySearch {
-
-    /**
-     * 函数接口，用于定义待搜索的单峰函数。
-     */
-    @FunctionalInterface
-    public interface UnivariateFunction {
-        double apply(double x);
-    }
 
     /**
      * 三分搜索寻找单峰函数的最大值点。
@@ -234,26 +224,6 @@ public class TernarySearch {
     }
 
     /**
-     * 搜索结果类，包含极值点和极值。
-     */
-    public static class SearchResult {
-        public final double x;      // 极值点横坐标
-        public final double value;  // 极值
-        public final int iterations; // 迭代次数
-
-        public SearchResult(double x, double value, int iterations) {
-            this.x = x;
-            this.value = value;
-            this.iterations = iterations;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("x=%.6f, f(x)=%.6f, iterations=%d", x, value, iterations);
-        }
-    }
-
-    /**
      * 带统计信息的三分搜索。
      *
      * @param function 单峰函数
@@ -263,8 +233,8 @@ public class TernarySearch {
      * @param findMaximum true表示寻找最大值，false表示寻找最小值
      * @return 搜索结果
      */
-    public static SearchResult searchWithStats(UnivariateFunction function, double left, double right, 
-                                             double epsilon, boolean findMaximum) {
+    public static SearchResult searchWithStats(UnivariateFunction function, double left, double right,
+            double epsilon, boolean findMaximum) {
         if (function == null) {
             throw new IllegalArgumentException("函数不能为空");
         }
@@ -306,5 +276,35 @@ public class TernarySearch {
         double resultValue = function.apply(resultX);
 
         return new SearchResult(resultX, resultValue, iterations);
+    }
+
+    /**
+     * 函数接口，用于定义待搜索的单峰函数。
+     */
+    @FunctionalInterface
+    public interface UnivariateFunction {
+
+        double apply(double x);
+    }
+
+    /**
+     * 搜索结果类，包含极值点和极值。
+     */
+    public static class SearchResult {
+
+        public final double x;      // 极值点横坐标
+        public final double value;  // 极值
+        public final int iterations; // 迭代次数
+
+        public SearchResult(double x, double value, int iterations) {
+            this.x = x;
+            this.value = value;
+            this.iterations = iterations;
+        }
+
+        @Override
+        public String toString() {
+            return String.format("x=%.6f, f(x)=%.6f, iterations=%d", x, value, iterations);
+        }
     }
 }

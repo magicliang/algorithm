@@ -1,6 +1,12 @@
 package algorithm.selectedtopics.computational;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -11,18 +17,18 @@ import java.util.*;
  *
  * 方法使用流程：
  * 1. numberToWords(String digits):
- *    - 输入数字串（如 "23"），返回所有可能的字母组合（如 ["AD", "AE", "AF", "BD", "BE", "BF", "CD", "CE", "CF"]）。
- *    - 适用于生成电话号码对应的字母组合。
+ * - 输入数字串（如 "23"），返回所有可能的字母组合（如 ["AD", "AE", "AF", "BD", "BE", "BF", "CD", "CE", "CF"]）。
+ * - 适用于生成电话号码对应的字母组合。
  *
  * 2. buildIndex(String[] dict):
- *    - 输入词典数组（如 ["FLOWERS", "FLOW"]），返回数字键到单词集合的映射。
- *    - 示例输出：{"3569377": ["FLOWERS"], "3569": ["FLOW"]}。
- *    - 适用于构建词典索引，便于后续查询。
+ * - 输入词典数组（如 ["FLOWERS", "FLOW"]），返回数字键到单词集合的映射。
+ * - 示例输出：{"3569377": ["FLOWERS"], "3569": ["FLOW"]}。
+ * - 适用于构建词典索引，便于后续查询。
  *
  * 3. numberToPhrase(String digits, Map<String, Set<String>> index):
- *    - 输入数字串（如 "3569377"）和词典索引，返回所有可能的单词串组合。
- *    - 示例输出：[["FLOWERS"], ["FLOW", "ER", "S"]]。
- *    - 适用于将数字串转换为词典中可拼写的单词串。
+ * - 输入数字串（如 "3569377"）和词典索引，返回所有可能的单词串组合。
+ * - 示例输出：[["FLOWERS"], ["FLOW", "ER", "S"]]。
+ * - 适用于将数字串转换为词典中可拼写的单词串。
  *
  * @author liangchuan
  */
@@ -58,29 +64,29 @@ public class PhoneMnemonic8Plain {
      * 示例：输入数字 "23"，输出 ["AD", "AE", "AF", "BD", "BE", "BF", "CD", "CE", "CF"]
      * 执行步骤：
      * 1. 初始调用：dfs(['2','3'], 0, [' ',' '], [])
-     *    - pos=0, d=2, letters="ABC"
-     *    - 遍历 "ABC"：
-     *      a. path[0]='A' → 递归 dfs(['2','3'], 1, ['A',' '], [])
-     *         - pos=1, d=3, letters="DEF"
-     *         - 遍历 "DEF"：
-     *           i. path[1]='D' → 递归 dfs(['2','3'], 2, ['A','D'], [])
-     *              - pos=2 → 终止，res=["AD"]
-     *           ii. path[1]='E' → 递归 dfs(['2','3'], 2, ['A','E'], [])
-     *              - pos=2 → 终止，res=["AD", "AE"]
-     *           iii. path[1]='F' → 递归 dfs(['2','3'], 2, ['A','F'], [])
-     *              - pos=2 → 终止，res=["AD", "AE", "AF"]
-     *      b. path[0]='B' → 递归 dfs(['2','3'], 1, ['B',' '], [])
-     *         - pos=1, d=3, letters="DEF"
-     *         - 遍历 "DEF"：
-     *           i. path[1]='D' → res=["AD", "AE", "AF", "BD"]
-     *           ii. path[1]='E' → res=[..., "BE"]
-     *           iii. path[1]='F' → res=[..., "BF"]
-     *      c. path[0]='C' → 递归 dfs(['2','3'], 1, ['C',' '], [])
-     *         - pos=1, d=3, letters="DEF"
-     *         - 遍历 "DEF"：
-     *           i. path[1]='D' → res=[..., "CD"]
-     *           ii. path[1]='E' → res=[..., "CE"]
-     *           iii. path[1]='F' → res=[..., "CF"]
+     * - pos=0, d=2, letters="ABC"
+     * - 遍历 "ABC"：
+     * a. path[0]='A' → 递归 dfs(['2','3'], 1, ['A',' '], [])
+     * - pos=1, d=3, letters="DEF"
+     * - 遍历 "DEF"：
+     * i. path[1]='D' → 递归 dfs(['2','3'], 2, ['A','D'], [])
+     * - pos=2 → 终止，res=["AD"]
+     * ii. path[1]='E' → 递归 dfs(['2','3'], 2, ['A','E'], [])
+     * - pos=2 → 终止，res=["AD", "AE"]
+     * iii. path[1]='F' → 递归 dfs(['2','3'], 2, ['A','F'], [])
+     * - pos=2 → 终止，res=["AD", "AE", "AF"]
+     * b. path[0]='B' → 递归 dfs(['2','3'], 1, ['B',' '], [])
+     * - pos=1, d=3, letters="DEF"
+     * - 遍历 "DEF"：
+     * i. path[1]='D' → res=["AD", "AE", "AF", "BD"]
+     * ii. path[1]='E' → res=[..., "BE"]
+     * iii. path[1]='F' → res=[..., "BF"]
+     * c. path[0]='C' → 递归 dfs(['2','3'], 1, ['C',' '], [])
+     * - pos=1, d=3, letters="DEF"
+     * - 遍历 "DEF"：
+     * i. path[1]='D' → res=[..., "CD"]
+     * ii. path[1]='E' → res=[..., "CE"]
+     * iii. path[1]='F' → res=[..., "CF"]
      *
      * @param digits 输入的数字字符数组
      * @param pos 当前处理的数字位置
@@ -116,8 +122,8 @@ public class PhoneMnemonic8Plain {
      * 示例：输入词典 ["FLOWERS", "FLOW"]
      * 执行步骤：
      * 1. 遍历词典中的每个单词 w
-     *    - 调用 wordToNumber(w) 将单词转换为数字键（如 "FLOWERS" → "3569377"）
-     *    - 将单词添加到对应数字键的集合中（map.computeIfAbsent）
+     * - 调用 wordToNumber(w) 将单词转换为数字键（如 "FLOWERS" → "3569377"）
+     * - 将单词添加到对应数字键的集合中（map.computeIfAbsent）
      * 2. 返回数字键到单词集合的映射
      *
      * 输出示例：
@@ -125,8 +131,8 @@ public class PhoneMnemonic8Plain {
      * Word: FLOW -> Key: 3569
      * 最终返回的映射：
      * {
-     *   "3569377": ["FLOWERS"],
-     *   "3569": ["FLOW"]
+     * "3569377": ["FLOWERS"],
+     * "3569": ["FLOW"]
      * }
      *
      * @param dict 输入的词典数组
@@ -149,9 +155,9 @@ public class PhoneMnemonic8Plain {
      * 示例：输入 "FLOWERS"，输出 "3569377"
      * 执行步骤：
      * 1. 遍历单词的每个字符 c
-     *    - 将字符转换为大写
-     *    - 遍历数字 2-9，检查字符是否在 MAP[d] 中
-     *      - 如果是，将数字 d 添加到结果中
+     * - 将字符转换为大写
+     * - 遍历数字 2-9，检查字符是否在 MAP[d] 中
+     * - 如果是，将数字 d 添加到结果中
      * 2. 返回生成的数字键
      *
      * @param w 输入的单词
@@ -184,7 +190,7 @@ public class PhoneMnemonic8Plain {
      * @return 所有可能的单词串组合
      */
     public static List<List<String>> numberToPhrase(String digits,
-                                                    Map<String, Set<String>> index) {
+            Map<String, Set<String>> index) {
         List<List<String>> res = new ArrayList<>();
         char[] num = digits.toCharArray();
         backtrack(num, 0, new ArrayList<>(), res, index);
@@ -197,14 +203,14 @@ public class PhoneMnemonic8Plain {
      * 执行步骤：
      * 1. 终止条件：处理完所有数字时，将当前路径加入结果
      * 2. 尝试匹配长度为1的单词（如 "S"）：
-     *    - 提取当前数字 key1 = num[pos]
-     *    - 如果索引中存在 key1，遍历所有匹配的单词，递归处理剩余数字
+     * - 提取当前数字 key1 = num[pos]
+     * - 如果索引中存在 key1，遍历所有匹配的单词，递归处理剩余数字
      * 3. 尝试匹配长度为2的单词（如 "ER"）：
-     *    - 提取当前数字 key2 = num[pos..pos+1]
-     *    - 如果索引中存在 key2，遍历所有匹配的单词，递归处理剩余数字
+     * - 提取当前数字 key2 = num[pos..pos+1]
+     * - 如果索引中存在 key2，遍历所有匹配的单词，递归处理剩余数字
      * 4. 尝试匹配长度为3到任意长度的单词（如 "FLOW"）：
-     *    - 提取当前数字 key = num[pos..pos+len-1]
-     *    - 如果索引中存在 key，遍历所有匹配的单词，递归处理剩余数字
+     * - 提取当前数字 key = num[pos..pos+len-1]
+     * - 如果索引中存在 key，遍历所有匹配的单词，递归处理剩余数字
      *
      * @param num 输入的数字字符数组
      * @param pos 当前处理的数字位置
@@ -213,9 +219,9 @@ public class PhoneMnemonic8Plain {
      * @param index 词典索引
      */
     private static void backtrack(char[] num, int pos,
-                                  List<String> path,
-                                  List<List<String>> res,
-                                  Map<String, Set<String>> index) {
+            List<String> path,
+            List<List<String>> res,
+            Map<String, Set<String>> index) {
         if (pos == num.length) {
             res.add(new ArrayList<>(path));
             return;
@@ -262,7 +268,7 @@ public class PhoneMnemonic8Plain {
      * 根据按键编码返回所有可能的匹配名字
      * 示例：输入 "3569377"，返回 ["FLOWERS"]
      *
-     * @param key   输入的按键编码
+     * @param key 输入的按键编码
      * @param index 词典索引
      * @return 所有可能的匹配名字集合
      */
@@ -293,7 +299,9 @@ public class PhoneMnemonic8Plain {
         for (List<String> p : phrases) {
             for (int i = 0; i < p.size(); i++) {
                 System.out.print(p.get(i));
-                if (i < p.size() - 1) System.out.print(' ');
+                if (i < p.size() - 1) {
+                    System.out.print(' ');
+                }
             }
             System.out.println();
         }

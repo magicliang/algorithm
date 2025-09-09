@@ -66,9 +66,9 @@ package algorithm.advanced.dynamicprogramming;
  *
  * @author magicliang
  * @version 1.0
- * @since 2025-08-26
  * @see <a href="https://leetcode-cn.com/problems/climbing-stairs/">LeetCode 70. 爬楼梯</a>
  * @see <a href="https://en.wikipedia.org/wiki/Fibonacci_number">Fibonacci number - Wikipedia</a>
+ * @since 2025-08-26
  */
 public class ClimbSteps {
 
@@ -198,9 +198,9 @@ public class ClimbSteps {
      * @apiNote 这是最优化的实现，空间复杂度为O(1)
      * @implSpec 使用滚动数组技术，只保留前两个状态
      * @implNote 相比记忆化搜索，避免了递归栈的开销
-     * @since 1.0
      * @see #memoizationClimb(int)
      * @see <a href="https://leetcode-cn.com/problems/climbing-stairs/">LeetCode 70. 爬楼梯</a>
+     * @since 1.0
      */
     public int dpClimb(int n) {
         if (n <= 0) {
@@ -252,11 +252,11 @@ public class ClimbSteps {
      *
      *         <p><b>示例：</b></p>
      *         <pre>{@code
-     *         n = 1: 1种方法 (1)
-     *         n = 2: 1种方法 (2) - 不能连续跳1，所以(1,1)不合法
-     *         n = 3: 2种方法 (1,2) 和 (2,1)
-     *         n = 4: 3种方法 (2,2), (1,2,1), (2,1,2)
-     *         }</pre>
+     *                 n = 1: 1种方法 (1)
+     *                 n = 2: 1种方法 (2) - 不能连续跳1，所以(1,1)不合法
+     *                 n = 3: 2种方法 (1,2) 和 (2,1)
+     *                 n = 4: 3种方法 (2,2), (1,2,1), (2,1,2)
+     *                 }</pre>
      *
      *         <p><b>状态定义：</b></p>
      *         <ul>

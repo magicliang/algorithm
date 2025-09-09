@@ -8,10 +8,10 @@ package algorithm.advanced.backtracking;
  *
  * 解题思路：
  * 1. 约束分析：
- *    - 行约束：每一行的数字 1-9 不能重复，使用 rows[row][num] 记录第 row 行是否已使用数字 num。
- *    - 列约束：每一列的数字 1-9 不能重复，使用 cols[col][num] 记录第 col 列是否已使用数字 num。
- *    - 九宫格约束：每个 3×3 九宫格的数字 1-9 不能重复，使用 boxes[boxIndex][num] 记录第 boxIndex 个九宫格是否已使用数字 num。
- *      九宫格索引计算：boxIndex = (row / 3) * 3 + (col / 3)
+ * - 行约束：每一行的数字 1-9 不能重复，使用 rows[row][num] 记录第 row 行是否已使用数字 num。
+ * - 列约束：每一列的数字 1-9 不能重复，使用 cols[col][num] 记录第 col 列是否已使用数字 num。
+ * - 九宫格约束：每个 3×3 九宫格的数字 1-9 不能重复，使用 boxes[boxIndex][num] 记录第 boxIndex 个九宫格是否已使用数字 num。
+ * 九宫格索引计算：boxIndex = (row / 3) * 3 + (col / 3)
  * 2. 算法选择：使用回溯法（Backtracking）进行深度优先搜索。
  * 3. 剪枝策略：在每个空位尝试填入数字时，检查行、列、九宫格约束。如果冲突，则跳过该数字，实现剪枝。
  * 4. 优化策略：只对空位（'.'）进行填充，已有数字的位置跳过。
@@ -32,15 +32,15 @@ public class SudokuSolver {
     public static void main(String[] args) {
         // 测试用例：标准数独题目，'.' 表示空位
         char[][] board = {
-            {'5', '3', '.', '.', '7', '.', '.', '.', '.'},
-            {'6', '.', '.', '1', '9', '5', '.', '.', '.'},
-            {'.', '9', '8', '.', '.', '.', '.', '6', '.'},
-            {'8', '.', '.', '.', '6', '.', '.', '.', '3'},
-            {'4', '.', '.', '8', '.', '3', '.', '.', '1'},
-            {'7', '.', '.', '.', '2', '.', '.', '.', '6'},
-            {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
-            {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
-            {'.', '.', '.', '.', '8', '.', '.', '7', '9'}
+                {'5', '3', '.', '.', '7', '.', '.', '.', '.'},
+                {'6', '.', '.', '1', '9', '5', '.', '.', '.'},
+                {'.', '9', '8', '.', '.', '.', '.', '6', '.'},
+                {'8', '.', '.', '.', '6', '.', '.', '.', '3'},
+                {'4', '.', '.', '8', '.', '3', '.', '.', '1'},
+                {'7', '.', '.', '.', '2', '.', '.', '.', '6'},
+                {'.', '6', '.', '.', '.', '.', '2', '8', '.'},
+                {'.', '.', '.', '4', '1', '9', '.', '.', '5'},
+                {'.', '.', '.', '.', '8', '.', '.', '7', '9'}
         };
 
         System.out.println("原始数独：");
@@ -80,7 +80,7 @@ public class SudokuSolver {
                 if (board[row][col] != '.') {
                     int num = board[row][col] - '1'; // 将字符 '1'-'9' 转换为索引 0-8
                     int boxIndex = getBoxIndex(row, col);
-                    
+
                     // 标记该数字在对应行、列、九宫格中已被使用
                     rows[row][num] = true;
                     cols[col][num] = true;
@@ -99,12 +99,12 @@ public class SudokuSolver {
      * 1. 寻找下一个空位：从当前位置开始，找到下一个需要填充的空位（'.'）。
      * 2. 递归基（Base Case）：如果所有位置都已填充完毕，返回 true。
      * 3. 递归步骤（Recursive Step）：在当前空位尝试填入数字 1-9。
-     *    a. 剪枝：检查当前数字是否与行、列、九宫格约束冲突。
-     *    b. 如果不冲突：
-     *       i.   更新状态：在棋盘上填入数字，更新约束数组。
-     *       ii.  递归调用，处理下一个位置。
-     *       iii. 如果递归成功，返回 true。
-     *       iv.  回溯（Backtrack）：撤销当前填入的数字，恢复约束数组。
+     * a. 剪枝：检查当前数字是否与行、列、九宫格约束冲突。
+     * b. 如果不冲突：
+     * i.   更新状态：在棋盘上填入数字，更新约束数组。
+     * ii.  递归调用，处理下一个位置。
+     * iii. 如果递归成功，返回 true。
+     * iv.  回溯（Backtrack）：撤销当前填入的数字，恢复约束数组。
      * 4. 如果所有数字都尝试失败，返回 false。
      *
      * @param board 数独棋盘
@@ -115,8 +115,8 @@ public class SudokuSolver {
      * @param col 当前处理的列号
      * @return 如果能成功填充返回 true，否则返回 false
      */
-    private static boolean backtrack(char[][] board, boolean[][] rows, boolean[][] cols, 
-                                   boolean[][] boxes, int row, int col) {
+    private static boolean backtrack(char[][] board, boolean[][] rows, boolean[][] cols,
+            boolean[][] boxes, int row, int col) {
         // 1. 寻找下一个空位
         while (row < 9) {
             while (col < 9 && board[row][col] != '.') {
@@ -137,7 +137,7 @@ public class SudokuSolver {
 
         // 3. 递归步骤：在当前空位 (row, col) 尝试填入数字 1-9
         int boxIndex = getBoxIndex(row, col);
-        
+
         for (int num = 0; num < 9; num++) { // num 对应数字 1-9
             // 3a. 剪枝：检查约束冲突
             if (rows[row][num] || cols[col][num] || boxes[boxIndex][num]) {
@@ -170,7 +170,7 @@ public class SudokuSolver {
      * 0 1 2
      * 3 4 5
      * 6 7 8
-     * 
+     *
      * 计算公式：boxIndex = (row / 3) * 3 + (col / 3)
      *
      * @param row 行号 (0-8)

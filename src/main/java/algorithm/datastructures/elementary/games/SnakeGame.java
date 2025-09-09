@@ -1,33 +1,39 @@
 package algorithm.datastructures.elementary.games;
 
-import java.util.*;
+import java.util.LinkedList;
+import java.util.Objects;
 
 /**
  * 坐标位置类
- * 
+ *
  * 设计要点：
  * 1. 不可变对象设计：坐标一旦创建就不可修改，保证线程安全
  * 2. 正确实现equals和hashCode：支持在HashSet/HashMap中使用
  * 3. 简洁的数据结构：只包含必要的x,y坐标信息
- * 
+ *
  * 时间复杂度：
  * - equals(): O(1)
  * - hashCode(): O(1)
  */
 class Position {
+
     int x, y;  // 坐标值，使用int类型节省内存
-    
+
     Position(int x, int y) {
         this.x = x;
         this.y = y;
     }
-    
+
     // 为了在Set中正确比较，需要重写equals和hashCode
     // 这是Java集合框架的基本要求
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;  // 引用相等性检查，性能优化
-        if (o == null || getClass() != o.getClass()) return false;  // 类型检查
+        if (this == o) {
+            return true;  // 引用相等性检查，性能优化
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;  // 类型检查
+        }
         Position position = (Position) o;
         return x == position.x && y == position.y;  // 值相等性检查
     }
@@ -37,7 +43,7 @@ class Position {
         // 使用Objects.hash确保良好的哈希分布
         return Objects.hash(x, y);
     }
-    
+
     /**
      * 重写toString方法，便于调试和日志输出
      */
@@ -49,43 +55,77 @@ class Position {
 
 /**
  * 贪吃蛇游戏核心逻辑实现
- * 
+ *
  * 算法设计思路：
  * 1. 新节点依赖于方向
  * 2. 方向制造新节点
  * 3. 出现新节点以后，要先碰撞：看看是不是撞到链表自己-重写链表的 equals 方法；看看是不是撞到食物。
  * 4. 无论如何新增头节点
  * 5. 如果吃到食物，保留尾节点，否则删除尾节点
- * 
+ *
  * 数据结构选择：
  * - 使用LinkedList<Position>表示蛇身：支持O(1)的头部插入和尾部删除
  * - 蛇头在链表前端，蛇尾在链表后端，符合游戏逻辑
- * 
+ *
  * 性能特点：
  * - 移动操作：O(n) 时间复杂度（主要是碰撞检测）
  * - 空间复杂度：O(n)，n为蛇的长度
- * 
+ *
  * 优化建议：
  * - 在实际游戏中可维护HashSet<Position>来实现O(1)碰撞检测
  * - 可以预先计算边界来避免重复的边界检查
- * 
+ *
  * @author magicliang
  */
 public class SnakeGame {
 
     /**
+     * 主方法：演示贪吃蛇游戏的基本功能
+     *
+     * 测试场景：
+     * 1. 初始化蛇身和食物
+     * 2. 测试吃食物的情况（蛇身增长）
+     * 3. 测试普通移动的情况（蛇身长度不变）
+     */
+    public static void main(String[] args) {
+        SnakeGame game = new SnakeGame();
+
+        // 初始化一条蛇 [(2,0), (1,0), (0,0)]
+        LinkedList<Position> snake = new LinkedList<>();
+        snake.add(new Position(2, 0));
+        snake.add(new Position(1, 0));
+        snake.add(new Position(0, 0));
+
+        Position food = new Position(3, 0);
+
+        System.out.println("初始蛇身: " + snake);
+        System.out.println("食物位置: " + food);
+
+        // 向右移动，吃到食物
+        boolean success = game.move(snake, food, 'R');
+        System.out.println("向右移动 (吃食物) 是否成功: " + success);
+        System.out.println("移动后蛇身: " + snake);
+
+        // 再向右移动，未吃食物
+        food = new Position(5, 5); // 食物移走
+        success = game.move(snake, food, 'R');
+        System.out.println("向右移动 (未吃食物) 是否成功: " + success);
+        System.out.println("移动后蛇身: " + snake);
+    }
+
+    /**
      * 移动贪吃蛇（核心游戏逻辑）
-     * 
+     *
      * 算法步骤：
      * 1. 根据方向计算新头部位置
      * 2. 检查碰撞（边界、自身）
      * 3. 检查是否吃到食物
      * 4. 更新蛇身（添加新头部）
      * 5. 根据是否吃食物决定是否移除尾部
-     * 
+     *
      * 时间复杂度：O(n)，n为蛇的长度（主要是碰撞检测）
      * 空间复杂度：O(1)，只使用常量额外空间
-     * 
+     *
      * @param snake 蛇身坐标链表，头部在前。方法会原地修改此链表。
      * @param food 食物坐标
      * @param direction 移动方向 ('U', 'D', 'L', 'R')
@@ -103,10 +143,18 @@ public class SnakeGame {
         // 使用策略模式的思想，根据不同方向计算新位置
         Position newHead;
         switch (direction) {
-            case 'U': newHead = new Position(currentHead.x, currentHead.y - 1); break;  // 向上：y坐标减1
-            case 'D': newHead = new Position(currentHead.x, currentHead.y + 1); break;  // 向下：y坐标加1
-            case 'L': newHead = new Position(currentHead.x - 1, currentHead.y); break;  // 向左：x坐标减1
-            case 'R': newHead = new Position(currentHead.x + 1, currentHead.y); break;  // 向右：x坐标加1
+            case 'U':
+                newHead = new Position(currentHead.x, currentHead.y - 1);
+                break;  // 向上：y坐标减1
+            case 'D':
+                newHead = new Position(currentHead.x, currentHead.y + 1);
+                break;  // 向下：y坐标加1
+            case 'L':
+                newHead = new Position(currentHead.x - 1, currentHead.y);
+                break;  // 向左：x坐标减1
+            case 'R':
+                newHead = new Position(currentHead.x + 1, currentHead.y);
+                break;  // 向右：x坐标加1
             default:
                 // 无效方向，不移动（容错处理）
                 return true;
@@ -143,21 +191,23 @@ public class SnakeGame {
         return true; // 移动成功
     }
 
+    // --- 以下是为了演示和测试 ---
+
     /**
      * 检查新头位置是否与蛇身冲突（碰撞检测）
-     * 
+     *
      * 算法说明：
      * - 当前实现：O(n)线性搜索，简单但效率较低
      * - 优化方案：维护HashSet<Position>实现O(1)查找
-     * 
+     *
      * 边界情况处理：
      * - 空蛇身：不会碰撞
      * - 单节点蛇身：新头不能与当前头重合
-     * 
+     *
      * 关键逻辑：
      * - 需要排除即将被移除的尾部节点（如果没吃到食物的话）
      * - 这里为了简化，我们检查除了尾部以外的所有节点
-     * 
+     *
      * @param snake 当前蛇身
      * @param newHead 新的头部位置
      * @return 是否碰撞
@@ -186,41 +236,6 @@ public class SnakeGame {
             }
         }
         return false;
-    }
-
-    // --- 以下是为了演示和测试 ---
-    /**
-     * 主方法：演示贪吃蛇游戏的基本功能
-     * 
-     * 测试场景：
-     * 1. 初始化蛇身和食物
-     * 2. 测试吃食物的情况（蛇身增长）
-     * 3. 测试普通移动的情况（蛇身长度不变）
-     */
-    public static void main(String[] args) {
-        SnakeGame game = new SnakeGame();
-
-        // 初始化一条蛇 [(2,0), (1,0), (0,0)]
-        LinkedList<Position> snake = new LinkedList<>();
-        snake.add(new Position(2, 0));
-        snake.add(new Position(1, 0));
-        snake.add(new Position(0, 0));
-
-        Position food = new Position(3, 0);
-
-        System.out.println("初始蛇身: " + snake);
-        System.out.println("食物位置: " + food);
-
-        // 向右移动，吃到食物
-        boolean success = game.move(snake, food, 'R');
-        System.out.println("向右移动 (吃食物) 是否成功: " + success);
-        System.out.println("移动后蛇身: " + snake);
-
-        // 再向右移动，未吃食物
-        food = new Position(5, 5); // 食物移走
-        success = game.move(snake, food, 'R');
-        System.out.println("向右移动 (未吃食物) 是否成功: " + success);
-        System.out.println("移动后蛇身: " + snake);
     }
 
     @Override

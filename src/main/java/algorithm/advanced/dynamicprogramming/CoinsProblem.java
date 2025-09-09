@@ -12,17 +12,17 @@ import java.util.Arrays;
  * 与传统背包问题的关键区别在于约束条件：
  * - 传统背包：容量 ≤ 限制值（不超过约束）
  * - 零钱兑换：总金额 = 目标值（等值约束）
- * 
+ *
  * 这种等值约束导致可能出现"无解"情况，需要特殊处理返回-1。
  *
  * 【状态定义】：
  * dp[i][amount] 表示用前i种硬币凑成金额amount所需的最少硬币数
- * 
+ *
  * 【状态转移】：
  * dp[i][amount] = min(dp[i-1][amount], dp[i][amount-coins[i-1]] + 1)
  * - 不选当前硬币：dp[i-1][amount]
  * - 选择当前硬币：dp[i][amount-coins[i-1]] + 1（可重复选择）
- * 
+ *
  * 【边界条件】：
  * - dp[i][0] = 0（金额为0不需要硬币），这里0是合法值
  * - dp[0][amount] = -1 或者 amount + 1（没有硬币无法凑出正金额，可以给出一个负值或者一个利于min比较的值）
@@ -32,7 +32,7 @@ import java.util.Arrays;
  * 1. 资源约束优先原则（最高优先级）：硬币面额 > 目标金额时，强制选择"不使用"，但状态合法
  * 2. 状态边界检查原则（次优先级）：无硬币可用时，返回-1表示非法状态
  * 3. 优化选择原则（最低优先级）：在合法范围内选择硬币数量最少的方案
- * 
+ *
  * 关键洞察：资源极值时，状态极值的DP是合法的；状态极值时，DP可能非法
  *
  * @author magicliang
@@ -43,25 +43,26 @@ public class CoinsProblem {
 
     /**
      * 使用深度优先搜索解决零钱兑换问题
-     * 
+     *
      * 【问题定义】：
      * 给定不同面额的硬币coins和一个总金额targetAmount，
      * 计算可以凑成总金额所需的最少硬币个数。
      * 如果不能凑成总金额，返回-1。
-     * 
+     *
      * 【状态转移方程】：
      * dp[i][amount] = min(dp[i-1][amount], dp[i][amount-coins[i-1]] + 1)
-     * 
+     *
      * 【参数说明】：
+     *
      * @param coins 硬币面额数组（0-based索引）
      * @param i 当前考虑的硬币种类数量（1-based，表示前i种硬币）
      * @param targetAmount 目标金额
      * @return 最少硬币数量，无解时返回-1
-     * 
-     * 【算法特点】：
-     * - 每种硬币可以使用无限次（完全背包特性）
-     * - 目标是最小化硬币数量（而不是最大化价值）
-     * - 使用-1表示无解状态
+     *
+     *         【算法特点】：
+     *         - 每种硬币可以使用无限次（完全背包特性）
+     *         - 目标是最小化硬币数量（而不是最大化价值）
+     *         - 使用-1表示无解状态
      */
     // 返回值是达成 targetAmount 的硬币数量，i 是硬币的搜索规模，即使是 dfs 也需要先写 dp 方程才好搜索
     public int coinChangeDfs(int[] coins, int i, int targetAmount) {
@@ -79,7 +80,7 @@ public class CoinsProblem {
 
         // 【选择1】：不使用当前硬币coins[i-1]，问题规模缩减为前i-1种硬币
         int subProblemChoice = coinChangeDfs(coins, i - 1, targetAmount);
-        
+
         // 【剪枝优化】：当前硬币面额大于目标金额，无法使用
         // 【资源约束优先原则】：当资源出现极值时（硬币面额 > 目标金额），
         // 虽然选择受限，但dp状态仍然合法，只是被迫选择"不使用当前硬币"的路径
@@ -103,7 +104,7 @@ public class CoinsProblem {
         // 
         // 这就是为什么要分别检查每种情况的原因
         int currentProblemChoice = coinChangeDfs(coins, i, targetAmount - coins[i - 1]);
-        
+
         // 【情况1】：使用当前硬币的方案无解，只能选择不使用的方案
         if (currentProblemChoice == -1) {
             return subProblemChoice;
@@ -111,7 +112,7 @@ public class CoinsProblem {
 
         // 【重要】：使用当前硬币需要额外消耗1个硬币
         currentProblemChoice += 1;
-        
+
         // 【情况2】：不使用当前硬币的方案无解，只能选择使用的方案
         if (subProblemChoice == -1) {
             return currentProblemChoice;
@@ -123,18 +124,18 @@ public class CoinsProblem {
 
     /**
      * 使用记忆化搜索解决零钱兑换问题（公共接口）
-     * 
+     *
      * 【记忆化搜索的优势】：
      * 1. 时间复杂度：从DFS的O(2^(n+targetAmount))优化为O(n*targetAmount)
      * 2. 空间复杂度：O(n*targetAmount)用于存储memo数组
      * 3. 编程复杂度：相比动态规划更直观，保持了递归的思维模式
-     * 
+     *
      * 【初始化策略】：
      * memo数组初始化为-1有特殊含义：
      * - -1：表示该状态尚未计算（区别于计算结果为-1的无解状态）
      * - 0或正数：表示已计算的有效结果
      * - 这种设计避免了"未计算"与"无解"状态的混淆
-     * 
+     *
      * @param coins 硬币面额数组
      * @param i 硬币种类数量（1-based，表示前i种硬币）
      * @param targetAmount 目标金额
@@ -154,7 +155,7 @@ public class CoinsProblem {
         for (int[] row : memo) {
             Arrays.fill(row, -1);
         }
-        
+
         // 【步骤3】：调用递归函数开始计算
         return coinChangeMemoization(coins, i, targetAmount, memo);
     }
@@ -163,20 +164,20 @@ public class CoinsProblem {
      * 【记忆化搜索的核心思想】：
      * 将DFS的指数级复杂度O(2^(n+targetAmount))优化为多项式级O(n*targetAmount)
      * 通过缓存已计算的子问题结果，避免重复计算
-     * 
+     *
      * 【缓存设计】：
      * memo[i][amount]存储"使用前i种硬币凑出amount金额"的最优解
      * -1表示该子问题尚未计算
      * 其他值表示已计算的最优解（包括-1表示无解）
-     * 
+     *
      * 【状态传播机制】：
      * 1. 缓存命中：直接返回已存储的结果
      * 2. 缓存未命中：计算后存储并返回
      * 3. 无解状态传播：-1作为特殊值在递归中正确传播
-     * 
+     *
      * 【与DFS的等价性】：
      * 记忆化搜索与DFS的决策树结构完全相同，只是通过缓存避免了重复遍历
-     * 
+     *
      * @param coins 硬币面额数组
      * @param i 当前考虑的硬币种类数量（1-based）
      * @param targetAmount 目标金额
@@ -204,7 +205,7 @@ public class CoinsProblem {
         // 【选择1】：不使用当前硬币coins[i-1]
         // 递归计算使用前i-1种硬币凑出targetAmount的最优解
         int subProblemChoice = coinChangeMemoization(coins, i - 1, targetAmount, memo);
-        
+
         // 【缓存更新1】：先将不选择当前硬币的结果存入缓存
         // 这样即使后续选择当前硬币失败，也有一个备选方案
         memo[i][targetAmount] = subProblemChoice;
@@ -218,16 +219,16 @@ public class CoinsProblem {
         // 【选择2】：使用当前硬币coins[i-1]
         // 递归计算使用当前硬币后的子问题：目标金额减少，硬币种类不变（完全背包特性）
         int currentProblemChoice = coinChangeMemoization(coins, i, targetAmount - coins[i - 1], memo);
-        
+
         // 【无解处理1】：如果使用当前硬币的方案无解
         // 保持原有的subProblemChoice结果，不进行进一步处理
         if (currentProblemChoice == -1) {
             return memo[i][targetAmount];
         }
-        
+
         // 【硬币计数】：使用当前硬币需要额外消耗1个硬币
         currentProblemChoice += 1;
-        
+
         // 【缓存更新2】：比较两种选择，更新为最优解
         // 需要处理subProblemChoice为-1（无解）的情况
         if (memo[i][targetAmount] == -1) {
@@ -243,31 +244,31 @@ public class CoinsProblem {
 
     /**
      * 使用动态规划解决零钱兑换问题
-     * 
+     *
      * 【动态规划的优势】：
      * 1. 时间复杂度：O(item * targetAmount)，与记忆化搜索相同但常数更小
      * 2. 空间复杂度：O(item * targetAmount)，可进一步优化为O(targetAmount)
      * 3. 编程复杂度：自底向上填表，避免递归调用栈开销
      * 4. 可读性：状态转移过程更直观，便于理解和调试
-     * 
+     *
      * 【状态定义】：
      * dp[i][j] 表示使用前i种硬币凑出金额j所需的最少硬币数
-     * 
+     *
      * 【状态转移方程】：
      * dp[i][j] = min(dp[i-1][j], dp[i][j-coins[i-1]] + 1)
      * - 不选当前硬币：dp[i-1][j]
      * - 选择当前硬币：dp[i][j-coins[i-1]] + 1（注意这里是dp[i]而不是dp[i-1]，体现完全背包特性）
-     * 
+     *
      * 【边界条件】：
      * - dp[i][0] = 0：凑出金额0需要0个硬币
      * - dp[0][j] = MAX：没有硬币无法凑出正金额（用MAX标记无效状态）
-     * 
+     *
      * 【无效状态处理】：
      * 使用MAX = targetAmount + 1作为无效状态标记，因为：
      * - 任何有效解的硬币数都不会超过targetAmount（最坏情况全用面额1的硬币）
      * - MAX比所有有效解都大，在min比较中会被自然淘汰
      * - 最终通过 dp[item][targetAmount] < MAX 判断是否有解
-     * 
+     *
      * @param coins 硬币面额数组
      * @param item 硬币种类数量（1-based，表示前item种硬币）
      * @param targetAmount 目标金额
@@ -292,7 +293,7 @@ public class CoinsProblem {
 
         // 【步骤2】：初始化边界条件
         // dp[i][0] = 0：凑出金额0需要0个硬币（默认值已经是0）
-        
+
         // dp[0][j] = MAX：没有硬币无法凑出正金额，用MAX标记无效状态
         // MAX恰好比所有有效解都大1，在min函数中会被自然淘汰。注意，0行0列返回应该是0而不是 MAX
         for (int amount = 1; amount <= targetAmount; amount++) {
@@ -314,8 +315,8 @@ public class CoinsProblem {
                     // 注意：dp[i][j - coins[i-1]]而不是dp[i-1][j - coins[i-1]]
                     // 这体现了完全背包的特性：同一种硬币可以重复使用
                     dp[i][j] = Math.min(
-                        dp[i - 1][j],                    // 不选当前硬币
-                        dp[i][j - coins[i - 1]] + 1     // 选择当前硬币
+                            dp[i - 1][j],                    // 不选当前硬币
+                            dp[i][j - coins[i - 1]] + 1     // 选择当前硬币
                     );
                 }
             }
@@ -329,20 +330,20 @@ public class CoinsProblem {
 
     /**
      * 使用空间优化的动态规划解决零钱兑换问题
-     * 
+     *
      * 【空间优化原理】：
      * 将二维DP表dp[i][j]压缩为一维数组dp[j]，空间复杂度从O(item*targetAmount)优化为O(targetAmount)
-     * 
+     *
      * 【关键洞察】：
      * 在完全背包问题中，dp[i][j]只依赖于：
      * 1. dp[i-1][j]（上一轮迭代的值，即不选当前硬币）
      * 2. dp[i][j-coins[i-1]]（本轮已更新的值，即选择当前硬币）
-     * 
+     *
      * 【遍历顺序的重要性】：
      * - 外层循环：硬币种类（从前往后）
      * - 内层循环：金额（从前往后）
      * 这样确保dp[j-coins[i-1]]是"当前硬币种类下已更新的值"，体现完全背包特性
-     * 
+     *
      * @param coins 硬币面额数组
      * @param item 硬币种类数量
      * @param targetAmount 目标金额
@@ -379,12 +380,12 @@ public class CoinsProblem {
             for (int j = 1; j <= targetAmount; j++) {
                 // dp[i][j] = min(dp[i-1][j], dp[i][j-coins[i-1]] + 1)
                 // 这里要比的就是 j，就是当前这个序列上的容量
-                
+
                 // 【约束处理优先级原则的体现】：
                 // 1. 资源约束检查（最高优先级）：coins[i-1] <= j
                 // 2. 状态边界已在外层处理（targetAmount=0, item<=0等）
                 // 3. 优化选择（最低优先级）：Math.min比较
-                
+
                 // 【状态转移】：dp[j]原值相当于dp[i-1][j]（不选当前硬币）
                 // dp[j-coins[i-1]]相当于dp[i][j-coins[i-1]]（选择当前硬币，已在本轮更新）
                 if (coins[i - 1] <= j) {
