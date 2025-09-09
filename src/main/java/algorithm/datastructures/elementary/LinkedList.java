@@ -13,6 +13,9 @@ package algorithm.datastructures.elementary;
  *
  * 二叉树是分叉链表，我们遇到各种全局问题最好先观察子链表、子树结构有什么特别的地方，如果有不同，则归类到逻辑分支里，尝试构造一个递归形式的dc过程，最后得到全局解
  * 链表是由表头和子链表组成的，而二叉树是由根和左右子树构成的。
+ *
+ * 二分 merge 和前缀 merge
+ *
  * @author magicliang
  * @date 2025-09-02
  */
@@ -99,9 +102,10 @@ public class LinkedList {
             current = next;
 
             // 当 current 等于null的时候，整个原链表都变成了prev链表，可以直接使用 prev 了
+
         }
 
-        // 最后 prev 是新头
+        // 最后 prev 是新头，pcn 的最终返回值就是 p
         return prev;
     }
 
@@ -355,7 +359,7 @@ public class LinkedList {
      * 这个算法的 k + 1 和 dummyHead 是必须匹配存在的
      * 没有 dummyHead 不能处理头节点删除
      * 如果有了 dummyHead，如果k等于链表长度，k+1 也能受得住，无从删除起
-     * 所以查找节点不需要 dummyHead，删除节点需要
+     * 所以查找节点有没有 dummyHead 无所谓，删除节点需要这个操作来简化复杂度
      * 定律：
      * 1. 如果要让 slow 停在倒数第k个节点，要让 fast 先走 k 步。
      * 2. 如果要删除 k 节点（包括头），就要让 slow 停在倒数 k + 1 处。
