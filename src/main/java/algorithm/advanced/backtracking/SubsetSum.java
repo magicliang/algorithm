@@ -11,6 +11,77 @@ import java.util.List;
  * description: 子集和问题 - 寻找数组中所有和为指定目标值的子集
  * 允许重复使用数组中的元素
  *
+ * <h3>DFS求和问题去重的核心诀窍：</h3>
+ * <ol>
+ *   <li><strong>排序预处理</strong>：必须先对数组排序，使相同元素相邻，为后续去重创造条件</li>
+ *   <li><strong>层级去重机制</strong>：
+ *     <ul>
+ *       <li>使用条件判断 {@code i > start && nums[i] == nums[i-1]} 跳过同一层级的重复元素</li>
+ *       <li>关键点在于比较当前索引i与起始位置start的关系</li>
+ *     </ul>
+ *   </li>
+ *   <li><strong>两种典型场景处理</strong>：
+ *     <ul>
+ *       <li>允许重复使用元素时：直接遍历所有元素无需去重</li>
+ *       <li>不允许重复使用元素时：递归传入i+1确保不重复使用同一元素</li>
+ *     </ul>
+ *   </li>
+ *   <li><strong>去重本质</strong>：
+ *     <ul>
+ *       <li>水平去重：防止同一递归层级选择相同值</li>
+ *       <li>垂直去重：通过start参数控制避免重复使用元素</li>
+ *     </ul>
+ *   </li>
+ *   <li><strong>记忆口诀</strong>：排序→层级判断→相邻比较→递增起点</li>
+ * </ol>
+ *
+ * <h3>双指针算法 vs 回溯算法对比：</h3>
+ * <table border="1">
+ *   <tr>
+ *     <th>算法特点</th>
+ *     <th>双指针算法</th>
+ *     <th>回溯算法</th>
+ *   </tr>
+ *   <tr>
+ *     <td>适用场景</td>
+ *     <td>固定数量数字求和（如两数/三数之和）和有序数组</td>
+ *     <td>不定数量数字求和（如子集和问题）和需要所有解的情况</td>
+ *   </tr>
+ *   <tr>
+ *     <td>时间复杂度</td>
+ *     <td>两数之和O(n)，三数之和O(n²)，四数之和O(n³)</td>
+ *     <td>子集和问题O(2^n)</td>
+ *   </tr>
+ *   <tr>
+ *     <td>去重机制</td>
+ *     <td>利用单调性去重：排序后的确定性移动避免重复</td>
+ *     <td>层级去重：通过条件判断跳过同层重复元素</td>
+ *   </tr>
+ *   <tr>
+ *     <td>搜索空间</td>
+ *     <td>线性搜索空间：只能在一条线性路径上移动</td>
+ *     <td>树形搜索空间：可以探索所有可能的组合路径</td>
+ *   </tr>
+ *   <tr>
+ *     <td>解的数量</td>
+ *     <td>适合找到一对解或固定结构的解</td>
+ *     <td>适合找到所有可能的解</td>
+ *   </tr>
+ *   <tr>
+ *     <td>决策机制</td>
+ *     <td>基于当前状态的确定性移动，无法回溯</td>
+ *     <td>每个位置都有"选择"或"不选择"的决策树</td>
+ *   </tr>
+ * </table>
+ *
+ * <h3>算法选择建议：</h3>
+ * <ul>
+ *   <li><strong>固定数量求和</strong>：优先考虑双指针（效率更高）</li>
+ *   <li><strong>不定长度组合</strong>：必须使用回溯（双指针无法处理）</li>
+ *   <li><strong>需要所有解</strong>：只能使用回溯（双指针只能找到部分解）</li>
+ *   <li><strong>单一解或少数解</strong>：双指针更高效</li>
+ * </ul>
+ *
  * @author magicliang
  *
  *         date: 2025-08-26 10:41
@@ -152,6 +223,25 @@ public class SubsetSum {
      *         4. 剪枝优化：利用排序特性，提前终止不可能的路径
      *         5. 递归探索：对每个有效选择进行深度优先搜索
      *         6. 回溯撤销：移除最后选择的元素，继续探索其他可能性
+     * @implNote <strong>DFS去重的核心诀窍详解：</strong>
+     *         <ul>
+     *           <li><strong>排序是前提</strong>：{@code Arrays.sort(nums)} 使相同元素相邻</li>
+     *           <li><strong>层级去重条件</strong>：{@code i > start && nums[i] == nums[i-1]}
+     *             <ul>
+     *               <li>{@code i > start}：确保只在同一层级跳过重复，不影响不同层级的相同值</li>
+     *               <li>{@code nums[i] == nums[i-1]}：检测相邻重复元素</li>
+     *             </ul>
+     *           </li>
+     *           <li><strong>垂直去重</strong>：{@code i + 1} 作为下次递归的start，确保不重复使用元素</li>
+     *           <li><strong>水平去重</strong>：跳过同层重复值，避免 [1,1,2] 和 [1,1,2] 这样的重复组合</li>
+     *         </ul>
+     * @implNote <strong>为什么不能用双指针解决此问题：</strong>
+     *         <ul>
+     *           <li><strong>搜索空间不同</strong>：双指针是线性搜索，回溯是树形搜索</li>
+     *           <li><strong>解的数量要求</strong>：双指针适合找一对解，回溯适合找所有解</li>
+     *           <li><strong>组合长度</strong>：双指针适合固定长度（如三数和），回溯适合不定长度</li>
+     *           <li><strong>决策机制</strong>：双指针是确定性移动，回溯有选择/不选择的决策树</li>
+     *         </ul>
      * @timeComplexity O(2 ^ n) 其中n是数组长度，每个元素都有选或不选两种选择
      * @spaceComplexity O(n) 递归栈的最大深度，最坏情况下为数组长度
      * @see #subsetSumNoDuplicateCombination(int[], int) 公有方法调用此私有方法
@@ -167,8 +257,13 @@ public class SubsetSum {
         final int length = nums.length;
         // 从start开始，确保不重复使用前面的元素
         for (int i = start; i < length; i++) {
-            // 跳过重复元素，避免重复解
+            // 跳过重复元素，避免重复解 - DFS去重的核心诀窍
             // 关键：i > start 确保只在同一层级跳过重复，不影响不同层级的相同值
+            // 诀窍解析：
+            // 1. 排序预处理使相同元素相邻：[1,1,2] 而不是 [1,2,1]
+            // 2. i > start：只在同一递归层级去重，允许不同层级使用相同值
+            // 3. nums[i] == nums[i-1]：检测相邻重复，这是排序的直接好处
+            // 4. 水平去重：防止同层选择重复值产生 [1₁,2] 和 [1₂,2] 这样的重复组合
             if (i > start && nums[i] == nums[i - 1]) {
                 continue;
             }
@@ -181,8 +276,11 @@ public class SubsetSum {
 
             states.add(nums[i]);
 
-            // 传入i+1确保不重复使用当前元素
+            // 传入i+1确保不重复使用当前元素 - 垂直去重的关键
             // 关键：i+1 确保每个元素只使用一次
+            // 垂直去重诀窍：通过递增start参数，类似双指针的内指针机制
+            // 区别于双指针：双指针是线性确定性移动，这里是树形递归探索
+            // 为什么不能用双指针：需要找所有解而非一对解，需要回溯探索所有路径
             backtrackNoDuplicateCombination(nums, target - nums[i], states, i + 1, result);
 
             states.remove(states.size() - 1);
@@ -270,8 +368,13 @@ public class SubsetSum {
 
         final int length = nums.length;
         for (int i = start; i < length; i++) {
-            // 跳过重复元素，避免重复解
+            // 跳过重复元素，避免重复解 - DFS去重的核心诀窍（与上面方法相同）
             // 关键：只在同一层级跳过重复，不影响不同层级的相同值
+            // 去重诀窍记忆口诀：排序→层级判断→相邻比较→递增起点
+            // 1. 排序：Arrays.sort(nums) 使相同元素相邻
+            // 2. 层级判断：i > start 确保只在同层去重
+            // 3. 相邻比较：nums[i] == nums[i-1] 检测重复
+            // 4. 递增起点：下次递归传入 i+1 避免重复使用
             if (i > start && nums[i] == nums[i - 1]) {
                 continue;
             }
@@ -283,9 +386,12 @@ public class SubsetSum {
             }
 
             states.add(nums[i]);
-            // 此处是 i + 1，不是 i 了
-            // 修改递归值是类似 twosum 的改法
+            // 此处是 i + 1，不是 i 了 - 垂直去重机制
+            // 修改递归值是类似 twosum 的改法，但本质不同：
+            // 双指针：线性搜索空间，确定性移动，适合找一对解
+            // 回溯：树形搜索空间，回溯探索，适合找所有解
             // 关键：i+1 确保每个元素只使用一次，避免重复使用
+            // 为什么必须用回溯而非双指针：组合长度不固定且需要所有可能的解
             backtrackNoDuplicateElements(nums, target - nums[i], states, i + 1, result);
             states.remove(states.size() - 1);
         }
