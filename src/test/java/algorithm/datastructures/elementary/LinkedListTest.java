@@ -243,7 +243,7 @@ public class LinkedListTest {
     void testRemoveKthFromEnd() {
         // 测试删除中间节点
         int[] input = {1, 2, 3, 4, 5};
-        int[] expected = {1, 2, 4, 5}; // 删除倒数第2个节点（4）
+        int[] expected = {1, 2, 3, 5}; // 删除倒数第2个节点（4）
         LinkedList.ListNode head = LinkedList.createFromArray(input);
         LinkedList.ListNode result = linkedList.removeKthFromEnd(head, 2);
         assertArrayEquals(expected, LinkedList.toArray(result));
@@ -366,6 +366,190 @@ public class LinkedListTest {
         assertArrayEquals(expectedWithIncomplete, LinkedList.toArray(reversedWithIncomplete));
         
         System.out.println("=== 综合测试完成 ===");
+    }
+
+    // ==================== 新增方法测试 ====================
+
+    @Test
+    @DisplayName("测试K个一组翻转链表（头插法 + 递归实现）")
+    void testReverseKGroupWithHeadInsert() {
+        System.out.println("=== 测试K个一组翻转链表（头插法 + 递归实现） ===");
+        
+        // 测试用例1：正常情况 k=2
+        int[] testData1 = {1, 2, 3, 4, 5, 6};
+        LinkedList.ListNode result1 = linkedList.reverseKGroupWithHeadInsert(
+            LinkedList.createFromArray(testData1), 2);
+        System.out.println("原链表: " + LinkedList.printList(LinkedList.createFromArray(testData1)));
+        System.out.println("k=2翻转结果: " + LinkedList.printList(result1));
+        int[] expected1 = {2, 1, 4, 3, 6, 5};
+        assertArrayEquals(expected1, LinkedList.toArray(result1));
+        
+        // 测试用例2：正常情况 k=3
+        int[] testData2 = {1, 2, 3, 4, 5, 6, 7, 8};
+        LinkedList.ListNode result2 = linkedList.reverseKGroupWithHeadInsert(
+            LinkedList.createFromArray(testData2), 3);
+        System.out.println("k=3翻转结果: " + LinkedList.printList(result2));
+        int[] expected2 = {3, 2, 1, 6, 5, 4, 7, 8}; // 最后不足3个的保持原序
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
+        
+        // 测试用例3：k=1（不需要翻转）
+        int[] testData3 = {1, 2, 3, 4};
+        LinkedList.ListNode result3 = linkedList.reverseKGroupWithHeadInsert(
+            LinkedList.createFromArray(testData3), 1);
+        System.out.println("k=1翻转结果: " + LinkedList.printList(result3));
+        assertArrayEquals(testData3, LinkedList.toArray(result3));
+        
+        // 测试用例4：k大于链表长度
+        int[] testData4 = {1, 2, 3};
+        LinkedList.ListNode result4 = linkedList.reverseKGroupWithHeadInsert(
+            LinkedList.createFromArray(testData4), 5);
+        System.out.println("k=5翻转结果: " + LinkedList.printList(result4));
+        assertArrayEquals(testData4, LinkedList.toArray(result4)); // 保持原序
+        
+        // 测试用例5：空链表
+        LinkedList.ListNode result5 = linkedList.reverseKGroupWithHeadInsert(null, 2);
+        assertNull(result5);
+        
+        // 测试用例6：单节点链表
+        int[] testData6 = {1};
+        LinkedList.ListNode result6 = linkedList.reverseKGroupWithHeadInsert(
+            LinkedList.createFromArray(testData6), 2);
+        System.out.println("单节点k=2翻转结果: " + LinkedList.printList(result6));
+        assertArrayEquals(testData6, LinkedList.toArray(result6));
+        
+        System.out.println("=== 头插法+递归实现测试完成 ===\n");
+    }
+
+    @Test
+    @DisplayName("测试K个一组翻转链表（递归 + 递归实现）")
+    void testReverseKGroupWithDoubleRecursion() {
+        System.out.println("=== 测试K个一组翻转链表（递归 + 递归实现） ===");
+        
+        // 测试用例1：正常情况 k=2
+        int[] testData1 = {1, 2, 3, 4, 5, 6};
+        LinkedList.ListNode result1 = linkedList.reverseKGroupWithDoubleRecursion(
+            LinkedList.createFromArray(testData1), 2);
+        System.out.println("原链表: " + LinkedList.printList(LinkedList.createFromArray(testData1)));
+        System.out.println("k=2翻转结果: " + LinkedList.printList(result1));
+        int[] expected1 = {2, 1, 4, 3, 6, 5};
+        assertArrayEquals(expected1, LinkedList.toArray(result1));
+        
+        // 测试用例2：正常情况 k=3
+        int[] testData2 = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        LinkedList.ListNode result2 = linkedList.reverseKGroupWithDoubleRecursion(
+            LinkedList.createFromArray(testData2), 3);
+        System.out.println("k=3翻转结果: " + LinkedList.printList(result2));
+        int[] expected2 = {3, 2, 1, 6, 5, 4, 9, 8, 7}; // 每3个一组都翻转
+        assertArrayEquals(expected2, LinkedList.toArray(result2));
+        
+        // 测试用例3：k=4，有不完整组
+        int[] testData3 = {1, 2, 3, 4, 5, 6, 7};
+        LinkedList.ListNode result3 = linkedList.reverseKGroupWithDoubleRecursion(
+            LinkedList.createFromArray(testData3), 4);
+        System.out.println("k=4翻转结果: " + LinkedList.printList(result3));
+        int[] expected3 = {4, 3, 2, 1, 5, 6, 7}; // 只翻转前4个，后3个保持原序
+        assertArrayEquals(expected3, LinkedList.toArray(result3));
+        
+        // 测试用例4：k=1（不需要翻转）
+        int[] testData4 = {1, 2, 3, 4};
+        LinkedList.ListNode result4 = linkedList.reverseKGroupWithDoubleRecursion(
+            LinkedList.createFromArray(testData4), 1);
+        System.out.println("k=1翻转结果: " + LinkedList.printList(result4));
+        assertArrayEquals(testData4, LinkedList.toArray(result4));
+        
+        // 测试用例5：k大于链表长度
+        int[] testData5 = {1, 2};
+        LinkedList.ListNode result5 = linkedList.reverseKGroupWithDoubleRecursion(
+            LinkedList.createFromArray(testData5), 3);
+        System.out.println("k=3翻转结果: " + LinkedList.printList(result5));
+        assertArrayEquals(testData5, LinkedList.toArray(result5)); // 保持原序
+        
+        // 测试用例6：空链表
+        LinkedList.ListNode result6 = linkedList.reverseKGroupWithDoubleRecursion(null, 2);
+        assertNull(result6);
+        
+        System.out.println("=== 递归+递归实现测试完成 ===\n");
+    }
+
+    @Test
+    @DisplayName("测试两种新实现与原实现的一致性")
+    void testConsistencyBetweenImplementations() {
+        System.out.println("=== 测试两种新实现与原实现的一致性 ===");
+        
+        // 测试多种不同的输入情况
+        int[][] testCases = {
+            {1, 2, 3, 4, 5, 6, 7, 8},
+            {1, 2, 3, 4, 5},
+            {1, 2, 3},
+            {1, 2}
+        };
+        
+        int[] kValues = {2, 3, 4};
+        
+        for (int[] testData : testCases) {
+            for (int k : kValues) {
+                if (k > testData.length) continue; // 跳过k大于数组长度的情况
+                
+                // 创建三个相同的链表
+                LinkedList.ListNode list1 = LinkedList.createFromArray(testData);
+                LinkedList.ListNode list2 = LinkedList.createFromArray(testData);
+                LinkedList.ListNode list3 = LinkedList.createFromArray(testData);
+                
+                // 使用三种不同的实现
+                LinkedList.ListNode result1 = linkedList.reverseKGroup(list1, k);
+                LinkedList.ListNode result2 = linkedList.reverseKGroupWithHeadInsert(list2, k);
+                LinkedList.ListNode result3 = linkedList.reverseKGroupWithDoubleRecursion(list3, k);
+                
+                // 转换为数组进行比较
+                int[] array1 = LinkedList.toArray(result1);
+                int[] array2 = LinkedList.toArray(result2);
+                int[] array3 = LinkedList.toArray(result3);
+                
+                // 验证三种实现的结果一致
+                assertArrayEquals(array1, array2, 
+                    String.format("头插法实现与原实现不一致，测试数据: %s, k=%d", 
+                    java.util.Arrays.toString(testData), k));
+                assertArrayEquals(array1, array3, 
+                    String.format("双递归实现与原实现不一致，测试数据: %s, k=%d", 
+                    java.util.Arrays.toString(testData), k));
+                
+                System.out.printf("测试数据: %s, k=%d - 三种实现结果一致: %s%n", 
+                    java.util.Arrays.toString(testData), k, java.util.Arrays.toString(array1));
+            }
+        }
+        
+        System.out.println("=== 一致性测试完成 ===\n");
+    }
+
+    @Test
+    @DisplayName("测试边界情况和异常处理")
+    void testEdgeCasesForNewMethods() {
+        System.out.println("=== 测试新方法的边界情况 ===");
+        
+        // 测试k=0的情况
+        int[] testData = {1, 2, 3, 4};
+        LinkedList.ListNode list1 = LinkedList.createFromArray(testData);
+        LinkedList.ListNode list2 = LinkedList.createFromArray(testData);
+        
+        LinkedList.ListNode result1 = linkedList.reverseKGroupWithHeadInsert(list1, 0);
+        LinkedList.ListNode result2 = linkedList.reverseKGroupWithDoubleRecursion(list2, 0);
+        
+        // k=0时应该返回原链表
+        assertArrayEquals(testData, LinkedList.toArray(result1));
+        assertArrayEquals(testData, LinkedList.toArray(result2));
+        
+        // 测试负数k的情况
+        LinkedList.ListNode list3 = LinkedList.createFromArray(testData);
+        LinkedList.ListNode list4 = LinkedList.createFromArray(testData);
+        
+        LinkedList.ListNode result3 = linkedList.reverseKGroupWithHeadInsert(list3, -1);
+        LinkedList.ListNode result4 = linkedList.reverseKGroupWithDoubleRecursion(list4, -1);
+        
+        // 负数k时应该返回原链表
+        assertArrayEquals(testData, LinkedList.toArray(result3));
+        assertArrayEquals(testData, LinkedList.toArray(result4));
+        
+        System.out.println("=== 边界情况测试完成 ===");
     }
 
     // ==================== 辅助方法 ====================

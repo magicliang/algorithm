@@ -178,9 +178,19 @@ public class LinkedList {
 
     /**
      * 反转链表
-     * 时间复杂度：O(n)
-     * 空间复杂度：不使用 dummy节点的解法，实际上仍然是 O(1) 复杂度的算法
+     * <p>
+     * 使用三指针技术（prev、current、next）迭代地反转链表中每个节点的指针方向。
+     * 这是最经典的链表反转算法，通过逐个改变节点的next指针来实现整个链表的反转。
+     * <p>
+     * 算法步骤：
+     * 1. 初始化prev为null，current为head
+     * 2. 在每次循环中：保存next节点，反转current.next指向prev，移动prev和current
+     * 3. 当current为null时，prev就是新的头节点
+     * <p>
+     * 时间复杂度：O(n) - 需要遍历链表中的每个节点一次
+     * 空间复杂度：O(1) - 只使用了常数个额外指针变量
      *
+     * @param head 待反转链表的头节点
      * @return 反转后的链表头节点
      */
     public ListNode reverse(ListNode head) {
@@ -727,11 +737,19 @@ public class LinkedList {
      * 翻转整个链表（辅助方法）
      * <p>
      * 用于 isPalindrome 方法中翻转后半部分链表
+     * <p>
+     * 算法思路：
+     * 1. 使用三指针技术：prev（前驱）、current（当前）、next（后继）
+     * 2. 逐个翻转每个节点的指针方向
+     * 3. 最终prev指向新的头节点
+     * <p>
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(1)
      *
      * @param head 链表头节点
      * @return 翻转后的链表头节点
      */
-    private ListNode reverseList(ListNode head) {
+    ListNode reverseList(ListNode head) {
         ListNode prev = null;
         ListNode current = head;
 
@@ -1167,11 +1185,16 @@ public class LinkedList {
          * 2. 在回溯过程中逐步反转指针方向
          * 3. 保存第n+1个节点作为successor，用于连接未反转部分
          * <p>
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(n)（递归栈开销）
+         * 递归过程详解：
+         * - 递归终止条件：n == 1时，记录successor并返回当前节点
+         * - 递归调用：处理剩余n-1个节点的反转
+         * - 回溯处理：反转当前节点的指针，连接到successor
+         * <p>
+         * 时间复杂度：O(n) - 递归深度为n，每层处理常数时间
+         * 空间复杂度：O(n) - 递归栈的深度为n
          *
          * @param head 链表头节点
-         * @param n 需要反转的节点数
+         * @param n 需要反转的节点数（必须 >= 1且 <= 链表长度）
          * @return 反转后的链表头节点
          */
         public ListNode reverse(ListNode head, int n) {
@@ -1201,8 +1224,12 @@ public class LinkedList {
          * - 避免递归栈溢出风险
          * - 逻辑更直观易懂
          * <p>
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(1)
+         * 边界处理：
+         * - 当head为null或n <= 0时，直接返回原链表
+         * - 当n大于链表长度时，只反转实际存在的节点
+         * <p>
+         * 时间复杂度：O(min(n, 链表长度)) - 最多遍历n个节点
+         * 空间复杂度：O(1) - 只使用常数个额外指针
          *
          * @param head 链表头节点
          * @param n 需要反转的节点数
@@ -1246,17 +1273,19 @@ public class LinkedList {
          * 核心技巧：头插法反转
          * - 每次将current节点插入到dummyHead的后面
          * - 这样自然形成了反转的顺序
+         * - 头插法：current.next = dummyHead.next; dummyHead.next = current
          * <p>
          * 相比其他实现的特点：
          * - 使用dummy节点避免特殊处理头节点
          * - 头插法思路清晰直观
          * - 代码简洁优雅
+         * - 适合理解链表操作的基本技巧
          * <p>
-         * 时间复杂度：O(n)
-         * 空间复杂度：O(1)
+         * 时间复杂度：O(min(n, 链表长度)) - 最多处理n个节点
+         * 空间复杂度：O(1) - 只使用常数个额外节点和指针
          *
          * @param head 链表头节点
-         * @param n 需要反转的节点数
+         * @param n 需要反转的节点数（必须 >= 0）
          * @return 反转后的链表头节点
          */
         public ListNode reverse3(ListNode head, int n) {
@@ -1410,6 +1439,11 @@ public class LinkedList {
      * 2. 在回溯过程中逐步翻转指针方向
      * 3. 每层递归处理一个节点的翻转
      * <p>
+     * 递归过程详解：
+     * - 递归终止条件：k == 1时返回当前节点作为新头
+     * - 递归调用：处理剩余k-1个节点的翻转
+     * - 回溯处理：在返回过程中翻转当前节点的指针
+     * <p>
      * 注意：此方法假定输入的链表至少有K个节点
      * <p>
      * 时间复杂度：O(k)
@@ -1419,7 +1453,7 @@ public class LinkedList {
      * @param k 需要翻转的节点数
      * @return 翻转后的链表头节点
      */
-    private ListNode reverseKNodes(ListNode head, int k) {
+    ListNode reverseKNodes(ListNode head, int k) {
         // 递归终止条件：只有1个节点时直接返回
         if (k == 1) {
             return head;
@@ -1436,6 +1470,5 @@ public class LinkedList {
         
         return newHead;
     }
-
 
 }
