@@ -29,6 +29,79 @@ package algorithm.sorting;
  * </ul>
  * </p>
  *
+ * <p>
+ * <strong>分区方案图解对比：</strong>
+ * </p>
+ * <pre>
+ * ┌─────────────────────────────────────────────────────────────────────────────────┐
+ * │                           Lomuto 分区方案 (partition)                           │
+ * ├─────────────────────────────────────────────────────────────────────────────────┤
+ * │ 特点：单向扫描，以末尾元素为pivot，逻辑简单直观                                    │
+ * │                                                                                 │
+ * │ 初始状态：[4, 2, 8, 1, 9, 3, 7, 5]  pivot = 5 (末尾元素)                        │
+ * │           ↑                    ↑                                                │
+ * │           i=-1 (小值区末尾)     j=0 (扫描指针)                                    │
+ * │                                                                                 │
+ * │ 扫描过程：j 从左到右单向扫描，遇到小于pivot的元素就与i+1位置交换                    │
+ * │                                                                                 │
+ * │ Step 1: j=0, arr[0]=4 < 5 → i++, swap(i,j) → [4, 2, 8, 1, 9, 3, 7, 5]         │
+ * │         ↑  ↑                                                                    │
+ * │         i=0 j=1                                                                 │
+ * │                                                                                 │
+ * │ Step 2: j=1, arr[1]=2 < 5 → i++, swap(i,j) → [4, 2, 8, 1, 9, 3, 7, 5]         │
+ * │            ↑  ↑                                                                 │
+ * │            i=1 j=2                                                              │
+ * │                                                                                 │
+ * │ Step 3: j=2, arr[2]=8 ≥ 5 → 不交换，j继续                                       │
+ * │               ↑                                                                 │
+ * │               j=3                                                               │
+ * │                                                                                 │
+ * │ 最终结果：[4, 2, 1, 3, 9, 8, 7, 5] → 交换pivot到正确位置 → [4, 2, 1, 3, 5, 8, 7, 9] │
+ * │                    ↑                                           ↑               │
+ * │                  小值区                                      pivot位置          │
+ * └─────────────────────────────────────────────────────────────────────────────────┘
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────────────┐
+ * │                           Hoare 分区方案 (partition2)                          │
+ * ├─────────────────────────────────────────────────────────────────────────────────┤
+ * │ 特点：双向扫描，以首元素为pivot，交换次数更少，性能更优                            │
+ * │                                                                                 │
+ * │ 初始状态：[5, 2, 8, 1, 9, 3, 7, 4]  pivot = 5 (首元素)                          │
+ * │           ↑                    ↑                                                │
+ * │           i=0 (左指针)          j=7 (右指针)                                      │
+ * │                                                                                 │
+ * │ 扫描过程：双指针从两端向中间移动，寻找需要交换的元素对                             │
+ * │                                                                                 │
+ * │ Step 1: 右指针j向左找 < pivot的元素：j=7, arr[7]=4 < 5 ✓                         │
+ * │         左指针i向右找 ≥ pivot的元素：i=0, arr[0]=5 ≥ 5 ✓                         │
+ * │         交换 arr[0] ↔ arr[7] → [4, 2, 8, 1, 9, 3, 7, 5]                        │
+ * │                                                                                 │
+ * │ Step 2: 继续扫描：j向左找 < 5的元素，i向右找 ≥ 5的元素                            │
+ * │         j=6, arr[6]=7 ≥ 5 → j=5, arr[5]=3 < 5 ✓                                │
+ * │         i=1, arr[1]=2 < 5 → i=2, arr[2]=8 ≥ 5 ✓                                │
+ * │         交换 arr[2] ↔ arr[5] → [4, 2, 3, 1, 9, 8, 7, 5]                        │
+ * │                                                                                 │
+ * │ Step 3: 继续直到 i ≥ j，最后将pivot交换到相遇位置                                │
+ * │         最终结果：[4, 2, 3, 1, 5, 8, 7, 9]                                      │
+ * │                           ↑                                                     │
+ * │                        pivot位置                                                │
+ * └─────────────────────────────────────────────────────────────────────────────────┘
+ *
+ * ┌─────────────────────────────────────────────────────────────────────────────────┐
+ * │                                性能对比分析                                      │
+ * ├─────────────────────────────────────────────────────────────────────────────────┤
+ * │ 方案特性        │ Lomuto分区              │ Hoare分区                           │
+ * ├─────────────────┼─────────────────────────┼─────────────────────────────────────┤
+ * │ 扫描方向        │ 单向（左→右）            │ 双向（左↔右）                        │
+ * │ Pivot选择       │ 末尾元素                │ 首元素                              │
+ * │ 交换次数        │ 较多（每个小元素都交换） │ 较少（只交换违规元素对）              │
+ * │ 代码复杂度      │ 简单直观                │ 稍复杂（需注意扫描顺序）              │
+ * │ 缓存友好性      │ 较好（顺序访问）         │ 一般（跳跃访问）                     │
+ * │ 实际性能        │ 中等                    │ 更优（减少交换操作）                  │
+ * │ 稳定性          │ 实现简单不易出错         │ 需要注意边界条件                     │
+ * └─────────────────┴─────────────────────────┴─────────────────────────────────────┘
+ * </pre>
+ *
  * @author magicliang
  * @version 1.0
  * @see <a href="https://en.wikipedia.org/wiki/Quicksort">Quicksort - Wikipedia</a>
@@ -37,10 +110,10 @@ package algorithm.sorting;
 public class QuickSort {
 
     /**
-     * 快速排序入口方法：对整个数组进行原地快速排序
+     * 基于Lomuto分区方案的快速排序入口方法
      * <p>
      * 使用递归分治策略，通过 pivot 分割区间，逐步将每个元素归位。
-     * 这是最基础的快速排序实现，使用Lomuto分区方案。
+     * 这是最基础的快速排序实现，使用Lomuto分区方案（以末尾元素为pivot）。
      * </p>
      *
      * <p>
@@ -77,21 +150,21 @@ public class QuickSort {
      * @return 排序后的原数组引用（对于null输入返回null）
      * @throws ArrayIndexOutOfBoundsException 当数组为null时调用arr.length会抛出此异常
      */
-    public static int[] quickSort(int[] arr) {
+    public static int[] quickSortLomuto(int[] arr) {
         // 边界检查：null数组无法获取长度，会抛出异常
         if (arr == null) {
             return null;
         }
         // 将全局排序委托给区间版本：[0, length-1]
-        return quickSort(arr, 0, arr.length - 1);
+        return quickSortLomuto(arr, 0, arr.length - 1);
     }
 
     /**
-     * 快速排序递归主函数：对子数组 [begin, end] 进行排序
+     * 基于Lomuto分区方案的快速排序递归主函数：对子数组 [begin, end] 进行排序
      * 实现原地（in-place）排序，不额外分配空间
      * <p>
      * 核心流程：
-     * 1. 分区（partition）：选出一个 pivot，将其放置到最终有序位置 pivotal
+     * 1. 分区（partitionLomuto）：选出一个 pivot，将其放置到最终有序位置 pivotal
      * 2. 分治（divide & conquer）：
      * - 递归排序左半部分 [begin, pivotal-1]
      * - 递归排序右半部分 [pivotal+1, end]
@@ -105,7 +178,7 @@ public class QuickSort {
      * @param end 当前排序区间的结束索引（包含）
      * @return 排序完成后的原数组引用
      */
-    public static int[] quickSort(int[] arr, int begin, int end) {
+    public static int[] quickSortLomuto(int[] arr, int begin, int end) {
         // ======== 递归终止条件：无需排序的情况 ========
         // 以下情况直接返回，不再递归：
         // 1. 数组为空或未初始化
@@ -119,44 +192,75 @@ public class QuickSort {
 
         // ======== 分治三步走 ========
         // 1. 分区：将当前区间划分为左小右大两部分，并返回 pivot 的最终位置
-        int pivotal = partition(arr, begin, end);
+        int pivotal = partitionLomuto(arr, begin, end);
 
         // 2. 递归处理左半部分：[begin, pivotal - 1]
         //    注意：pivotal 已就位，不再参与排序
-        quickSort(arr, begin, pivotal - 1);
+        quickSortLomuto(arr, begin, pivotal - 1);
 
         // 3. 递归处理右半部分：[pivotal + 1, end]
         //    同样跳过 pivot，只排右边
-        quickSort(arr, pivotal + 1, end);
+        quickSortLomuto(arr, pivotal + 1, end);
 
         // 所有递归完成后，整个数组自然有序
         return arr;
     }
 
     /**
+     * 基于尾递归优化的快速排序入口方法
+     * <p>
+     * 使用尾递归优化技术，控制递归深度在O(log n)范围内，
+     * 避免在极端情况下的栈溢出问题。适用于处理超大数据集。
+     * </p>
+     *
+     * @param arr 待排序的整型数组（允许 null 或空）
+     * @return 排序后的原数组（null 或已排序）
+     */
+    public static int[] quickSortTailRecursive(int[] arr) {
+        if (arr == null || arr.length <= 1) {
+            return arr;
+        }
+        return quickSortTailRecursive(arr, 0, arr.length - 1);
+    }
+
+    /**
+     * 基于三数取中法的尾递归优化快速排序实现
+     * <p>
      * 为了防止栈帧空间的累积，我们可以在每轮哨兵排序完成后，比较两个子数组的长度，仅对较短的子数组进行递归。
      * 由于较短子数组的长度不会超过 n/2，因此这种方法能确保递归深度不超过 logn
+     * </p>
      *
-     * 尾递归优化的快速排序实现：
-     * - 使用迭代+递归混合模式，将递归深度控制在O(log n)
-     * - 每次只递归处理较短的子区间，避免栈溢出
-     * - 较长的子区间通过迭代处理，减少栈帧创建
+     * <p>
+     * <strong>尾递归优化的快速排序特点：</strong>
+     * </p>
+     * <ul>
+     *   <li>使用迭代+递归混合模式，将递归深度控制在O(log n)</li>
+     *   <li>每次只递归处理较短的子区间，避免栈溢出</li>
+     *   <li>较长的子区间通过迭代处理，减少栈帧创建</li>
+     *   <li>使用三数取中法选择pivot，避免最坏情况</li>
+     * </ul>
      *
-     * 算法流程：
-     * 1. 使用while循环替代纯递归，处理当前区间
-     * 2. 每次分区后，比较左右子区间长度
-     * 3. 递归处理较短的子区间（保证递归深度）
-     * 4. 通过修改begin/end迭代处理较长的子区间
+     * <p>
+     * <strong>算法流程：</strong>
+     * </p>
+     * <ol>
+     *   <li>使用while循环替代纯递归，处理当前区间</li>
+     *   <li>每次分区后，比较左右子区间长度</li>
+     *   <li>递归处理较短的子区间（保证递归深度）</li>
+     *   <li>通过修改begin/end迭代处理较长的子区间</li>
+     * </ol>
      *
-     * 时间复杂度：平均O(n log n)，最坏O(n²)（但概率极低，因使用三数取中法）
-     * 空间复杂度：O(log n)（栈空间，最坏情况）
+     * <p>
+     * <strong>时间复杂度：</strong> 平均O(n log n)，最坏O(n²)（但概率极低，因使用三数取中法）<br>
+     * <strong>空间复杂度：</strong> O(log n)（栈空间，最坏情况）
+     * </p>
      *
      * @param arr 待排序数组
      * @param begin 当前排序区间的起始索引（包含）
      * @param end 当前排序区间的结束索引（包含）
      * @return 排序完成后的原数组引用
      */
-    public static int[] quickSortShortest(int[] arr, int begin, int end) {
+    public static int[] quickSortTailRecursive(int[] arr, int begin, int end) {
         // ======== 递归终止条件：无需排序的情况 ========
         // 以下情况直接返回，不再递归：
         // 1. 数组为空或未初始化
@@ -171,14 +275,14 @@ public class QuickSort {
         // 递归排序要像二分一样，迭代处理一个区间
         while (begin < end) {
             // 每一轮查找开始，会重新计算 pivotal
-            int pivotal = partitionMedian(arr, begin, end); // 使用 partition3
+            int pivotal = partitionMedianOfThree(arr, begin, end); // 使用三数取中分区
             // 只排序短区间
             if (pivotal - begin < end - pivotal) {
-                quickSortShortest(arr, begin, pivotal - 1);
+                quickSortTailRecursive(arr, begin, pivotal - 1);
                 // 左区间排好，收窄左区间，进入下一轮循环
                 begin = pivotal + 1;
             } else {
-                quickSortShortest(arr, pivotal + 1, end);
+                quickSortTailRecursive(arr, pivotal + 1, end);
                 // 右区间排好，收窄右区间，进入下一轮循环
                 end = pivotal - 1;
             }
@@ -190,108 +294,174 @@ public class QuickSort {
     }
 
     /**
-     * 使用partition2的快速排序入口方法
-     * 基于Hoare分区方案的快速排序实现
+     * 基于Hoare分区方案的快速排序入口方法
+     * <p>
+     * 使用Hoare分区方案的快速排序实现，这是由快速排序发明者C.A.R. Hoare
+     * 提出的原始分区方案，相比Lomuto方案具有更少的交换次数，在实践中性能更优。
+     * </p>
+     *
+     * <p>
+     * <strong>Hoare分区方案特点：</strong>
+     * </p>
+     * <ul>
+     *   <li>双指针从两端向中间扫描</li>
+     *   <li>交换次数更少，性能更优</li>
+     *   <li>以首元素为pivot</li>
+     *   <li>实现稍复杂，但效率更高</li>
+     * </ul>
      *
      * @param arr 待排序的整型数组（允许 null 或空）
      * @return 排序后的原数组（null 或已排序）
      */
-    public static int[] quickSort2(int[] arr) {
+    public static int[] quickSortHoare(int[] arr) {
         if (arr == null || arr.length <= 1) {
             return arr;
         }
-        return quickSort2(arr, 0, arr.length - 1);
+        return quickSortHoare(arr, 0, arr.length - 1);
     }
 
     /**
-     * 使用partition2的快速排序递归主函数
-     * 基于Hoare分区方案的快速排序实现
+     * 基于Hoare分区方案的快速排序递归主函数
+     * <p>
+     * 使用Hoare分区方案进行递归排序，该方案通过双指针从两端向中间扫描，
+     * 减少了交换次数，提高了排序效率。
+     * </p>
      *
      * @param arr 待排序数组
      * @param begin 当前排序区间的起始索引（包含）
      * @param end 当前排序区间的结束索引（包含）
      * @return 排序完成后的原数组引用
      */
-    public static int[] quickSort2(int[] arr, int begin, int end) {
+    public static int[] quickSortHoare(int[] arr, int begin, int end) {
         if (arr == null || begin >= end) {
             return arr;
         }
 
-        // 使用partition2进行分区
-        int pivotal = partition2(arr, begin, end);
+        // 使用Hoare分区进行分区
+        int pivotal = partitionHoare(arr, begin, end);
 
         // 递归处理左半部分：[begin, pivotal-1]
-        quickSort2(arr, begin, pivotal - 1);
+        quickSortHoare(arr, begin, pivotal - 1);
 
         // 递归处理右半部分：[pivotal+1, end]
-        quickSort2(arr, pivotal + 1, end);
+        quickSortHoare(arr, pivotal + 1, end);
 
         return arr;
     }
 
     /**
-     * 使用partition3的快速排序入口方法
-     * 基于三数取中法和Hoare分区方案的高效快速排序实现
+     * 默认快速排序入口方法（向后兼容）
+     * <p>
+     * 为了保持向后兼容性，该方法委托给性能最优的三数取中法快速排序实现。
+     * 推荐在生产环境中使用，具有最佳的平均性能表现。
+     * </p>
      *
-     * 特点：
-     * - 使用三数取中法选择pivot，避免最坏情况
-     * - 使用Hoare分区方案，减少交换次数
-     * - 对于大数据集有更好的性能表现
+     * @param arr 待排序的整型数组（允许 null 或空数组）
+     * @return 排序后的原数组引用（对于null输入返回null）
+     * @see #quickSortMedianOfThree(int[]) 实际执行的方法
+     */
+    public static int[] quickSort(int[] arr) {
+        return quickSortMedianOfThree(arr);
+    }
+
+    /**
+     * 默认快速排序递归主函数（向后兼容）
+     * <p>
+     * 为了保持向后兼容性，该方法委托给性能最优的三数取中法快速排序实现。
+     * </p>
+     *
+     * @param arr 待排序数组
+     * @param begin 当前排序区间的起始索引（包含）
+     * @param end 当前排序区间的结束索引（包含）
+     * @return 排序完成后的原数组引用
+     * @see #quickSortMedianOfThree(int[], int, int) 实际执行的方法
+     */
+    public static int[] quickSort(int[] arr, int begin, int end) {
+        return quickSortMedianOfThree(arr, begin, end);
+    }
+
+    /**
+     * 基于三数取中法的快速排序入口方法
+     * <p>
+     * 基于三数取中法和Hoare分区方案的高效快速排序实现，
+     * 这是快速排序的优化版本，在实际应用中性能最佳。
+     * </p>
+     *
+     * <p>
+     * <strong>三数取中法快速排序特点：</strong>
+     * </p>
+     * <ul>
+     *   <li>使用三数取中法选择pivot，避免最坏情况</li>
+     *   <li>使用Hoare分区方案，减少交换次数</li>
+     *   <li>对于大数据集有更好的性能表现</li>
+     *   <li>在已排序或逆序数组上表现优异</li>
+     * </ul>
      *
      * @param arr 待排序的整型数组（允许 null 或空）
      * @return 排序后的原数组（null 或已排序）
      */
-    public static int[] quickSort3(int[] arr) {
+    public static int[] quickSortMedianOfThree(int[] arr) {
         if (arr == null || arr.length <= 1) {
             return arr;
         }
-        return quickSort3(arr, 0, arr.length - 1);
+        return quickSortMedianOfThree(arr, 0, arr.length - 1);
     }
 
     /**
-     * 使用partition3的快速排序递归主函数
-     * 基于三数取中法和Hoare分区方案的高效快速排序实现
+     * 基于三数取中法的快速排序递归主函数
+     * <p>
+     * 使用三数取中法和Hoare分区方案的高效快速排序实现，
+     * 通过选择更好的pivot来避免最坏情况的发生。
+     * </p>
      *
      * @param arr 待排序数组
      * @param begin 当前排序区间的起始索引（包含）
      * @param end 当前排序区间的结束索引（包含）
      * @return 排序完成后的原数组引用
      */
-    public static int[] quickSort3(int[] arr, int begin, int end) {
+    public static int[] quickSortMedianOfThree(int[] arr, int begin, int end) {
         if (arr == null || begin >= end) {
             return arr;
         }
 
-        // 使用partition3进行分区（三数取中法+Hoare分区）
-        int pivotal = partitionMedian(arr, begin, end);
+        // 使用三数取中分区进行分区（三数取中法+Hoare分区）
+        int pivotal = partitionMedianOfThree(arr, begin, end);
 
         // 递归处理左半部分：[begin, pivotal-1]
-        quickSort3(arr, begin, pivotal - 1);
+        quickSortMedianOfThree(arr, begin, pivotal - 1);
 
         // 递归处理右半部分：[pivotal+1, end]
-        quickSort3(arr, pivotal + 1, end);
+        quickSortMedianOfThree(arr, pivotal + 1, end);
 
         return arr;
     }
 
     /**
-     * 快速排序的核心分区操作：Lomuto 分区方案
+     * Lomuto分区方案的核心分区操作
+     * <p>
      * 将子数组 [begin, end] 按 pivot 值划分为：
      * [ 小于 pivot ]  [ pivot ]  [ 大于等于 pivot ]
      * 并返回 pivot 的最终位置（即"已排好序的中间节点"）
+     * </p>
+     *
      * <p>
      * 与归并排序不同，快排是"先定位，再分治"：
-     * - 先确定一个元素的最终位置（锚点）
-     * - 再递归处理其左右区间
+     * </p>
+     * <ul>
+     *   <li>先确定一个元素的最终位置（锚点）</li>
+     *   <li>再递归处理其左右区间</li>
+     * </ul>
+     *
      * <p>
      * 使用 Lomuto 方案（以末尾元素为 pivot），逻辑清晰，易于理解
+     * </p>
      *
      * @param arr 待分区的数组
      * @param begin 当前处理区间的起始索引（包含）
      * @param end 当前处理区间的结束索引（包含）
      * @return pivot 元素排序后所在的索引位置（分割点）
      */
-    static int partition(int[] arr, int begin, int end) {
+    static int partitionLomuto(int[] arr, int begin, int end) {
         // 特殊情况：区间只有一个元素，无需分区，直接返回其位置
         if (begin == end) {
             return begin;
@@ -344,7 +514,7 @@ public class QuickSort {
     }
 
     /**
-     * Hoare分区方案的分区操作
+     * Hoare分区方案的核心分区操作
      * <p>
      * 这是由快速排序发明者C.A.R. Hoare提出的原始分区方案，
      * 相比Lomuto方案具有更少的交换次数，在实践中性能更优。
@@ -352,6 +522,7 @@ public class QuickSort {
      *
      * <p>
      * <strong>算法流程：</strong>
+     * </p>
      * <ol>
      *   <li>选择区间起始元素作为pivot</li>
      *   <li>使用双指针从两端向中间扫描</li>
@@ -360,16 +531,15 @@ public class QuickSort {
      *   <li>交换找到的元素，继续扫描直到指针相遇</li>
      *   <li>将pivot交换到最终位置</li>
      * </ol>
-     * </p>
      *
      * <p>
      * <strong>关键设计要点：</strong>
+     * </p>
      * <ul>
      *   <li>选择左端元素为pivot时，必须先从右端开始扫描</li>
      *   <li>这样确保最终相遇位置的元素小于等于pivot</li>
      *   <li>避免了将大于pivot的元素交换到起始位置的错误</li>
      * </ul>
-     * </p>
      *
      * <p>
      * <strong>时间复杂度：</strong> O(n) - 需要扫描整个区间<br>
@@ -381,7 +551,7 @@ public class QuickSort {
      * @param end 分区区间的结束索引（包含）
      * @return pivot元素的最终位置索引
      */
-    static int partition2(int[] arr, int begin, int end) {
+    static int partitionHoare(int[] arr, int begin, int end) {
         if (begin == end) {
             return begin;
         }
@@ -414,31 +584,43 @@ public class QuickSort {
     }
 
     /**
-     * 使用三数取中法的Hoare分区方案
+     * 基于三数取中法的Hoare分区方案
+     * <p>
+     * 该分区方法结合了三数取中法和Hoare分区的优势，
+     * 既避免了最坏情况，又减少了交换次数，是性能最优的分区方案。
+     * </p>
      *
-     * 该分区方法通过以下步骤实现：
-     * 1. 使用三数取中法选择pivot，避免最坏情况
-     * 2. 将pivot交换到区间起始位置
-     * 3. 使用Hoare双指针方案进行分区
-     * 4. 最后将pivot交换到最终位置
+     * <p>
+     * <strong>算法步骤：</strong>
+     * </p>
+     * <ol>
+     *   <li>使用三数取中法选择pivot，避免最坏情况</li>
+     *   <li>将pivot交换到区间起始位置</li>
+     *   <li>使用Hoare双指针方案进行分区</li>
+     *   <li>最后将pivot交换到最终位置</li>
+     * </ol>
      *
-     * 分区完成后满足：
-     * - pivot左边的所有元素 <= pivot
-     * - pivot右边的所有元素 >= pivot
-     * - pivot位于其最终排序位置
+     * <p>
+     * <strong>分区完成后满足：</strong>
+     * </p>
+     * <ul>
+     *   <li>pivot左边的所有元素 <= pivot</li>
+     *   <li>pivot右边的所有元素 >= pivot</li>
+     *   <li>pivot位于其最终排序位置</li>
+     * </ul>
      *
      * @param arr 待分区的数组
      * @param begin 分区区间的起始索引（包含）
      * @param end 分区区间的结束索引（包含）
      * @return pivot的最终位置索引
      */
-    static int partitionMedian(int[] arr, int begin, int end) {
+    static int partitionMedianOfThree(int[] arr, int begin, int end) {
         if (begin >= end) {
             return begin;
         }
 
         int mid = begin + (end - begin) / 2;
-        final int median = medianThree(arr, begin, mid, end);
+        final int median = medianOfThree(arr, begin, mid, end);
 
         // 标准的左交换方案：即使是使用随机化的 pivotal，找到以后都要和开头交换
         int target = arr[median];
@@ -486,7 +668,20 @@ public class QuickSort {
 
     /**
      * 三数取中法：找到三个位置中中位数的索引
-     * 用于快速排序中选择更好的pivot，避免最坏情况
+     * <p>
+     * 用于快速排序中选择更好的pivot，避免最坏情况。
+     * 通过比较首、中、尾三个位置的元素值，选择中位数作为pivot，
+     * 可以有效避免在已排序或逆序数组上的最坏情况。
+     * </p>
+     *
+     * <p>
+     * <strong>算法优势：</strong>
+     * </p>
+     * <ul>
+     *   <li>避免最坏情况：对于已排序或逆序数组表现优异</li>
+     *   <li>提高平均性能：选择更接近真实中位数的pivot</li>
+     *   <li>实现简单：仅需要常数时间的比较操作</li>
+     * </ul>
      *
      * @param nums 数组
      * @param left 左索引
@@ -494,7 +689,7 @@ public class QuickSort {
      * @param right 右索引
      * @return 中位数所在的索引
      */
-    static int medianThree(int[] nums, int left, int mid, int right) {
+    static int medianOfThree(int[] nums, int left, int mid, int right) {
         int a = nums[left];
         int b = nums[mid];
         int c = nums[right];
