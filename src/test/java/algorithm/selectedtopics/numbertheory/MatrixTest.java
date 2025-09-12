@@ -224,4 +224,215 @@ class MatrixTest {
         matrix.reverseArray(evenLength);
         assertArrayEquals(new int[]{4, 3, 2, 1}, evenLength, "偶数长度数组反转结果不正确");
     }
+
+    // ==================== 逆时针旋转测试用例 ====================
+
+    @Test
+    @DisplayName("测试2x2矩阵逆时针旋转 - 基础情况验证")
+    void testReverseRotate2x2Matrix() {
+        // 基础情况：验证副对角线翻转算法的起始条件
+        int[][] input = {
+            {1, 2},
+            {3, 4}
+        };
+
+        int[][] expected = {
+            {2, 4},
+            {1, 3}
+        };
+
+        matrix.reverseRotate(input);
+        assertArrayEquals(expected, input, "2x2矩阵逆时针旋转90度结果不正确");
+    }
+
+    @Test
+    @DisplayName("测试3x3矩阵逆时针旋转 - 奇数维度验证")
+    void testReverseRotate3x3Matrix() {
+        int[][] input = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
+
+        int[][] expected = {
+            {3, 6, 9},
+            {2, 5, 8},
+            {1, 4, 7}
+        };
+
+        matrix.reverseRotate(input);
+        assertArrayEquals(expected, input, "3x3矩阵逆时针旋转90度结果不正确");
+    }
+
+    @Test
+    @DisplayName("测试4x4矩阵逆时针旋转 - 偶数维度验证")
+    void testReverseRotate4x4Matrix() {
+        int[][] input = {
+            {1,  2,  3,  4},
+            {5,  6,  7,  8},
+            {9,  10, 11, 12},
+            {13, 14, 15, 16}
+        };
+
+        int[][] expected = {
+            {4,  8,  12, 16},
+            {3,  7,  11, 15},
+            {2,  6,  10, 14},
+            {1,  5,  9,  13}
+        };
+
+        matrix.reverseRotate(input);
+        assertArrayEquals(expected, input, "4x4矩阵逆时针旋转90度结果不正确");
+    }
+
+    @Test
+    @DisplayName("测试1x1矩阵逆时针旋转 - 边界情况")
+    void testReverseRotate1x1Matrix() {
+        int[][] input = {{42}};
+        int[][] expected = {{42}};
+
+        matrix.reverseRotate(input);
+        assertArrayEquals(expected, input, "1x1矩阵逆时针旋转后应保持不变");
+    }
+
+    @Test
+    @DisplayName("测试包含负数的矩阵逆时针旋转")
+    void testReverseRotateMatrixWithNegativeNumbers() {
+        int[][] input = {
+            {-1, -2, -3},
+            {-4, -5, -6},
+            {-7, -8, -9}
+        };
+
+        int[][] expected = {
+            {-3, -6, -9},
+            {-2, -5, -8},
+            {-1, -4, -7}
+        };
+
+        matrix.reverseRotate(input);
+        assertArrayEquals(expected, input, "包含负数的矩阵逆时针旋转结果不正确");
+    }
+
+    @Test
+    @DisplayName("测试连续逆时针旋转4次回到原状态")
+    void testFourConsecutiveReverseRotations() {
+        int[][] original = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
+
+        // 深拷贝原矩阵
+        int[][] input = new int[original.length][];
+        for (int i = 0; i < original.length; i++) {
+            input[i] = original[i].clone();
+        }
+
+        // 连续逆时针旋转4次，应该回到原状态
+        for (int i = 0; i < 4; i++) {
+            matrix.reverseRotate(input);
+        }
+
+        assertArrayEquals(original, input, "连续逆时针旋转4次后应回到原始状态");
+    }
+
+    @Test
+    @DisplayName("验证逆时针旋转位置变换公式 (i,j) → (n-1-j, i)")
+    void testReverseRotatePositionTransformationFormula() {
+        // 创建一个特殊矩阵，每个位置的值为 i*10 + j，便于验证位置变换
+        int[][] input = {
+            {0,  1,  2},   // 位置(0,0)=0, (0,1)=1, (0,2)=2
+            {10, 11, 12},  // 位置(1,0)=10, (1,1)=11, (1,2)=12
+            {20, 21, 22}   // 位置(2,0)=20, (2,1)=21, (2,2)=22
+        };
+
+        matrix.reverseRotate(input);
+
+        // 验证关键位置的变换：
+        // 原位置(0,0)的值0 → 新位置(n-1-0, 0) = (2,0)
+        assertEquals(0, input[2][0], "原位置(0,0)的值0应变换到(2,0)");
+        // 原位置(0,2)的值2 → 新位置(n-1-2, 0) = (0,0)
+        assertEquals(2, input[0][0], "原位置(0,2)的值2应变换到(0,0)");
+        // 原位置(1,1)的值11 → 新位置(n-1-1, 1) = (1,1) (中心点不变)
+        assertEquals(11, input[1][1], "中心位置(1,1)应保持不变");
+        // 原位置(2,0)的值20 → 新位置(n-1-0, 2) = (2,2)
+        assertEquals(20, input[2][2], "原位置(2,0)的值20应变换到(2,2)");
+        // 原位置(2,2)的值22 → 新位置(n-1-2, 2) = (0,2)
+        assertEquals(22, input[0][2], "原位置(2,2)的值22应变换到(0,2)");
+    }
+
+    @Test
+    @DisplayName("测试顺时针和逆时针旋转的互逆性")
+    void testRotateAndReverseRotateInversibility() {
+        int[][] original = {
+            {1, 2, 3, 4},
+            {5, 6, 7, 8},
+            {9, 10, 11, 12},
+            {13, 14, 15, 16}
+        };
+
+        // 深拷贝原矩阵
+        int[][] input = new int[original.length][];
+        for (int i = 0; i < original.length; i++) {
+            input[i] = original[i].clone();
+        }
+
+        // 先顺时针旋转，再逆时针旋转，应该回到原状态
+        matrix.rotate(input);
+        matrix.reverseRotate(input);
+
+        assertArrayEquals(original, input, "顺时针旋转后再逆时针旋转应回到原始状态");
+    }
+
+    @Test
+    @DisplayName("测试逆时针旋转3次等于顺时针旋转1次")
+    void testThreeReverseRotationsEqualsOneRotation() {
+        int[][] original = {
+            {1, 2, 3},
+            {4, 5, 6},
+            {7, 8, 9}
+        };
+
+        // 准备两个相同的矩阵副本
+        int[][] input1 = new int[original.length][];
+        int[][] input2 = new int[original.length][];
+        for (int i = 0; i < original.length; i++) {
+            input1[i] = original[i].clone();
+            input2[i] = original[i].clone();
+        }
+
+        // input1: 逆时针旋转3次
+        for (int i = 0; i < 3; i++) {
+            matrix.reverseRotate(input1);
+        }
+
+        // input2: 顺时针旋转1次
+        matrix.rotate(input2);
+
+        assertArrayEquals(input2, input1, "逆时针旋转3次的结果应等于顺时针旋转1次");
+    }
+
+    @Test
+    @DisplayName("测试5x5矩阵逆时针旋转 - 验证副对角线翻转算法")
+    void testReverseRotate5x5Matrix() {
+        int[][] input = {
+            {1,  2,  3,  4,  5},
+            {6,  7,  8,  9,  10},
+            {11, 12, 13, 14, 15},
+            {16, 17, 18, 19, 20},
+            {21, 22, 23, 24, 25}
+        };
+
+        int[][] expected = {
+            {5,  10, 15, 20, 25},
+            {4,  9,  14, 19, 24},
+            {3,  8,  13, 18, 23},
+            {2,  7,  12, 17, 22},
+            {1,  6,  11, 16, 21}
+        };
+
+        matrix.reverseRotate(input);
+        assertArrayEquals(expected, input, "5x5矩阵逆时针旋转90度结果不正确");
+    }
 }
