@@ -1,6 +1,9 @@
 package algorithm.selectedtopics.numbertheory;
 
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * project name: algorithm
  *
@@ -35,6 +38,64 @@ package algorithm.selectedtopics.numbertheory;
  */
 public class Matrix {
 
+    /**
+     * 螺旋遍历矩阵 - 按顺时针方向遍历矩阵的所有元素
+     * 
+     * 算法思路：
+     * 1. 维护四个边界：上边界(top)、下边界(bottom)、左边界(left)、右边界(right)
+     * 2. 按照 右→下→左→上 的顺序遍历，每完成一个方向就收缩对应边界
+     * 3. 当边界交叉时停止遍历
+     * 
+     * 时间复杂度：O(m×n)，空间复杂度：O(1)（不计算结果数组）
+     * 
+     * @param matrix 输入的二维矩阵
+     * @return 螺旋遍历的结果列表
+     */
+    List<Integer> spiralOrder(int[][] matrix) {
+        List<Integer> result = new ArrayList<>();
+        
+        if (matrix == null || matrix.length == 0 || matrix[0].length == 0) {
+            return result;
+        }
+
+        // 定义四个边界
+        int top = 0;                    // 上边界
+        int bottom = matrix.length - 1; // 下边界  
+        int left = 0;                   // 左边界
+        int right = matrix[0].length - 1; // 右边界
+
+        while (top <= bottom && left <= right) {
+            // 1. 从左到右遍历上边界
+            for (int j = left; j <= right; j++) {
+                result.add(matrix[top][j]);
+            }
+            top++; // 上边界下移
+
+            // 2. 从上到下遍历右边界
+            for (int i = top; i <= bottom; i++) {
+                result.add(matrix[i][right]);
+            }
+            right--; // 右边界左移
+
+            // 3. 从右到左遍历下边界（需要检查是否还有行）
+            if (top <= bottom) {
+                for (int j = right; j >= left; j--) {
+                    result.add(matrix[bottom][j]);
+                }
+                bottom--; // 下边界上移
+            }
+
+            // 4. 从下到上遍历左边界（需要检查是否还有列）
+            if (left <= right) {
+                for (int i = bottom; i >= top; i--) {
+                    result.add(matrix[i][left]);
+                }
+                left++; // 左边界右移
+            }
+        }
+
+        return result;
+    }
 
     /**
      * 矩阵顺时针旋转90度的主方法
@@ -83,7 +144,7 @@ public class Matrix {
      */
     public void reverseRotate(int[][] matrix) {
         int n = matrix.length;
-        
+
         // Step 1: 沿副对角线翻转（从右上到左下的对角线）
         // 只遍历副对角线上方的元素，避免重复交换
         for (int i = 0; i < n; i++) {

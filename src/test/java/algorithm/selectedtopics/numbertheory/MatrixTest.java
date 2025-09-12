@@ -5,6 +5,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * Matrix类的JUnit测试
  *
@@ -434,5 +437,100 @@ class MatrixTest {
 
         matrix.reverseRotate(input);
         assertArrayEquals(expected, input, "5x5矩阵逆时针旋转90度结果不正确");
+    }
+
+    // ==================== 螺旋遍历测试用例 ====================
+
+    /**
+     * 测试3x3矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrder3x3Matrix() {
+        int[][] matrix = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};
+        List<Integer> expected = Arrays.asList(1, 2, 3, 6, 9, 8, 7, 4, 5);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "3x3矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试4x4矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrder4x4Matrix() {
+        int[][] matrix = {
+            {1, 2, 3, 4},
+            {5, 6, 7, 8},
+            {9, 10, 11, 12},
+            {13, 14, 15, 16}
+        };
+        List<Integer> expected = Arrays.asList(1, 2, 3, 4, 8, 12, 16, 15, 14, 13, 9, 5, 6, 7, 11, 10);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "4x4矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试1x1矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrder1x1Matrix() {
+        int[][] matrix = {{42}};
+        List<Integer> expected = Arrays.asList(42);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "1x1矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试单行矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrderSingleRow() {
+        int[][] matrix = {{1, 2, 3, 4, 5}};
+        List<Integer> expected = Arrays.asList(1, 2, 3, 4, 5);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "单行矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试单列矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrderSingleColumn() {
+        int[][] matrix = {{1}, {2}, {3}, {4}};
+        List<Integer> expected = Arrays.asList(1, 2, 3, 4);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "单列矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试2x3矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrder2x3Matrix() {
+        int[][] matrix = {{1, 2, 3}, {4, 5, 6}};
+        List<Integer> expected = Arrays.asList(1, 2, 3, 6, 5, 4);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "2x3矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试3x2矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrder3x2Matrix() {
+        int[][] matrix = {{1, 2}, {3, 4}, {5, 6}};
+        List<Integer> expected = Arrays.asList(1, 2, 4, 6, 5, 3);
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "3x2矩阵螺旋遍历结果不正确");
+    }
+
+    /**
+     * 测试空矩阵的螺旋遍历
+     */
+    @Test
+    void testSpiralOrderEmptyMatrix() {
+        int[][] matrix = {};
+        List<Integer> expected = Arrays.asList();
+        List<Integer> actual = this.matrix.spiralOrder(matrix);
+        assertEquals(expected, actual, "空矩阵螺旋遍历应返回空列表");
     }
 }
