@@ -47,7 +47,7 @@ public class BurstBalloonsTest {
     public void testAllOnes() {
         // 测试全为1的情况
         int[] nums = {1, 1, 1, 1};
-        int expected = 8; // 每次戳破都是1*1*1=1，共4次，但顺序影响结果
+        int expected = 4; // 每次戳破都是1*1*1=1，共4次
         assertEquals(expected, solution.maxCoins(nums));
     }
 

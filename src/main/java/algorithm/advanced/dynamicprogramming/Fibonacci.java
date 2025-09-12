@@ -47,6 +47,11 @@ public class Fibonacci {
      * @since 1.0
      */
     public static long fib(int n) {
+        // 输入验证：不接受负数
+        if (n < 0) {
+            throw new IllegalArgumentException("斐波那契数列不支持负数输入: " + n);
+        }
+        
         // 边界条件：F(0) = 0, F(1) = 1
         if (n <= 1) {
             return n;

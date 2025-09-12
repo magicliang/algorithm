@@ -34,7 +34,7 @@ public class CuttingStickTest {
         // 测试两次切割
         int n = 9;
         int[] cuts = {5, 6};
-        int expected = 22; // 9 + (5+4) = 9 + 9 = 18 或 9 + (6+3) = 9 + 9 = 18，实际最优可能不同
+        int expected = 13; // 最优切割顺序：先切5(成本9)，再切6(成本4)，总成本13
         assertEquals(expected, solution.minCost(n, cuts));
     }
 
@@ -43,7 +43,7 @@ public class CuttingStickTest {
         // 测试三次切割
         int n = 6;
         int[] cuts = {1, 3, 4};
-        int expected = 22; // 根据最优切割顺序计算
+        int expected = 12; // 根据最优切割顺序计算
         assertEquals(expected, solution.minCost(n, cuts));
     }
 

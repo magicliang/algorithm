@@ -14,7 +14,8 @@ public class LongestPalindromeTest {
     @Test
     public void testBasicPalindromes() {
         // 测试基本回文串
-        assertEquals("bab", solution.longestPalindrome("babad")); // 或 "aba"
+        String result = solution.longestPalindrome("babad");
+        assertTrue(result.equals("bab") || result.equals("aba"), "应该返回 'bab' 或 'aba'");
         assertEquals("bb", solution.longestPalindrome("cbbd"));
     }
 
@@ -29,7 +30,8 @@ public class LongestPalindromeTest {
     public void testTwoCharacters() {
         // 测试两字符
         assertEquals("aa", solution.longestPalindrome("aa"));
-        assertEquals("a", solution.longestPalindrome("ab")); // 或 "b"
+        String result = solution.longestPalindrome("ab");
+        assertTrue(result.equals("a") || result.equals("b"), "应该返回 'a' 或 'b'");
     }
 
     @Test
@@ -81,7 +83,8 @@ public class LongestPalindromeTest {
     @Test
     public void testOptimizedVersion() {
         // 测试优化版本
-        assertEquals("bab", solution.longestPalindromeOptimized("babad")); // 或 "aba"
+        String result1 = solution.longestPalindromeOptimized("babad");
+        assertTrue(result1.equals("bab") || result1.equals("aba"), "应该返回 'bab' 或 'aba'");
         assertEquals("bb", solution.longestPalindromeOptimized("cbbd"));
         assertEquals("a", solution.longestPalindromeOptimized("a"));
     }
@@ -89,7 +92,8 @@ public class LongestPalindromeTest {
     @Test
     public void testWithProcessVersion() {
         // 测试带处理版本
-        assertEquals("bab", solution.longestPalindromeWithProcess("babad")); // 或 "aba"
+        String result2 = solution.longestPalindromeWithProcess("babad");
+        assertTrue(result2.equals("bab") || result2.equals("aba"), "应该返回 'bab' 或 'aba'");
         assertEquals("bb", solution.longestPalindromeWithProcess("cbbd"));
         assertEquals("a", solution.longestPalindromeWithProcess("a"));
     }

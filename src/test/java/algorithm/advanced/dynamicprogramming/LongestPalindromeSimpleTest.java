@@ -108,7 +108,7 @@ public class LongestPalindromeSimpleTest {
         String result = solution.longestPalindrome("Aa");
         assertEquals(1, result.length(), "大小写不同，应该返回单字符");
         
-        assertEquals("AaA", solution.longestPalindrome("bAaAb"));
+        assertEquals("bAaAb", solution.longestPalindrome("bAaAb"));
     }
 
     @Test

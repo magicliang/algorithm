@@ -106,7 +106,7 @@ public class MatrixChainMultiplicationTest {
         
         // 测试包含1的维度
         int[] p1 = {1, 1, 1, 1};
-        assertEquals(0, solution.matrixChainOrder(p1)); // 所有乘法成本都是0
+        assertEquals(2, solution.matrixChainOrder(p1)); // 3个1×1矩阵相乘，成本是2
         
         // 测试大数值
         int[] p2 = {100, 200, 300};

@@ -27,6 +27,9 @@ public class MatrixChainMultiplication {
      * 空间复杂度：O(n²)
      */
     public int matrixChainOrder(int[] p) {
+        if (p == null || p.length < 2) {
+            throw new IllegalArgumentException("至少需要2个维度来定义1个矩阵");
+        }
         int n = p.length - 1; // 矩阵个数
         
         // dp[i][j]表示计算矩阵Ai到Aj的最少标量乘法次数
