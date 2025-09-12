@@ -26,22 +26,6 @@ package algorithm.advanced.dynamicprogramming;
 public class Fibonacci {
 
     /**
-     * 测试方法：验证斐波那契数列的计算结果
-     *
-     * 测试用例：
-     * - F(0) = 0
-     * - F(1) = 1
-     * - F(2) = 1
-     * - F(3) = 2
-     */
-    public static void main(String[] args) {
-        System.out.println(fib(0)); // 输出: 0
-        System.out.println(fib(1)); // 输出: 1
-        System.out.println(fib(2)); // 输出: 1
-        System.out.println(fib(3)); // 输出: 2
-    }
-
-    /**
      * 计算第n个斐波那契数
      *
      * 使用动态规划的空间优化版本，通过滚动数组技术实现O(1)空间复杂度。
