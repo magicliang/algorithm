@@ -174,6 +174,89 @@ public class SlidingWindow {
     }
 
     /**
+     * 新增：固定长度子数组的和（使用前缀和优化）
+     *
+     * 问题描述：给定一个数组和固定长度k，计算所有长度为k的子数组的和。
+     *
+     * 算法思路：
+     * - 使用前缀和数组预处理
+     * - 每个窗口的和通过前缀和差值O(1)计算
+     *
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(n)
+     *
+     * @param nums 输入数组
+     * @param k 子数组长度
+     * @return 每个长度为k的子数组的和数组
+     */
+    public int[] sumSlidingWindow(int[] nums, int k) {
+        if (nums == null || nums.length == 0 || k <= 0 || k > nums.length) {
+            return new int[0];
+        }
+
+        int n = nums.length;
+        int[] result = new int[n - k + 1];
+        
+        // 构建前缀和数组
+        int[] prefixSum = new int[n + 1];
+        prefixSum[0] = 0;
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + nums[i];
+        }
+        
+        // 使用前缀和计算每个窗口的和
+        for (int i = 0; i <= n - k; i++) {
+            // 窗口 [i, i+k-1] 的和 = prefixSum[i+k] - prefixSum[i]
+            result[i] = prefixSum[i + k] - prefixSum[i];
+        }
+        
+        return result;
+    }
+
+    /**
+     * 新增：找到和等于目标值的子数组个数（前缀和 + 哈希表优化）
+     *
+     * 问题描述：给定数组和目标值，找出和等于目标值的连续子数组个数。
+     *
+     * 算法思路：
+     * - 使用前缀和 + 哈希表
+     * - 对于每个位置i，查找是否存在j使得prefixSum[i] - prefixSum[j] = target
+     * - 即查找prefixSum[j] = prefixSum[i] - target
+     *
+     * 时间复杂度：O(n)
+     * 空间复杂度：O(n)
+     *
+     * @param nums 输入数组
+     * @param target 目标和
+     * @return 和等于目标值的子数组个数
+     */
+    public int subarraySum(int[] nums, int target) {
+        if (nums == null || nums.length == 0) {
+            return 0;
+        }
+        
+        Map<Integer, Integer> prefixSumCount = new HashMap<>();
+        prefixSumCount.put(0, 1); // 前缀和为0的情况，对应空前缀
+        
+        int prefixSum = 0;
+        int count = 0;
+        
+        for (int num : nums) {
+            prefixSum += num;
+            
+            // 查找是否存在前缀和为 (prefixSum - target) 的位置
+            if (prefixSumCount.containsKey(prefixSum - target)) {
+                count += prefixSumCount.get(prefixSum - target);
+            }
+            
+            // 更新当前前缀和的出现次数
+            prefixSumCount.put(prefixSum, prefixSumCount.getOrDefault(prefixSum, 0) + 1);
+        }
+        
+        return count;
+    }
+
+    /**
      * 长度最小的子数组
      *
      * 问题描述：给定一个含有n个正整数的数组和一个正整数target。

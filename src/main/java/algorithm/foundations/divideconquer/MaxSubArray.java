@@ -59,23 +59,96 @@ public class MaxSubArray {
     /**
      * brutal force: O(n^2) - 使用前缀和优化
      * 预计算前缀和数组，然后通过前缀和差值快速计算子数组和
-     * 注意：此实现有bug，rangeSum数组初始化不正确
+     * 修复版本：正确初始化前缀和数组，支持所有子数组查询
      */
     public int maxSubArrayBrutalForce3(int[] arr) {
-        int max = arr[0];
-        int n = arr.length;
-        int[] rangeSum = new int[n];
-        for (int i = 1; i < n; i++) {
-            rangeSum[i] += rangeSum[i - 1] + arr[i];
+        if (arr == null || arr.length == 0) {
+            throw new IllegalArgumentException("Input array must not be null or empty");
         }
-        for (int i = 0; i < arr.length; i++) {
-            for (int j = i + 1; j < arr.length; j++) {
-                int sum = rangeSum[j] - rangeSum[i];
+        
+        int n = arr.length;
+        int max = arr[0]; // 初始化为第一个元素，处理全负数情况
+        
+        // 构建前缀和数组：prefixSum[i] = arr[0] + arr[1] + ... + arr[i-1]
+        // prefixSum[0] = 0，便于计算从索引0开始的子数组
+        int[] prefixSum = new int[n + 1];
+        prefixSum[0] = 0;
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + arr[i];
+        }
+        
+        // 枚举所有可能的子数组 [i, j]
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                // 子数组 arr[i...j] 的和 = prefixSum[j+1] - prefixSum[i]
+                int sum = prefixSum[j + 1] - prefixSum[i];
                 max = Math.max(max, sum);
             }
         }
-
+        
         return max;
+    }
+
+    /**
+     * 新增：使用前缀和的区间查询优化版本
+     * 支持多次查询任意子数组的和，适用于需要频繁区间查询的场景
+     * 
+     * 时间复杂度：预处理O(n)，每次查询O(1)
+     * 空间复杂度：O(n)
+     */
+    public static class PrefixSumArray {
+        private final int[] prefixSum;
+        
+        /**
+         * 构造前缀和数组
+         * @param arr 原始数组
+         */
+        public PrefixSumArray(int[] arr) {
+            if (arr == null || arr.length == 0) {
+                throw new IllegalArgumentException("Input array must not be null or empty");
+            }
+            
+            int n = arr.length;
+            this.prefixSum = new int[n + 1];
+            prefixSum[0] = 0;
+            for (int i = 0; i < n; i++) {
+                prefixSum[i + 1] = prefixSum[i] + arr[i];
+            }
+        }
+        
+        /**
+         * 查询区间 [left, right] 的和（包含边界）
+         * @param left 左边界索引
+         * @param right 右边界索引
+         * @return 区间和
+         */
+        public int rangeSum(int left, int right) {
+            if (left < 0 || right >= prefixSum.length - 1 || left > right) {
+                throw new IllegalArgumentException("Invalid range indices");
+            }
+            return prefixSum[right + 1] - prefixSum[left];
+        }
+        
+        /**
+         * 使用前缀和数组找到最大子数组和
+         * @return 最大子数组和
+         */
+        public int findMaxSubArraySum() {
+            int n = prefixSum.length - 1; // 原数组长度
+            if (n == 0) return 0;
+            
+            int maxSum = Integer.MIN_VALUE;
+            
+            // 枚举所有子数组
+            for (int i = 0; i < n; i++) {
+                for (int j = i; j < n; j++) {
+                    int sum = rangeSum(i, j);
+                    maxSum = Math.max(maxSum, sum);
+                }
+            }
+            
+            return maxSum;
+        }
     }
 
     /**
