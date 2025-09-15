@@ -102,8 +102,4 @@ public class CuttingStick {
         
         return dp[0][newLength - 1];
     }
-    
-    /**
-     * 测试方法
-     */
 }
