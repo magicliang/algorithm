@@ -506,4 +506,134 @@ public class GridMinPath {
 
         return currentRowDp[j];
     }
+
+    /**
+     * 新增：使用二维前缀和优化的网格区域查询
+     * 
+     * 扩展网格路径问题，支持快速查询任意矩形区域的元素和。
+     * 适用于需要频繁进行区域统计的场景，如游戏地图分析、图像处理等。
+     * 
+     * 时间复杂度：预处理O(m×n)，每次查询O(1)
+     * 空间复杂度：O(m×n)
+     * 
+     * @param grid 二维网格
+     * @return 二维前缀和查询器
+     */
+    public GridRegionQuery createRegionQuery(int[][] grid) {
+        return new GridRegionQuery(grid);
+    }
+    
+    /**
+     * 网格区域查询辅助类
+     * 
+     * 提供对网格的高效区域查询功能，是对基本路径问题的扩展。
+     */
+    public static class GridRegionQuery {
+        private final int[][] prefixSum;
+        private final int rows;
+        private final int cols;
+        
+        public GridRegionQuery(int[][] grid) {
+            if (grid == null || grid.length == 0 || grid[0].length == 0) {
+                throw new IllegalArgumentException("Grid must not be null or empty");
+            }
+            
+            this.rows = grid.length;
+            this.cols = grid[0].length;
+            this.prefixSum = new int[rows + 1][cols + 1];
+            
+            // 构建二维前缀和
+            for (int i = 1; i <= rows; i++) {
+                for (int j = 1; j <= cols; j++) {
+                    prefixSum[i][j] = prefixSum[i-1][j] + prefixSum[i][j-1] 
+                                    - prefixSum[i-1][j-1] + grid[i-1][j-1];
+                }
+            }
+        }
+        
+        /**
+         * 查询矩形区域 [(row1,col1), (row2,col2)] 的和
+         */
+        public int queryRegionSum(int row1, int col1, int row2, int col2) {
+            if (row1 < 0 || col1 < 0 || row2 >= rows || col2 >= cols || 
+                row1 > row2 || col1 > col2) {
+                throw new IllegalArgumentException("Invalid region coordinates");
+            }
+            
+            return prefixSum[row2 + 1][col2 + 1] 
+                 - prefixSum[row1][col2 + 1] 
+                 - prefixSum[row2 + 1][col1] 
+                 + prefixSum[row1][col1];
+        }
+        
+        /**
+         * 找到网格中和最小的k×k子矩阵
+         * 
+         * 应用场景：在网格中寻找成本最低的正方形区域
+         * 
+         * @param k 子矩阵边长
+         * @return 最小子矩阵和
+         */
+        public int findMinSubMatrixSum(int k) {
+            if (k <= 0 || k > Math.min(rows, cols)) {
+                throw new IllegalArgumentException("Invalid submatrix size");
+            }
+            
+            int minSum = Integer.MAX_VALUE;
+            
+            for (int i = 0; i <= rows - k; i++) {
+                for (int j = 0; j <= cols - k; j++) {
+                    int sum = queryRegionSum(i, j, i + k - 1, j + k - 1);
+                    minSum = Math.min(minSum, sum);
+                }
+            }
+            
+            return minSum;
+        }
+        
+        /**
+         * 计算从任意起点到任意终点的路径上元素和的最小值
+         * 
+         * 结合动态规划和前缀和，支持多起点多终点的路径查询
+         * 
+         * @param startRow 起点行
+         * @param startCol 起点列
+         * @param endRow 终点行
+         * @param endCol 终点列
+         * @return 最小路径和
+         */
+        public int minPathSumBetween(int startRow, int startCol, int endRow, int endCol) {
+            if (startRow < 0 || startCol < 0 || endRow >= rows || endCol >= cols ||
+                startRow > endRow || startCol > endCol) {
+                throw new IllegalArgumentException("Invalid coordinates");
+            }
+            
+            int subRows = endRow - startRow + 1;
+            int subCols = endCol - startCol + 1;
+            
+            // 创建子网格的DP数组
+            int[][] dp = new int[subRows][subCols];
+            
+            // 从原网格提取子区域并计算最小路径和
+            for (int i = 0; i < subRows; i++) {
+                for (int j = 0; j < subCols; j++) {
+                    int originalRow = startRow + i;
+                    int originalCol = startCol + j;
+                    int currentValue = queryRegionSum(originalRow, originalCol, originalRow, originalCol);
+                    
+                    if (i == 0 && j == 0) {
+                        dp[i][j] = currentValue;
+                    } else if (i == 0) {
+                        dp[i][j] = dp[i][j-1] + currentValue;
+                    } else if (j == 0) {
+                        dp[i][j] = dp[i-1][j] + currentValue;
+                    } else {
+                        dp[i][j] = Math.min(dp[i-1][j], dp[i][j-1]) + currentValue;
+                    }
+                }
+            }
+            
+            return dp[subRows-1][subCols-1];
+        }
+    }
 }
