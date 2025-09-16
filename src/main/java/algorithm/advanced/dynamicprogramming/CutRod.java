@@ -24,7 +24,19 @@ public class CutRod {
      * @return 最大收益
      */
     public int cutRod(int[] prices, int n) {
-        // TODO: 实现动态规划解法
-        return 0;
+        // 初始化动态规划数组
+        int[] dp = new int[n + 1];
+        dp[0] = 0; // 长度为0的钢条收益为0
+
+        // 自底向上填充dp数组
+        for (int i = 1; i <= n; i++) {
+            int maxVal = Integer.MIN_VALUE;
+            for (int j = 0; j < i; j++) {
+                maxVal = Math.max(maxVal, prices[j] + dp[i - j - 1]);
+            }
+            dp[i] = maxVal;
+        }
+
+        return dp[n];
     }
 }
