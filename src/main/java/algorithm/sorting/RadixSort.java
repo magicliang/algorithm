@@ -31,6 +31,8 @@ import java.util.Arrays;
  * - 整数排序，特别是当数字范围不大但数字较长时
  * - 字符串排序（按字符逐位排序）
  * - 需要稳定排序的场景
+ *
+ * 口诀：先按各位升序排，再按十位升序排，最后按百位升序排，对每一位进行计数排序-因为每一位最多有 base 个数，所以 counter 数组大小为 base
  */
 public class RadixSort {
 
@@ -102,6 +104,8 @@ public class RadixSort {
     private static void countingSortByDigit(int[] arr, int exp, int base) {
         int n = arr.length;
 
+        // 每一轮都要刷新outpu和count，在这里不采用复用空间的做法
+
         // 输出数组（长度n）
         int[] output = new int[n];
 
@@ -110,20 +114,29 @@ public class RadixSort {
 
         // 1. 统计当前位的数字出现次数
         for (int num : arr) {
+            // 每次都求出当前位的个数，然后mod当前区间的range大小
+            // 521/1 mod 10 得到 1
+            // 521/10 mod 10 得到 2
             int digit = (num / exp) % base;
+
+            // 不管有多少个 arr 里的 num，我们会得到digit的数量的增加
             count[digit]++;
         }
 
         // 2. 计算累积计数（实现稳定性）
         for (int i = 1; i < base; i++) {
+            // 实现前缀和数组：从低位到高位
             count[i] += count[i - 1];
         }
 
         // 3. 从右向左构建稳定排序结果
         // 这是实现稳定性的关键步骤
         for (int i = n - 1; i >= 0; i--) {
+            // 用521取出1来
             int digit = (arr[i] / exp) % base;
+            // 排走了一个数，排出来的数是按照计数排序天然有序，且1based转成0based计算出来的
             output[count[digit] - 1] = arr[i];
+            // 相同的数，从右往左排，这里把 count 数组当做一个类似 stack 的方案
             count[digit]--;
         }
 
