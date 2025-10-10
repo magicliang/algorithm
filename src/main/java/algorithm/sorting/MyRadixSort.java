@@ -5,23 +5,25 @@ import java.util.Arrays;
 /**
  * @author liangchuan
  * 口诀：先按各位升序排，再按十位升序排，最后按百位升序排，对每一位进行计数排序-因为每一位最多有 base 个数，所以 counter 数组大小为 base。从右往左的意思是把中间结果按照从右往左的顺序消耗 counter 数组重新找位置
+ * 基数排序（LSD Least Significant Digit 最低有效位，十进制）口诀与要点：
+ * - 逐位稳定计数排序：先按个位升序排，再按十位升序排，再按百位……直到最高位。
+ * - 计数数组 counter 的大小等于进制 base（此处为 10）：先计数，再做前缀和（累计），用于定位。
+ * - 回写从右往左“消费”前缀和索引，保证稳定性（相同关键位元素相对顺序不变）。
+
+ * 补充：
+ * - 每一轮作用于“整个数组”（不是只处理某些元素）。
+ * - 当前实现仅支持非负整数；如需支持负数，可通过偏移（通过把数据在 arr 中与 min 的相对位置转化为计数数组的 pos 下标来实现）或分桶处理再合并。
  */
 public class MyRadixSort {
 
     /*
-     基数排序（LSD，十进制）口诀与要点：
-     - 逐位稳定计数排序：先按个位升序排，再按十位升序排，再按百位……直到最高位。
-     - 计数数组 counter 的大小等于进制 base（此处为 10）：先计数，再做前缀和（累计），用于定位。
-     - 回写从右往左“消费”前缀和索引，保证稳定性（相同关键位元素相对顺序不变）。
-
-     补充：
-     - 每一轮作用于“整个数组”（不是只处理某些元素）。
-     - 当前实现仅支持非负整数；如需支持负数，可通过偏移或分桶处理再合并。
-    */
-
+     * 结果数组，和输入数组等长
+     */
     static int[] res;
 
-    // base的大小等于一个 range 的大小
+    /*
+     * base的大小等于一个 range 的大小
+     */
     static int[] counter;
 
     public static synchronized int[] radixSort(int[] arr) {
@@ -59,8 +61,9 @@ public class MyRadixSort {
         }
 
         for(int i = res.length - 1; i >= 0 ; i--) {
-           int currentDigit = res[i] / exp % base;
-           counter[currentDigit]++;
+            int currentDigit;
+            currentDigit = res[i] / exp % base;
+            counter[currentDigit]++;
         }
 
         // 类似分数的排行，制造一个前缀和数组，修正这个 counter 数组
