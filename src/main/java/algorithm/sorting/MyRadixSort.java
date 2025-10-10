@@ -33,6 +33,8 @@ public class MyRadixSort {
 
         int n = arr.length;
         res = new int[n];
+
+        // 引导插入数组，一开始就要初始化好
         for (int i = 0; i < n; i++) {
             res[i] = arr[i];
         }
@@ -44,7 +46,8 @@ public class MyRadixSort {
         int max = Arrays.stream(arr).max().orElse(0);
 
         int exp = 1;
-        // 对521而言，1000才会让它大于0，这样可以保证它的全部位数都被消费了
+        // 对 max = 521而言，exp = 1000才会让它等于0，这样可以保证它的全部位数都被消费了
+        // max 本身不会缩减
         while (max / exp > 0) {
             countAndSort(exp);
             exp *= 10;
