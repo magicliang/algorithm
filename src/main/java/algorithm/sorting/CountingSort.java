@@ -127,7 +127,6 @@ public class CountingSort {
             count[num - minValue]--; // 更新前缀和数组，为下一个相同元素预留位置
         }
 
-
         return result;
     }
 
