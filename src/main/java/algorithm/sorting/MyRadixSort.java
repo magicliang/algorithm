@@ -49,7 +49,7 @@ public class MyRadixSort {
         // 对 max = 521而言，exp = 1000才会让它等于0，这样可以保证它的全部位数都被消费了
         // max 本身不会缩减
         while (max / exp > 0) {
-            countAndSort(exp);
+            // 按位十进制的位数来进行内部排序countAndSort(exp);
             exp *= 10;
         }
 
@@ -65,6 +65,7 @@ public class MyRadixSort {
 
         for(int i = res.length - 1; i >= 0 ; i--) {
             int currentDigit;
+            // 去头去尾，只保留当前位的技术非常好
             currentDigit = res[i] / exp % base;
             counter[currentDigit]++;
         }
@@ -84,6 +85,7 @@ public class MyRadixSort {
         // 所谓的从右向左体现在两个地方：从最低位开始计数排序，排序的中间结果每次也是从右到左遍历
         // 从右向左遍历数组，确保相同值的元素在排序后保持原始顺序（稳定性）。
         for(int i = res.length - 1; i >= 0; i--) {
+            // 再次使用去头去尾的技巧
             int currentDigit = tmpArr[i] / exp % base;
             // 举例：当前计数数组有1个1，2个2，3个3，4个4
             // 此时我们的 tmpArr[i] 对应位是2，那么2应该排在 res 的第三位-从0base看就是2。因为前缀和性质，现在 counter[2]的值是3，所以位数要改成3-1
