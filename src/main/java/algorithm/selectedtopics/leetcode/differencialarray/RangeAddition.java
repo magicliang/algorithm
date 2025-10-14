@@ -1,6 +1,17 @@
 package algorithm.selectedtopics.leetcode.differencialarray;
 
+/**
+ * 区间加法实现类，用于处理多个区间加法操作。
+ * 通过差分数组（Differencial）高效实现区间加法。
+ */
 public class RangeAddition {
+    
+    /**
+     * 根据给定的区间操作，返回修改后的数组。
+     * @param length 数组长度。
+     * @param updates 区间操作数组，每个操作为 [start, end, inc]。
+     * @return 修改后的数组。
+     */
     public int[] getModifiedArray(int length, int[][] updates) {
         // 直接给出0数组
         Differencial differencial = new Differencial(new int[length]);
@@ -15,10 +26,18 @@ public class RangeAddition {
     }
 }
 
+/**
+ * 差分数组工具类，用于高效处理区间加法操作。
+ */
 class Differencial {
 
+    // 差分数组
     private int[] diff;
 
+    /**
+     * 构造函数：根据初始数组构造差分数组。
+     * @param nums 初始数组。
+     */
     public Differencial(int[] nums) {
         if (nums == null) {
         }
@@ -34,6 +53,13 @@ class Differencial {
         }
     }
 
+    /**
+     * 区间加法操作：给闭区间 [begin, end] 增加 val（可以是负数）。
+     * @param begin 区间起始索引（包含）。
+     * @param end 区间结束索引（包含）。
+     * @param val 增加的值。
+     * @throws IllegalArgumentException 如果区间不合法（begin < 0 || end >= length || begin > end）。
+     */
     public void increment(int begin, int end, int val) {
         int n = diff.length;
         if (begin < 0 || end >= n || begin > end) {
@@ -47,6 +73,10 @@ class Differencial {
         }
     }
 
+    /**
+     * 返回结果数组：根据差分数组构造最终结果。
+     * @return 结果数组。
+     */
     public int[] result() {
         int n = diff.length;
         int[] res = new int[n];
