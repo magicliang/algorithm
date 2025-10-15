@@ -14,22 +14,22 @@ public class RangeAddition {
      */
     public int[] getModifiedArray(int length, int[][] updates) {
         // 直接给出0数组
-        Differencial differencial = new Differencial(new int[length]);
+        Differential differential = new Differential(new int[length]);
         for (int[] update : updates) {
             int begin = update[0];
             int end = update[1];
             int diff = update[2];
-            differencial.increment(begin, end, diff);
+            differential.increment(begin, end, diff);
         }
 
-        return differencial.result();
+        return differential.result();
     }
 }
 
 /**
  * 差分数组工具类，用于高效处理区间加法操作。
  */
-class Differencial {
+class Differential {
 
     // 差分数组
     private int[] diff;
@@ -38,7 +38,7 @@ class Differencial {
      * 构造函数：根据初始数组构造差分数组。
      * @param nums 初始数组。
      */
-    public Differencial(int[] nums) {
+    public Differential(int[] nums) {
         if (nums == null) {
         }
         int n = nums.length;
