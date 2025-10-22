@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
+ * 类似 arrange，而不是 combination
+ * permute 改变（全部）次序-所以不是组合，而是排列，因为它除了元素是否出现以外，也包括元素的 sequence。
  * 全排列问题的多种回溯算法实现
  * <p>
  * 这是一个经典的回溯算法问题，展示了如何使用不同的策略生成数组的所有排列。
